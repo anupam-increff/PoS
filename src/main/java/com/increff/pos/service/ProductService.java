@@ -26,6 +26,9 @@ public class ProductService {
     public ProductPojo get(Integer id) {
         return dao.select(id);
     }
+    public ProductPojo getByBarcode(String barcode) {
+        return dao.selectByBarcode(barcode);
+    }
 
     public List<ProductPojo> getAll() {
         return dao.selectAll();
