@@ -8,9 +8,4 @@ import lombok.Setter;
 public class ClientData {
     private Integer id;
     private String name;
-    private String email;
-    @Override
-    public String toString() {
-        return "ClientData{name='" + name + "', email='" + email + "'}";
-    }
 }
