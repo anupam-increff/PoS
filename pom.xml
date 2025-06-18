@@ -143,6 +143,18 @@
       <artifactId>commons-dbcp</artifactId>
       <version>1.4</version>
     </dependency>
+    <!-- JSR-303 Bean Validation API -->
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.1.0.Final</version>
+    </dependency>
+    <!-- Hibernate Validator (Reference implementation) -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>5.2.4.Final</version>
+    </dependency>
 
   </dependencies>
 

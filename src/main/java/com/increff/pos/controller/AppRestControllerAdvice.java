@@ -2,6 +2,8 @@ package com.increff.pos.controller;
 
 import com.increff.pos.exception.ApiException;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,6 +26,17 @@ public class AppRestControllerAdvice {
     public MessageData handle(Throwable e) {
         MessageData data = new MessageData();
         data.setMessage("An unknown error has occurred - " + e.getMessage());
+        return data;
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public MessageData handle(MethodArgumentNotValidException e) {
+        StringBuilder errorMsg = new StringBuilder();
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            errorMsg.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
+        }
+        MessageData data = new MessageData();
+        data.setMessage("Validation failed: " + errorMsg.toString());
         return data;
     }
 }
