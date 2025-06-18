@@ -2,13 +2,18 @@ package com.increff.pos.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.increff.pos.exception.ApiException;
+import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.dto.ClientDto;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.form.ClientForm;
+
+import javax.transaction.Transactional;
 
 @Service
 public class ClientService {
@@ -18,15 +23,42 @@ public class ClientService {
     private ClientDto dto;
 
     @Transactional
-    public ClientData add(ClientForm form) {
-        dto.validate(form);
-        return dto.create(form);
+    public ClientPojo add(ClientPojo clientPojo) {
+        if (dao.getClient(clientPojo.getName()) != null) {
+            throw new ApiException("Client with name already exists");
+        }
+        dao.insert(clientPojo);
+        return clientPojo;
+    }
+    @Transactional
+    public List<ClientData> getAllClients() {
+        return dao.selectAll().stream()
+                .map(pojo -> {
+                    return ConvertUtil.convert(pojo, ClientData.class);
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public List<ClientData> getAll() {
-        return dao.selectAll().stream()
-                .map(dto::toData)
-                .collect(Collectors.toList());
+    public ClientData update(int id, ClientForm form) {
+        dto.validate(form);
+
+        ClientPojo existing = dao.getById(id);
+        if (existing == null) {
+            throw new ApiException("Client with ID " + id + " does not exist");
+        }
+
+        ClientPojo duplicate = dao.getClient(form.getName());
+        if (duplicate != null && !duplicate.getId().equals(id)) {
+            throw new ApiException("Client Name already used by another client");
+        }
+        if(duplicate!=null && duplicate.getName().equals(form.getName())){
+            throw new ApiException("Client Name already set with the requested name");
+        }
+
+        existing.setName(form.getName());
+        dao.update(existing);
+        return ConvertUtil.convert(existing,ClientData.class);
     }
+
 }

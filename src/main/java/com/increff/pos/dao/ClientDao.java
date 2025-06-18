@@ -1,44 +1,46 @@
 package com.increff.pos.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.*;
-import org.springframework.stereotype.Repository;
 import com.increff.pos.pojo.ClientPojo;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
+@Transactional
 public class ClientDao {
-    @Autowired
-    private JdbcTemplate jdbc;
 
-    private static final String INSERT = "INSERT INTO client (name, email) VALUES (?, ?)";
-    private static final String SELECT_ALL = "SELECT id, name, email FROM client";
-    private static final String SELECT_BY_ID = "SELECT id, name, email FROM client WHERE id = ?";
-    private static final String UPDATE = "UPDATE client SET name=?, email=? WHERE id=?";
-
-    private static RowMapper<ClientPojo> mapper = (rs, i) -> {
-        ClientPojo p = new ClientPojo();
-        p.setId(rs.getInt("id"));
-        p.setName(rs.getString("name"));
-        p.setEmail(rs.getString("email"));
-        return p;
-    };
+    @PersistenceContext
+    private EntityManager em;
 
     public void insert(ClientPojo p) {
-        jdbc.update(INSERT, p.getName(), p.getEmail());
+        em.persist(p);
     }
 
-    public ClientPojo select(Integer id) {
-        return jdbc.queryForObject(SELECT_BY_ID, mapper, id);
+    public ClientPojo getById(Integer id) {
+        return em.find(ClientPojo.class, id);
+    }
+
+    public ClientPojo getClient(String clientName) {
+        TypedQuery<ClientPojo> query = em.createQuery(
+                "SELECT c FROM ClientPojo c WHERE c.name = :name", ClientPojo.class);
+        query.setParameter("name", clientName);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     public List<ClientPojo> selectAll() {
-        return jdbc.query(SELECT_ALL, mapper);
+        return em.createQuery("FROM ClientPojo", ClientPojo.class).getResultList();
     }
 
     public void update(ClientPojo p) {
-        jdbc.update(UPDATE, p.getName(), p.getEmail(), p.getId());
+        em.merge(p);
     }
 }

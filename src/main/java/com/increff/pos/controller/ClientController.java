@@ -1,5 +1,6 @@
 package com.increff.pos.controller;
 
+import com.increff.pos.dto.ClientDto;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.form.ClientForm;
 import com.increff.pos.service.ClientService;
@@ -13,15 +14,19 @@ import java.util.List;
 public class ClientController {
 
     @Autowired
-    private ClientService service;
+    private ClientDto dto;
 
     @GetMapping
     public List<ClientData> getAll() {
-        return service.getAll();
+        return dto.getAll();
     }
 
     @PostMapping
     public void add(@RequestBody ClientForm form) {
-        service.add(form);
+        dto.add(form);
+    }
+    @PutMapping("/{id}")
+    public void update(@PathVariable int id, @RequestBody ClientForm form){
+        dto.update(id,form);
     }
 }

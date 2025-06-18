@@ -1,34 +1,42 @@
 package com.increff.pos.dto;
 
+import com.increff.pos.exception.ApiException;
+import com.increff.pos.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.increff.pos.dao.ClientDao;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.form.ClientForm;
 import com.increff.pos.pojo.ClientPojo;
-import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.ConvertUtil;;import javax.transaction.Transactional;
+import java.util.List;
 
 @Component
 public class ClientDto {
     @Autowired
-    private ClientDao dao;
+    private ClientService service ;
 
     public void validate(ClientForm f) {
+        if (f == null) {
+            throw new ApiException("Invalid client form");
+        }
         if (f.getName() == null || f.getName().isEmpty()) {
-            throw new IllegalArgumentException("Name can't be blank");
-        }
-        if (!f.getEmail().contains("@")) {
-            throw new IllegalArgumentException("Invalid email");
+            throw new ApiException("Name can't be blank");
         }
     }
 
-    public ClientData create(ClientForm f) {
-        ClientPojo p = ConvertUtil.formToPojo(f);
-        dao.insert(p);
-        return toData(p);
+
+    public ClientData add(ClientForm form) {
+        validate(form);
+        ClientPojo pojo = ConvertUtil.convert(form,ClientPojo.class);
+        ClientPojo saved =service.add(pojo); // send POJO to service
+        return ConvertUtil.convert(saved,ClientData.class); // convert POJO to response format
+    }
+    public List<ClientData> getAll(){
+        return service.getAllClients();
     }
 
-    public ClientData toData(ClientPojo p) {
-        return ConvertUtil.pojoToData(p);
+    public ClientData update(int id, ClientForm form) {
+        validate(form);
+        return service.update(id,form);
     }
 }
