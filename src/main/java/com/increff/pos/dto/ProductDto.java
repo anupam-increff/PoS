@@ -35,9 +35,9 @@ public class ProductDto {
     }
 
     public void update(Integer id, @Valid ProductForm f) {
-        if(id!=f.getClientId()){
-            throw new ApiException("Invalid Product Id submitted") ;
-        }
+//        if(id!=f.getClientId()){
+//            throw new ApiException("Invalid Product Id submitted") ;
+//        }
         ProductPojo p = ConvertUtil.convert(f, ProductPojo.class);
         service.update(id, p);
     }

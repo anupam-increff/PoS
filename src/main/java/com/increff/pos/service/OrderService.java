@@ -49,7 +49,13 @@ public class OrderService {
         }
         return order.getId();
     }
-
+    public OrderPojo get(Integer id) {
+        OrderPojo order = orderDao.select(id);
+        if (order == null) {
+            throw new ApiException("Order with ID " + id + " not found");
+        }
+        return order;
+    }
     public List<OrderPojo> getAll() {
         return orderDao.selectAll();
     }
