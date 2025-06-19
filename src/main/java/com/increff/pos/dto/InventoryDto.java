@@ -45,7 +45,10 @@ public class InventoryDto {
 
     }
 
-    public void update(Integer id, InventoryForm inventoryForm) {
+    public void update(Integer id,@Valid InventoryForm inventoryForm) {
+        if(id!=inventoryForm.getProductId()){
+            throw new ApiException("Wrong productId combination !");
+        }
         service.update(id, ConvertUtil.convert(inventoryForm,InventoryPojo.class));
     }
 }
