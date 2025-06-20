@@ -7,6 +7,7 @@ import com.increff.pos.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,7 +23,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public void add(@RequestBody ClientForm form) {
+    public void add(@RequestBody @Valid ClientForm form) {
         dto.add(form);
     }
     @PutMapping("/{id}")
