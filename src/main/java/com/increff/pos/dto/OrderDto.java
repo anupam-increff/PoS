@@ -1,5 +1,6 @@
 package com.increff.pos.dto;
 
+import com.increff.pos.flow.OrderFlow;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.pojo.OrderItemPojo;
@@ -21,21 +22,10 @@ public class OrderDto {
     private OrderService orderService;
 
     @Autowired
-    private ProductService productService;
+    private OrderFlow orderFlow;
 
     public Integer placeOrder(@Valid OrderForm form) {
-        List<OrderItemPojo> items = form.getItems().stream().map(f -> {
-            ProductPojo product = productService.getByBarcode(f.getBarcode());
-            if (product == null) throw new RuntimeException("Invalid barcode " + f.getBarcode());
-
-            OrderItemPojo p = new OrderItemPojo();
-            p.setProductId(product.getId());
-            p.setQuantity(f.getQuantity());
-            p.setSellingPrice(f.getSellingPrice());
-            return p;
-        }).collect(Collectors.toList());
-
-        return orderService.createOrder(items);
+        return orderFlow.placeOrder(form);
     }
     public List<OrderData> getAll() {
         return orderService.getAll().stream().map(o ->

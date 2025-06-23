@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class InventoryDto {
 
     @Autowired
-    private InventoryService service;
+    private InventoryService inventoryService;
 
     @Autowired
     private ProductService productService;
@@ -29,11 +29,11 @@ public class InventoryDto {
         if (product == null) {
             throw new ApiException("Product with ID " + form.getProductId() + " not found");
         }
-        service.add(ConvertUtil.convert(form,InventoryPojo.class));
+        inventoryService.add(ConvertUtil.convert(form, InventoryPojo.class));
     }
 
     public List<InventoryData> getAll() {
-        return service.getAll().stream().map(pojo -> {
+        return inventoryService.getAll().stream().map(pojo -> {
             ProductPojo product = productService.get(pojo.getProductId());
             InventoryData data = new InventoryData();
             data.setId(pojo.getId());
@@ -42,13 +42,19 @@ public class InventoryDto {
             data.setName(product.getName());
             return data;
         }).collect(Collectors.toList());
-
     }
 
-    public void update(Integer id,@Valid InventoryForm inventoryForm) {
-        if(id!=inventoryForm.getProductId()){
-            throw new ApiException("Wrong productId combination !");
+    public void updateByProductId(Integer productId, @Valid InventoryForm form) {
+        if (!productId.equals(form.getProductId())) {
+            throw new ApiException("Product ID mismatch between URL and body");
         }
-        service.update(id, ConvertUtil.convert(inventoryForm,InventoryPojo.class));
+
+        InventoryPojo existing = inventoryService.getByProductId(productId);
+        if (existing == null) {
+            throw new ApiException("No inventory found for productId: " + productId);
+        }
+
+        InventoryPojo updated = ConvertUtil.convert(form, InventoryPojo.class);
+        inventoryService.update(existing.getId(), updated);
     }
 }

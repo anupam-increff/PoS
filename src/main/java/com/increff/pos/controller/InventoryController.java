@@ -26,8 +26,9 @@ public class InventoryController {
         return dto.getAll();
     }
 
-    @PutMapping("/{id}")
-    public void update(@PathVariable Integer id,@RequestBody @Valid InventoryForm inventoryForm) {
-        dto.update(id, inventoryForm);
+    @PutMapping("/{productId}")
+    public void update(@PathVariable Integer productId, @RequestBody @Valid InventoryForm form) {
+        form.setProductId(productId);
+        dto.updateByProductId(productId, form);
     }
 }

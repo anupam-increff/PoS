@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.List;
 
 @Service
@@ -17,9 +18,6 @@ public class ProductService {
 
     @Transactional
     public void add(ProductPojo p) {
-        if (dao.selectByBarcode(p.getBarcode()) != null) {
-            throw new RuntimeException("Barcode must be unique");
-        }
         dao.insert(p);
     }
 

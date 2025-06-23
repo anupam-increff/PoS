@@ -20,12 +20,8 @@ public class ProductController {
     public void add(@RequestBody @Valid ProductForm form){
         dto.add(form);
     }
-
     @GetMapping()
-    public List<ProductData> getAll(
-            @RequestParam(required = false) String client,
-            @RequestParam(required = false) String sku,
-            @RequestParam(required = false) String name) {
+    public List<ProductData> getAll() {
         return dto.getAll();
     }
     @GetMapping("/{id}")

@@ -39,11 +39,12 @@ public class InventoryService {
 
     @Transactional
     public void update(Integer id, InventoryPojo updatedInventoryPojo) {
-        InventoryPojo p = dao.select(id);
-        if (p == null) {
+        InventoryPojo existing = dao.select(id);
+        if (existing == null) {
             throw new ApiException("Inventory not found");
         }
-        p.setQuantity(updatedInventoryPojo.getQuantity());
-        dao.update(p);
+        existing.setQuantity(updatedInventoryPojo.getQuantity());
+        dao.update(existing);
     }
+
 }
