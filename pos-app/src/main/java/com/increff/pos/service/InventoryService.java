@@ -22,7 +22,7 @@ public class InventoryService {
         if (existing == null) dao.insert(p);
         else {
             existing.setQuantity(existing.getQuantity() + p.getQuantity());
-            dao.update(existing);
+            //dao.update(existing);
         }
     }
 
@@ -41,10 +41,10 @@ public class InventoryService {
     public void update(Integer id, InventoryPojo updatedInventoryPojo) {
         InventoryPojo existing = dao.select(id);
         if (existing == null) {
-            throw new ApiException("Inventory not found");
+            throw new ApiException("Inventory with Id : " + id + " not found");
         }
         existing.setQuantity(updatedInventoryPojo.getQuantity());
-        dao.update(existing);
+        //dao.update(existing);
     }
 
 }

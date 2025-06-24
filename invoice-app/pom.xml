@@ -5,6 +5,7 @@
     <groupId>com.increff</groupId>
     <artifactId>invoice-app</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- Apache FOP for PDF generation -->

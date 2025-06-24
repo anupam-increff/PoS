@@ -70,6 +70,7 @@ public class OrderFlow {
         OrderData od = new OrderData();
         od.setId(order.getId());
         od.setTime(order.getTime());
+        od.setTotal(order.getTotal());
         od.setInvoicePath("invoices/order-" + orderId + ".pdf");
 
         double total = 0;

@@ -2,37 +2,36 @@ package com.increff.invoice;
 
 import com.increff.invoice.model.OrderData;
 import com.increff.invoice.model.OrderItemData;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 
-import org.apache.fop.apps.*;
-
-import javax.xml.transform.*;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
 import java.util.Base64;
 import java.util.List;
 
 public class InvoiceGenerator {
-    private static final FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
 
     public static String generate(OrderData order, List<OrderItemData> items) throws Exception {
-        File xslt = new File(InvoiceGenerator.class.getResource("/invoice-template.xsl").toURI());
+        String fo = InvoiceXmlBuilder.build(order, items);
 
-        String xml = InvoiceXmlBuilder.build(order, items);
-        ByteArrayInputStream xmlStream = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+        FopFactory fopFactory = FopFactory.newInstance(new java.io.File(System.getProperty("user.dir")).toURI());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
 
-        ByteArrayOutputStream pdfStream = new ByteArrayOutputStream();
-        FOUserAgent userAgent = fopFactory.newFOUserAgent();
-        Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, userAgent, pdfStream);
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer(); // No XSLT needed here
 
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer(new StreamSource(xslt));
+        StreamSource foSource = new StreamSource(new StringReader(fo));
+        SAXResult result = new SAXResult(fop.getDefaultHandler());
 
-        Source src = new StreamSource(xmlStream);
-        Result res = new SAXResult(fop.getDefaultHandler());
-        transformer.transform(src, res);
+        transformer.transform(foSource, result);
 
-        return Base64.getEncoder().encodeToString(pdfStream.toByteArray());
+        return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 }

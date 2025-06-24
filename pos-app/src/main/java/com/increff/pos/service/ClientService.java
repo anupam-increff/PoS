@@ -15,11 +15,11 @@ import com.increff.pos.model.form.ClientForm;
 import javax.transaction.Transactional;
 
 @Service
+@Transactional
 public class ClientService {
     @Autowired
     private ClientDao dao;
 
-    @Transactional
     public ClientPojo add(ClientPojo clientPojo) {
         if (dao.getClient(clientPojo.getName()) != null) {
             throw new ApiException("Client with name already exists");
@@ -27,7 +27,7 @@ public class ClientService {
         dao.insert(clientPojo);
         return clientPojo;
     }
-    @Transactional
+
     public List<ClientData> getAllClients() {
         return dao.selectAll().stream()
                 .map(pojo -> {
@@ -35,7 +35,7 @@ public class ClientService {
                 })
                 .collect(Collectors.toList());
     }
-    @Transactional
+
     public ClientData update(int id, ClientForm form) {
 
         ClientPojo existing = dao.getById(id);
@@ -50,7 +50,7 @@ public class ClientService {
             throw new ApiException("Client Name already set with the requested name");
         }
         existing.setName(form.getName());
-        dao.update(existing);
+        //dao.update(existing);
         return ConvertUtil.convert(existing,ClientData.class);
     }
 

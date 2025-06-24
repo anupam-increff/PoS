@@ -14,6 +14,7 @@ import java.util.List;
 @Transactional
 public class ClientDao {
 
+    private static final String SELECT_CLIENT_BY_NAME = "SELECT c FROM ClientPojo c WHERE c.name = :name";
     @PersistenceContext
     private EntityManager em;
 
@@ -27,7 +28,7 @@ public class ClientDao {
 
     public ClientPojo getClient(String clientName) {
         TypedQuery<ClientPojo> query = em.createQuery(
-                "SELECT c FROM ClientPojo c WHERE c.name = :name", ClientPojo.class);
+                SELECT_CLIENT_BY_NAME, ClientPojo.class);
         query.setParameter("name", clientName);
         try {
             return query.getSingleResult();

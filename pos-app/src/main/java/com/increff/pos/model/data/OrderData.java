@@ -19,9 +19,10 @@ public class OrderData {
     public OrderData() {
     }
 
-    public OrderData(Integer id, ZonedDateTime time, String invoicePath) {
+    public OrderData(Integer id, ZonedDateTime time, String invoicePath , double total) {
         this.id = id;
         this.time = time;
         this.invoicePath = invoicePath;
+        this.total = total ;
     }
 }

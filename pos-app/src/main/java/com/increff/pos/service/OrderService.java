@@ -30,9 +30,6 @@ public class OrderService {
     private OrderDao orderDao;
     @Autowired
     private OrderItemDao itemDao;
-    @Autowired
-    private ProductDao productDao;
-    @Autowired OrderItemService orderItemService ;
 
     @Transactional
     public Integer createOrder(List<OrderItemPojo> items) {
@@ -66,7 +63,7 @@ public class OrderService {
         OrderPojo existing = get(id);
         existing.setInvoicePath(newPojo.getInvoicePath());
         existing.setTotal(newPojo.getTotal());
-        orderDao.update(existing);
+        //orderDao.update(existing);
     }
 
 
