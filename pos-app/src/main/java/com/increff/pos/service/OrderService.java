@@ -63,9 +63,7 @@ public class OrderService {
         OrderPojo existing = get(id);
         existing.setInvoicePath(newPojo.getInvoicePath());
         existing.setTotal(newPojo.getTotal());
-        //orderDao.update(existing);
+        orderDao.update(existing);
     }
-
-
 
 }

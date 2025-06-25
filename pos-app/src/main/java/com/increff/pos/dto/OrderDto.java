@@ -5,6 +5,7 @@ import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.OrderService;
+import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +31,7 @@ public class OrderDto {
         List<OrderData> list = new ArrayList<>();
 
         for (OrderPojo o : orders) {
-            OrderData d = new OrderData();
-            d.setId(o.getId());
-            d.setTime(o.getTime());
-            d.setInvoicePath(o.getInvoicePath());
+            OrderData d = ConvertUtil.convert(o,OrderData.class);
             list.add(d);
         }
         return list;

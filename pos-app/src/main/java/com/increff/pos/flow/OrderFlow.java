@@ -63,15 +63,9 @@ public class OrderFlow {
         return orderId;
     }
 
-    private void generateInvoice(Integer orderId) throws Exception {
+    public void generateInvoice(Integer orderId) throws Exception {
         OrderPojo order = orderService.get(orderId);
         List<OrderItemPojo> pojos = orderItemService.getByOrderId(orderId);
-
-        OrderData od = new OrderData();
-        od.setId(order.getId());
-        od.setTime(order.getTime());
-        od.setTotal(order.getTotal());
-        od.setInvoicePath("invoices/order-" + orderId + ".pdf");
 
         double total = 0;
         List<OrderItemData> items = new ArrayList<>();
@@ -91,22 +85,31 @@ public class OrderFlow {
             items.add(d);
         }
 
+        // ✅ Now construct OrderData with correct total
+        OrderData od = new OrderData();
+        od.setId(order.getId());
+        od.setTime(order.getTime());
         od.setTotal(total);
+        String invoicePath = "invoices/order-" + orderId + ".pdf";
+        od.setInvoicePath(invoicePath);
 
         // Generate PDF
         String base64 = InvoiceGenerator.generate(od, items);
         byte[] pdf = Base64.getDecoder().decode(base64);
+        Files.createDirectories(Paths.get("invoices"));
+        Files.write(Paths.get(invoicePath), pdf);
 
-        Files.createDirectories(Paths.get("invoices")); // Ensure folder
-        Files.write(Paths.get("invoices/order-" + orderId + ".pdf"), pdf);
-
-        // ✅ Save path + total to DB
-        OrderPojo updated = new OrderPojo();
-        updated.setInvoicePath(od.getInvoicePath());
-        updated.setTotal(total);
-        orderService.update(orderId, updated);
+        // ✅ Save invoice path and correct total
+        order.setInvoicePath(invoicePath);
+        order.setTotal(total);
+        orderService.update(order.getId(), order);
     }
 
+
+
+    public OrderPojo get(Integer id) {
+        return orderService.get(id);
+    }
 
 
 }
