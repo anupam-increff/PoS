@@ -24,6 +24,9 @@ public class ClientDto {
     public List<ClientData> getAll(){
         return service.getAllClients();
     }
+    public  ClientData getClient(String clientName){
+        return  service.getClient(clientName);
+    }
 
     public ClientData update(int id, @Valid ClientForm form) {
         return service.update(id,form);

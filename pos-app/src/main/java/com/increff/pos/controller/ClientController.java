@@ -22,6 +22,11 @@ public class ClientController {
         return dto.getAll();
     }
 
+    @GetMapping("/{clientName}")
+    public ClientData searchClient(@PathVariable String clientName){
+    return dto.getClient(clientName);
+    }
+
     @PostMapping
     public void add(@RequestBody @Valid ClientForm form) {
         dto.add(form);

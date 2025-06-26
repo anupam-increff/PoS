@@ -35,6 +35,10 @@ public class ClientService {
                 })
                 .collect(Collectors.toList());
     }
+    public ClientData getClient(String clientName){
+        ClientPojo clientPojo= dao.getClient(clientName);
+        return ConvertUtil.convert(clientPojo,ClientData.class);
+    }
 
     public ClientData update(int id, ClientForm form) {
 
