@@ -18,6 +18,9 @@ public class ProductService {
 
     @Transactional
     public void add(ProductPojo p) {
+        if(getByBarcode(p.getBarcode())!=null){
+            throw new ApiException("Product with same barcode : " + p.getBarcode() + " already exists !");
+        }
         dao.insert(p);
     }
 
@@ -31,6 +34,7 @@ public class ProductService {
     public List<ProductPojo> getAll() {
         return dao.selectAll();
     }
+    public List<ProductPojo> getByClient(Integer clientId){ return dao.selectByClientId(clientId); }
 
     @Transactional
     public void update(Integer id, ProductPojo p) {

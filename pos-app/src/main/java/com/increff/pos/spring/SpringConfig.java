@@ -9,7 +9,10 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import javax.persistence.EntityManagerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import javax.sql.DataSource;
 
@@ -20,6 +23,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @ComponentScan("com.increff.pos")
 @PropertySource("classpath:db.properties")
+@EnableScheduling
 public class SpringConfig {
 
     @Autowired
@@ -54,5 +58,12 @@ public class SpringConfig {
     @Bean
     public JpaTransactionManager transactionManager(EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
+    }
+    @Bean
+    public MultipartResolver multipartResolver() {
+        CommonsMultipartResolver resolver = new CommonsMultipartResolver();
+        resolver.setMaxUploadSize(5 * 1024 * 1024); // 5 MB max file size
+        resolver.setDefaultEncoding("utf-8");
+        return resolver;
     }
 }

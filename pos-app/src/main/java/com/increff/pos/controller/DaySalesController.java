@@ -1,0 +1,34 @@
+package com.increff.pos.controller;
+
+import com.increff.pos.dto.DaySalesDto;
+import com.increff.pos.pojo.DaySalesPojo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/reports/day-sales")
+public class DaySalesController {
+
+    @Autowired
+    private DaySalesDto dto;
+
+    @GetMapping
+    public List<DaySalesPojo> getSales(
+            @RequestParam("start") String start,
+            @RequestParam("end") String end
+    ) {
+        LocalDate startDate = LocalDate.parse(start.trim());
+        LocalDate endDate = LocalDate.parse(end.trim());
+        return dto.getByDateRange(startDate, endDate);
+    }
+    @PostMapping("/generate")
+    public void generateTodayReport() {
+        dto.generateTodayReport();
+    }
+
+
+}

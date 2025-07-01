@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.List;
@@ -54,6 +55,10 @@ public class OrderService {
     public List<OrderPojo> getAll() {
         return orderDao.selectAll();
     }
+    public List<OrderPojo> getOrdersByDate(LocalDate date) {
+        return orderDao.selectByDate(date);
+    }
+
 
     public List<OrderItemPojo> getOrderItems(Integer orderId) {
         return itemDao.selectByOrderId(orderId);

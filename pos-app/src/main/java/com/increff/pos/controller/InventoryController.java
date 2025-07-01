@@ -4,7 +4,9 @@ import com.increff.pos.dto.InventoryDto;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.form.InventoryForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -14,21 +16,22 @@ import java.util.List;
 public class InventoryController {
 
     @Autowired
-    private InventoryDto dto;
+    private InventoryDto inventoryDto;
 
-    @PostMapping
-    public void add(@RequestBody @Valid InventoryForm form) {
-        dto.add(form);
-    }
 
     @GetMapping
-    public List<InventoryData> getAll() {
-        return dto.getAll();
+    public List<InventoryData> getAllInventory() {
+        return inventoryDto.getAll();
     }
 
-    @PutMapping("/{productId}")
-    public void update(@PathVariable Integer productId, @RequestBody @Valid InventoryForm form) {
-        form.setProductId(productId);
-        dto.updateByProductId(productId, form);
+    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void uploadInventory(@RequestParam("file") MultipartFile file) {
+        inventoryDto.processTsvUpload(file);
+    }
+
+    @PutMapping(path = "/{barcode}")
+    public void updateInventory(@PathVariable String barcode,
+                                @RequestBody @Valid InventoryForm form) {
+        inventoryDto.updateByBarcode(barcode, form);
     }
 }

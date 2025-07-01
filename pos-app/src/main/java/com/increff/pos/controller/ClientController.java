@@ -23,16 +23,17 @@ public class ClientController {
     }
 
     @GetMapping("/{clientName}")
-    public ClientData searchClient(@PathVariable String clientName){
-    return dto.getClient(clientName);
+    public ClientData searchClient(@PathVariable String clientName) {
+        return dto.getClient(clientName);
     }
 
     @PostMapping
     public void add(@RequestBody @Valid ClientForm form) {
         dto.add(form);
     }
+
     @PutMapping("/{id}")
-    public void update(@PathVariable int id, @RequestBody ClientForm form){
-        dto.update(id,form);
+    public void update(@PathVariable int id, @RequestBody ClientForm form) {
+        dto.update(id, form);
     }
 }

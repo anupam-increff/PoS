@@ -1,5 +1,4 @@
 package com.increff.pos.dto;
-
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.form.InventoryForm;
@@ -8,10 +7,13 @@ import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.TSVUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,40 +23,33 @@ public class InventoryDto {
     @Autowired
     private InventoryService inventoryService;
 
-    @Autowired
-    private ProductService productService;
+    public void processTsvUpload(MultipartFile file) {
+        List<InventoryForm> forms = TSVUtil.readFromTsv(file, InventoryForm.class);
+        List<String> errors = new ArrayList<>();
 
-    public void add(@Valid InventoryForm form) {
-        ProductPojo product = productService.get(form.getProductId());
-        if (product == null) {
-            throw new ApiException("Product with ID " + form.getProductId() + " not found");
+        int rowNum = 1;
+        for (InventoryForm form : forms) {
+            try {
+                inventoryService.updateInventory(form.getBarcode(),form.getQuantity());
+            } catch (ApiException e) {
+                errors.add("Row " + rowNum + ": " + e.getMessage());
+            }
+            rowNum++;
         }
-        inventoryService.add(ConvertUtil.convert(form, InventoryPojo.class));
+
+        if (!errors.isEmpty()) {
+            throw new ApiException("Inventory TSV upload failed:\n" + String.join("\n", errors));
+        }
     }
 
     public List<InventoryData> getAll() {
-        return inventoryService.getAll().stream().map(pojo -> {
-            ProductPojo product = productService.get(pojo.getProductId());
-            InventoryData data = new InventoryData();
-            data.setId(pojo.getId());
-            data.setQuantity(pojo.getQuantity());
-            data.setBarcode(product.getBarcode());
-            data.setName(product.getName());
-            return data;
-        }).collect(Collectors.toList());
+        return inventoryService.getAll();
     }
 
-    public void updateByProductId(Integer productId, @Valid InventoryForm form) {
-        if (!productId.equals(form.getProductId())) {
-            throw new ApiException("Product ID mismatch between URL and body");
+    public void updateByBarcode(String barcode, @Valid InventoryForm form) {
+        if (!barcode.equals(form.getBarcode())) {
+            throw new ApiException("Barcode mismatch between path and form");
         }
-
-        InventoryPojo existing = inventoryService.getByProductId(productId);
-        if (existing == null) {
-            throw new ApiException("No inventory found for productId: " + productId);
-        }
-
-        InventoryPojo updated = ConvertUtil.convert(form, InventoryPojo.class);
-        inventoryService.update(existing.getId(), updated);
+        inventoryService.updateInventory(barcode, form.getQuantity());
     }
 }

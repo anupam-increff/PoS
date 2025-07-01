@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 public class InventoryForm {
-    @NotNull(message = "Product Id must not be blank")
-    private Integer productId;
+    @NotNull(message = "Barcode must not be blank")
+    private String barcode;
 
     @Min(value = 1,message = "Minimum quantity is least 1" )
     private Integer quantity;

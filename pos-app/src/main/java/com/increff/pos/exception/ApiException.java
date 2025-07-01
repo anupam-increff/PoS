@@ -7,5 +7,8 @@ public class ApiException extends RuntimeException {
     public ApiException(String string) {
         super(string);
     }
+    public ApiException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

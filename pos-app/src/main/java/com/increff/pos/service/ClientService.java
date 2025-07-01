@@ -1,6 +1,7 @@
 package com.increff.pos.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.increff.pos.exception.ApiException;
@@ -47,7 +48,7 @@ public class ClientService {
             throw new ApiException("Client with ID " + id + " does not exist");
         }
         ClientPojo duplicate = dao.getClient(form.getName());
-        if (duplicate != null && !duplicate.getId().equals(id)) {
+        if (Objects.isNull(duplicate) && !duplicate.getId().equals(id)) {
             throw new ApiException("Client Name already used by another client");
         }
         if(duplicate!=null && duplicate.getName().equals(form.getName())){
