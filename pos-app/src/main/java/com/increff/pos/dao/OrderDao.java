@@ -14,34 +14,19 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class OrderDao {
+public class OrderDao extends AbstractDao<OrderPojo> {
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void insert(OrderPojo p) {
-        em.persist(p);
+    public OrderDao() {
+        super(OrderPojo.class);
     }
+    private static final String SELECT_ORDER_BETWEEN_DATES= "SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end";
 
-    public OrderPojo select(Integer id) {
-        return em.find(OrderPojo.class, id);
-    }
-
-    public List<OrderPojo> selectAll() {
-        return em.createQuery("FROM OrderPojo", OrderPojo.class).getResultList();
-    }
-    public List<OrderPojo> selectByDate(LocalDate date) {
+    public List<OrderPojo> getByDate(LocalDate date) {
         ZonedDateTime start = date.atStartOfDay(ZoneOffset.UTC);
         ZonedDateTime end = start.plusDays(1);
-
-        String jpql = "SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end";
-        TypedQuery<OrderPojo> query = em.createQuery(jpql, OrderPojo.class);
-        query.setParameter("start", start);
-        query.setParameter("end", end);
-        return query.getResultList();
-    }
-
-    public void update(OrderPojo p) {
-        em.merge(p);
+        return em.createQuery(SELECT_ORDER_BETWEEN_DATES, OrderPojo.class)
+                .setParameter("start", start)
+                        .setParameter("end", end)
+                                .getResultList();
     }
 }

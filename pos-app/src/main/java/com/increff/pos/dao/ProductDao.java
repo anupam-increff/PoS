@@ -3,55 +3,39 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.ProductPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
 @Transactional
-public class ProductDao {
+public class ProductDao extends AbstractDao<ProductPojo> {
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void insert(ProductPojo p) {
-        em.persist(p);
+    public ProductDao() {
+        super(ProductPojo.class);
     }
 
-    public ProductPojo select(Integer id) {
-        return em.find(ProductPojo.class, id);
-    }
+    private static final String SELECT_BY_BARCODE = "SELECT p FROM ProductPojo p WHERE p.barcode = :barcode";
+    private static final String SELECT_BY_CLIENT_ID = "SELECT p FROM ProductPojo p WHERE p.clientId = :clientId";
+    private static final String SELECT_BY_NAME = "SELECT p FROM ProductPojo p WHERE LOWER(p.name) LIKE :name";
 
-    public ProductPojo selectByBarcode(String barcode) {
-        List<ProductPojo> list = em.createQuery("SELECT p FROM ProductPojo p WHERE p.barcode = :barcode", ProductPojo.class)
+    public ProductPojo getByBarcode(String barcode) {
+        return em.createQuery(SELECT_BY_BARCODE, ProductPojo.class)
                 .setParameter("barcode", barcode)
-                .getResultList();
-        return list.isEmpty() ? null : list.get(0);
+                        .getResultList()
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
     }
 
-    public List<ProductPojo> selectByClientId(Integer clientId) {
-        return em.createQuery("SELECT p FROM ProductPojo p WHERE p.clientId = :clientId", ProductPojo.class)
+    public List<ProductPojo> getByClientId(Integer clientId) {
+        return em.createQuery(SELECT_BY_CLIENT_ID, ProductPojo.class)
                 .setParameter("clientId", clientId)
-                .getResultList();
+                        .getResultList();
     }
 
-    public List<ProductPojo> selectByName(String name) {
-        return em.createQuery("SELECT p FROM ProductPojo p WHERE LOWER(p.name) LIKE :name", ProductPojo.class)
+    public List<ProductPojo> getByName(String name) {
+        return em.createQuery(SELECT_BY_NAME, ProductPojo.class)
                 .setParameter("name", "%" + name.toLowerCase() + "%")
-                .getResultList();
-    }
-
-    public List<ProductPojo> selectAll() {
-        return em.createQuery("FROM ProductPojo", ProductPojo.class).getResultList();
-    }
-
-    public void update(ProductPojo p) {
-        em.merge(p);
-    }
-
-    public void delete(ProductPojo p) {
-        em.remove(p);
+                        .getResultList();
     }
 }
-

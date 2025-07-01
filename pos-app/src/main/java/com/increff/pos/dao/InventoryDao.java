@@ -3,35 +3,23 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.InventoryPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
-public class InventoryDao {
-    @PersistenceContext
-    private EntityManager em;
+@Transactional
+public class InventoryDao extends AbstractDao<InventoryPojo> {
 
-    public void insert(InventoryPojo pojo) {
-        em.persist(pojo);
+    public InventoryDao() {
+        super(InventoryPojo.class);
     }
+    private static final String SELECT_BY_PRODUCT_ID= "SELECT i FROM InventoryPojo i WHERE i.productId = :pid";
 
-    public void update(InventoryPojo pojo) {
-        em.merge(pojo);
-    }
-
-    public InventoryPojo select(Integer id) {
-        return em.find(InventoryPojo.class, id);
-    }
-
-    public InventoryPojo selectByProductId(Integer productId) {
-        List<InventoryPojo> list = em.createQuery("SELECT i FROM InventoryPojo i WHERE i.productId = :pid", InventoryPojo.class)
-                .setParameter("pid", productId)
-                .getResultList();
+    public InventoryPojo getByProductId(Integer productId) {
+        List<InventoryPojo> list = em.createQuery(
+                SELECT_BY_PRODUCT_ID, InventoryPojo.class)
+                        .setParameter("pid", productId)
+                                .getResultList();
         return list.isEmpty() ? null : list.get(0);
-    }
-
-    public List<InventoryPojo> selectAll() {
-        return em.createQuery("FROM InventoryPojo", InventoryPojo.class).getResultList();
     }
 }

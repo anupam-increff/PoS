@@ -78,7 +78,7 @@ public class OrderFlow {
         return orderId;
     }
 
-    public void generateInvoice(Integer orderId) throws TransformerException, FOPException, IOException {
+    public void generateInvoice(Integer orderId) throws Exception {
         OrderPojo order = orderService.get(orderId);
         List<OrderItemPojo> orderItems = orderItemService.getByOrderId(orderId);
 

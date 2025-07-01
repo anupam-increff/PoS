@@ -46,22 +46,22 @@ public class OrderService {
     }
 
     public OrderPojo get(Integer id) {
-        OrderPojo order = orderDao.select(id);
+        OrderPojo order = orderDao.getById(id);
         if (order == null) {
             throw new ApiException("Order with ID " + id + " not found");
         }
         return order;
     }
     public List<OrderPojo> getAll() {
-        return orderDao.selectAll();
+        return orderDao.getAll();
     }
     public List<OrderPojo> getOrdersByDate(LocalDate date) {
-        return orderDao.selectByDate(date);
+        return orderDao.getByDate(date);
     }
 
 
     public List<OrderItemPojo> getOrderItems(Integer orderId) {
-        return itemDao.selectByOrderId(orderId);
+        return itemDao.getByOrderId(orderId);
     }
 
     public void update(Integer id, OrderPojo newPojo) {

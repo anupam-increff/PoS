@@ -10,18 +10,17 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class OrderItemDao {
+public class OrderItemDao extends AbstractDao<OrderItemPojo> {
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void insert(OrderItemPojo p) {
-        em.persist(p);
+    public OrderItemDao() {
+        super(OrderItemPojo.class);
     }
+    private static final String GET_BY_ORDER_ID="SELECT p FROM OrderItemPojo p WHERE p.orderId = :orderId";
 
-    public List<OrderItemPojo> selectByOrderId(Integer orderId) {
-        return em.createQuery("SELECT p FROM OrderItemPojo p WHERE p.orderId = :orderId", OrderItemPojo.class)
-                .setParameter("orderId", orderId)
-                .getResultList();
+    public List<OrderItemPojo> getByOrderId(Integer orderId) {
+        return em.createQuery(
+                GET_BY_ORDER_ID, OrderItemPojo.class)
+                        .setParameter("orderId", orderId)
+                                .getResultList();
     }
 }

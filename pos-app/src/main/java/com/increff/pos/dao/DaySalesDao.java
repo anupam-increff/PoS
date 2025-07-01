@@ -3,20 +3,17 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.DaySalesPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public class DaySalesDao {
+@Transactional
+public class DaySalesDao extends AbstractDao<DaySalesPojo> {
+    private static final String GET_ORDERS_BETWEEN_DATES = "SELECT d FROM DaySalesPojo d WHERE d.date BETWEEN :start AND :end ORDER BY d.date";
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void insert(DaySalesPojo pojo) {
-        em.persist(pojo);
+    public DaySalesDao() {
+        super(DaySalesPojo.class);
     }
 
     public DaySalesPojo getByDate(LocalDate date) {
@@ -24,10 +21,9 @@ public class DaySalesDao {
     }
 
     public List<DaySalesPojo> getBetween(LocalDate start, LocalDate end) {
-        String jpql = "SELECT d FROM DaySalesPojo d WHERE d.date BETWEEN :start AND :end ORDER BY d.date";
-        TypedQuery<DaySalesPojo> query = em.createQuery(jpql, DaySalesPojo.class);
-        query.setParameter("start", start);
-        query.setParameter("end", end);
-        return query.getResultList();
+        return em.createQuery(GET_ORDERS_BETWEEN_DATES, DaySalesPojo.class)
+                .setParameter("start", start)
+                        .setParameter("end", end)
+                                .getResultList();
     }
 }

@@ -14,7 +14,7 @@ public class OrderItemService {
     private OrderItemDao itemDao;
 
     public List<OrderItemPojo> getByOrderId(Integer orderId) {
-        return itemDao.selectByOrderId(orderId);
+        return itemDao.getByOrderId(orderId);
     }
 }
 

@@ -25,20 +25,20 @@ public class ProductService {
     }
 
     public ProductPojo get(Integer id) {
-        return dao.select(id);
+        return dao.getById(id);
     }
     public ProductPojo getByBarcode(String barcode) {
-        return dao.selectByBarcode(barcode);
+        return dao.getByBarcode(barcode);
     }
 
     public List<ProductPojo> getAll() {
-        return dao.selectAll();
+        return dao.getAll();
     }
-    public List<ProductPojo> getByClient(Integer clientId){ return dao.selectByClientId(clientId); }
+    public List<ProductPojo> getByClient(Integer clientId){ return dao.getByClientId(clientId); }
 
     @Transactional
     public void update(Integer id, ProductPojo p) {
-        ProductPojo existing = dao.select(id);
+        ProductPojo existing = get(id);
         if (existing == null) throw new ApiException("Product not found");
         existing.setBarcode(p.getBarcode());
         existing.setName(p.getName());

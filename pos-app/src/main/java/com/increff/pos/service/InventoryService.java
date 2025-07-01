@@ -37,7 +37,7 @@ public class InventoryService {
         }
     }
     public List<InventoryData> getAll() {
-        return inventoryDao.selectAll().stream().map(pojo -> {
+        return inventoryDao.getAll().stream().map(pojo -> {
             ProductPojo product = productService.get(pojo.getProductId());
             InventoryData data = new InventoryData();
             data.setId(pojo.getId());
@@ -64,7 +64,7 @@ public class InventoryService {
         if (product == null) {
             throw new ApiException("Product with productId" + productId + " not found");
         }
-        return inventoryDao.selectByProductId(productId);
+        return inventoryDao.getByProductId(productId);
     }
 
 }

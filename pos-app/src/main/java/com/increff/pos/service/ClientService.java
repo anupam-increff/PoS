@@ -19,43 +19,44 @@ import javax.transaction.Transactional;
 @Transactional
 public class ClientService {
     @Autowired
-    private ClientDao dao;
+    private ClientDao clientDao;
 
     public ClientPojo add(ClientPojo clientPojo) {
-        if (dao.getClient(clientPojo.getName()) != null) {
+        if (clientDao.getClient(clientPojo.getName()) != null) {
             throw new ApiException("Client with name already exists");
         }
-        dao.insert(clientPojo);
+        clientDao.insert(clientPojo);
         return clientPojo;
     }
 
     public List<ClientData> getAllClients() {
-        return dao.selectAll().stream()
+        return clientDao.getAll().stream()
                 .map(pojo -> {
                     return ConvertUtil.convert(pojo, ClientData.class);
                 })
                 .collect(Collectors.toList());
     }
     public ClientData getClient(String clientName){
-        ClientPojo clientPojo= dao.getClient(clientName);
+        ClientPojo clientPojo= clientDao.getClient(clientName);
         return ConvertUtil.convert(clientPojo,ClientData.class);
     }
 
     public ClientData update(int id, ClientForm form) {
 
-        ClientPojo existing = dao.getById(id);
-        if (existing == null) {
+        ClientPojo existing = clientDao.getById(id);
+        if (Objects.isNull(existing)) {
             throw new ApiException("Client with ID " + id + " does not exist");
         }
-        ClientPojo duplicate = dao.getClient(form.getName());
-        if (Objects.isNull(duplicate) && !duplicate.getId().equals(id)) {
+
+        ClientPojo duplicate = clientDao.getClient(form.getName());
+        if (!Objects.isNull(duplicate) && !duplicate.getId().equals(id)) {
             throw new ApiException("Client Name already used by another client");
         }
-        if(duplicate!=null && duplicate.getName().equals(form.getName())){
+        if(!Objects.isNull(duplicate) && duplicate.getName().equals(form.getName())){
             throw new ApiException("Client Name already set with the requested name");
         }
+
         existing.setName(form.getName());
-        //dao.update(existing);
         return ConvertUtil.convert(existing,ClientData.class);
     }
 
