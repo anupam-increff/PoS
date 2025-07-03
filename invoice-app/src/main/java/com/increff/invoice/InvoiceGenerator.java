@@ -2,11 +2,13 @@ package com.increff.invoice;
 
 import com.increff.invoice.model.OrderData;
 import com.increff.invoice.model.OrderItemData;
+import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
@@ -17,7 +19,7 @@ import java.util.List;
 
 public class InvoiceGenerator {
 
-    public static String generate(OrderData order, List<OrderItemData> items) throws Exception {
+    public static String generate(OrderData order, List<OrderItemData> items) throws TransformerException, FOPException {
         String fo = InvoiceXmlBuilder.build(order, items);
 
         FopFactory fopFactory = FopFactory.newInstance(new java.io.File(System.getProperty("user.dir")).toURI());
