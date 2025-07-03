@@ -1,6 +1,5 @@
 package com.increff.pos.dao;
 
-import com.increff.pos.dao.AbstractDao;
 import com.increff.pos.pojo.ClientPojo;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +15,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
         super(ClientPojo.class);
     }
 
-    public ClientPojo getClient(String clientName) {
+    public ClientPojo getClientByName(String clientName) {
         return em.createQuery(SELECT_CLIENT_BY_NAME, ClientPojo.class)
                 .setParameter("name", clientName)
                 .getResultList()
