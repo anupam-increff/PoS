@@ -27,7 +27,7 @@ public class OrderService {
         return orderPojo.getId();
     }
 
-    public OrderPojo get(Integer id) {
+    public OrderPojo getCheckByOrderId(Integer id) {
         OrderPojo order = orderDao.getById(id);
         if (Objects.isNull(order)) {
             throw new ApiException("Order with ID " + id + " not found");
@@ -47,7 +47,7 @@ public class OrderService {
     }
 
     public void update(Integer id, OrderPojo newPojo) {
-        OrderPojo existing = get(id);
+        OrderPojo existing = getCheckByOrderId(id);
         existing.setInvoicePath(newPojo.getInvoicePath());
         existing.setTotal(newPojo.getTotal());
         orderDao.update(existing);

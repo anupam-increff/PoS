@@ -19,4 +19,7 @@ public class InvoiceDto {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(invoice);
     }
+    public void generateInvoice(Integer orderId) throws Exception {
+        invoiceFlow.generateInvoice(orderId);
+    }
 }

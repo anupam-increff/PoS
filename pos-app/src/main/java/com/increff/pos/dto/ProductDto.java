@@ -22,7 +22,7 @@ public class ProductDto {
     private ProductFlow productFlow;
 
     public void addProduct(@Valid ProductForm productForm) {
-        ProductPojo productPojo = productFormToPojo(productForm);
+        ProductPojo productPojo = ConvertUtil.convert(productForm,ProductPojo.class);
         productFlow.addProduct(productPojo);
     }
 
@@ -34,7 +34,7 @@ public class ProductDto {
     }
 
     public ProductData getByBarcode(String barcode) {
-        return productPojoToData(productFlow.getProductByBarcode(barcode));
+        return productFlow.getProductByBarcode(barcode);
     }
 
     public void uploadProductMasterByTsv(MultipartFile file) {
@@ -61,13 +61,7 @@ public class ProductDto {
     }
 
     public void update(Integer id, @Valid ProductForm productForm) {
-        ProductPojo p = productFormToPojo(productForm);
-        productFlow.updateProduct(id, p);
-    }
-    private ProductPojo productFormToPojo(ProductForm form){
-        return ConvertUtil.convert(form, ProductPojo.class);
-    };
-    private ProductData productPojoToData(ProductPojo pojo){
-        return ConvertUtil.convert(pojo,ProductData.class);
+        ProductPojo productPojo = ConvertUtil.convert(productForm,ProductPojo.class);
+        productFlow.updateProduct(id, productPojo);
     }
 }

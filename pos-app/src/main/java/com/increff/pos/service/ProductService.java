@@ -51,7 +51,9 @@ public class ProductService {
 
     @Transactional
     public void update(Integer id, ProductPojo newProductPojo) {
-        ProductPojo existing = getCheckProductById(id);
-        UpdateUtil.applyUpdates(existing, newProductPojo);
+        ProductPojo productPojo = getCheckProductById(id);
+        productPojo.setName(newProductPojo.getName());
+        productPojo.setMrp(newProductPojo.getMrp());
+        newProductPojo.setImageUrl(newProductPojo.getImageUrl());
     }
 }

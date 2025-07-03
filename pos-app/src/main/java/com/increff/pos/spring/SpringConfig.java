@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
 import javax.sql.DataSource;
 
 import java.util.Properties;
@@ -24,7 +28,7 @@ import java.util.Properties;
 @ComponentScan("com.increff.pos")
 @PropertySource("classpath:db.properties")
 @EnableScheduling
-public class SpringConfig {
+public class SpringConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
     private Environment env;
@@ -65,5 +69,15 @@ public class SpringConfig {
         resolver.setMaxUploadSize(5 * 1024 * 1024); // 5 MB max file size
         resolver.setDefaultEncoding("utf-8");
         return resolver;
+    }
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry
+                .addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+
+        registry
+                .addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }

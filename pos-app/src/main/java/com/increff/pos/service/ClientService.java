@@ -38,7 +38,11 @@ public class ClientService {
     }
 
     public ClientPojo getCheckClientById(Integer id) {
-        return clientDao.getById(id);
+        ClientPojo client = clientDao.getById(id);
+        if (Objects.isNull(client)) {
+            throw new ApiException("Client with Id " + id + " does not exist");
+        }
+        return client;
     }
 
     public void update(int id, ClientPojo clientPojo) {

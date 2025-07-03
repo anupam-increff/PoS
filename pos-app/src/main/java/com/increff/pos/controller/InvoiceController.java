@@ -15,5 +15,9 @@ public class InvoiceController {
     public ResponseEntity<byte[]> downloadInvoice(@PathVariable Integer orderId) {
         return invoiceDto.downloadInvoice(orderId);
     }
+    @GetMapping("/generate/{orderId}")
+    public void generateInvoice(@PathVariable Integer orderId) throws Exception {
+        invoiceDto.generateInvoice(orderId);
+    }
 
 }

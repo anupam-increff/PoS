@@ -35,7 +35,7 @@ public class OrderDto {
     }
 
     public OrderData get(Integer id) {
-        OrderPojo orderPojo = orderService.get(id);
+        OrderPojo orderPojo = orderService.getCheckByOrderId(id);
         return ConvertUtil.convert(orderPojo, OrderData.class);
     }
 }

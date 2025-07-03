@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,31 +35,24 @@ public class OrderFlow {
 
     @Transactional
     public Integer placeOrder(OrderForm orderForm) {
-        List<OrderItemPojo> items = orderForm.getItems().stream().map(form -> {
-            ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
-
-            OrderItemPojo pojo = new OrderItemPojo();
-            pojo.setProductId(product.getId());
-            pojo.setQuantity(form.getQuantity());
-            pojo.setSellingPrice(form.getSellingPrice());
-            return pojo;
-        }).collect(Collectors.toList());
-
-        for (OrderItemPojo item : items) {
+        List<OrderItemPojo> orderItemPojos = orderFormToListOfOrderItemPojo(orderForm);
+        double total = 0;
+        for (OrderItemPojo item : orderItemPojos) {
             ProductPojo product = productService.getCheckProductById(item.getProductId());
             InventoryPojo inventory = inventoryService.getCheckByProductId(item.getProductId());
-            if (inventory == null || inventory.getQuantity() < item.getQuantity()) {
+            if (inventory.getQuantity() < item.getQuantity()) {
                 throw new ApiException("Insufficient inventory for: " + product.getName());
             }
+            total += item.getSellingPrice() * item.getQuantity();
             inventory.setQuantity(inventory.getQuantity() - item.getQuantity());
-//            inventoryService.update(inventory);
         }
 
         OrderPojo order = new OrderPojo();
         order.setTime(ZonedDateTime.now());
+        order.setTotal(total);
         Integer orderId = orderService.createOrder(order);
 
-        for (OrderItemPojo item : items) {
+        for (OrderItemPojo item : orderItemPojos) {
             item.setOrderId(orderId);
             orderItemService.add(item);
         }
@@ -68,7 +60,18 @@ public class OrderFlow {
         return orderId;
     }
 
-    public OrderPojo get(Integer id) {
-        return orderService.get(id);
+    public OrderPojo getByOrderId(Integer id) {
+        return orderService.getCheckByOrderId(id);
+    }
+
+    private List<OrderItemPojo> orderFormToListOfOrderItemPojo(OrderForm orderForm) {
+        return orderForm.getItems().stream().map(form -> {
+            ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
+            OrderItemPojo pojo = new OrderItemPojo();
+            pojo.setProductId(product.getId());
+            pojo.setQuantity(form.getQuantity());
+            pojo.setSellingPrice(form.getSellingPrice());
+            return pojo;
+        }).collect(Collectors.toList());
     }
 }
