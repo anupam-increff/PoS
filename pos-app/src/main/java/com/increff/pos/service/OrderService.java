@@ -2,27 +2,16 @@ package com.increff.pos.service;
 
 import com.increff.pos.dao.OrderDao;
 import com.increff.pos.dao.OrderItemDao;
-import com.increff.pos.dao.ProductDao;
-import com.increff.pos.dao.InventoryDao;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.OrderData;
-import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.OrderItemPojo;
-import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.pojo.InventoryPojo;
-import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 public class OrderService {
@@ -33,21 +22,14 @@ public class OrderService {
     private OrderItemDao itemDao;
 
     @Transactional
-    public Integer createOrder(List<OrderItemPojo> items) {
-        OrderPojo order = new OrderPojo();
-        order.setTime(ZonedDateTime.now());
-        orderDao.insert(order);
-
-        for (OrderItemPojo item : items) {
-            item.setOrderId(order.getId());
-            itemDao.insert(item);
-        }
-        return order.getId();
+    public Integer createOrder(OrderPojo orderPojo) {
+        orderDao.insert(orderPojo);
+        return orderPojo.getId();
     }
 
     public OrderPojo get(Integer id) {
         OrderPojo order = orderDao.getById(id);
-        if (order == null) {
+        if (Objects.isNull(order)) {
             throw new ApiException("Order with ID " + id + " not found");
         }
         return order;

@@ -22,7 +22,7 @@ public class OrderItemDto {
     public List<OrderItemData> getByOrderId(Integer orderId) {
         List<OrderItemData> out = new ArrayList<>();
         orderItemService.getByOrderId(orderId).forEach(item -> {
-            ProductPojo p = productService.get(item.getProductId());
+            ProductPojo p = productService.getCheckProductById(item.getProductId());
 
             OrderItemData d = new OrderItemData();
             d.setId(item.getId());

@@ -13,6 +13,10 @@ public class OrderItemService {
     @Autowired
     private OrderItemDao itemDao;
 
+    public void add(OrderItemPojo orderItemPojo) {
+        itemDao.insert(orderItemPojo);
+    }
+
     public List<OrderItemPojo> getByOrderId(Integer orderId) {
         return itemDao.getByOrderId(orderId);
     }

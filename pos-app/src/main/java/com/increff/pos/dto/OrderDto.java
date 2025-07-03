@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class OrderDto {
@@ -22,27 +22,20 @@ public class OrderDto {
     @Autowired
     private OrderFlow orderFlow;
 
-    public Integer placeOrder(@Valid OrderForm form) {
-        return orderFlow.placeOrder(form);
+    public Integer placeOrder(@Valid OrderForm orderForm) {
+        return orderFlow.placeOrder(orderForm);
     }
 
     public List<OrderData> getAll() {
-        List<OrderPojo> orders = orderService.getAll();
-        List<OrderData> list = new ArrayList<>();
+        List<OrderPojo> orderPojos = orderService.getAll();
+        return orderPojos.stream().
+                map(orderPojo -> ConvertUtil.convert(orderPojo, OrderData.class)).
+                collect(Collectors.toList());
 
-        for (OrderPojo o : orders) {
-            OrderData d = ConvertUtil.convert(o,OrderData.class);
-            list.add(d);
-        }
-        return list;
     }
 
     public OrderData get(Integer id) {
-        OrderPojo o = orderService.get(id);
-        OrderData d = new OrderData();
-        d.setId(o.getId());
-        d.setTime(o.getTime());
-        d.setInvoicePath(o.getInvoicePath());
-        return d;
+        OrderPojo orderPojo = orderService.get(id);
+        return ConvertUtil.convert(orderPojo, OrderData.class);
     }
 }
