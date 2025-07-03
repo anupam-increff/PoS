@@ -30,5 +30,4 @@ public class DaySalesController {
         dto.generateTodayReport();
     }
 
-
 }
