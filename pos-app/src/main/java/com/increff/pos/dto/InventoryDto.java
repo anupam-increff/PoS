@@ -1,12 +1,9 @@
 package com.increff.pos.dto;
+
 import com.increff.pos.exception.ApiException;
+import com.increff.pos.flow.InventoryFlow;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.form.InventoryForm;
-import com.increff.pos.pojo.InventoryPojo;
-import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.InventoryService;
-import com.increff.pos.service.ProductService;
-import com.increff.pos.util.ConvertUtil;
 import com.increff.pos.util.TSVUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,13 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class InventoryDto {
 
     @Autowired
-    private InventoryService inventoryService;
+    private InventoryFlow inventoryFlow;
 
     public void processTsvUpload(MultipartFile file) {
         List<InventoryForm> forms = TSVUtil.readFromTsv(file, InventoryForm.class);
@@ -30,7 +26,7 @@ public class InventoryDto {
         int rowNum = 1;
         for (InventoryForm form : forms) {
             try {
-                inventoryService.updateInventory(form.getBarcode(),form.getQuantity());
+                updateByBarcode(form.getBarcode(), form);
             } catch (ApiException e) {
                 errors.add("Row " + rowNum + ": " + e.getMessage());
             }
@@ -43,13 +39,13 @@ public class InventoryDto {
     }
 
     public List<InventoryData> getAll() {
-        return inventoryService.getAll();
+        return inventoryFlow.getAll();
     }
 
     public void updateByBarcode(String barcode, @Valid InventoryForm form) {
         if (!barcode.equals(form.getBarcode())) {
             throw new ApiException("Barcode mismatch between path and form");
         }
-        inventoryService.updateInventory(barcode, form.getQuantity());
+        inventoryFlow.updateInventory(barcode, form.getQuantity());
     }
 }

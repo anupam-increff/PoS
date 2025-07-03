@@ -30,8 +30,7 @@ public class InventoryController {
     }
 
     @PutMapping(path = "/{barcode}")
-    public void updateInventory(@PathVariable String barcode,
-                                @RequestBody @Valid InventoryForm form) {
+    public void updateInventory(@PathVariable String barcode, @RequestBody @Valid InventoryForm form) {
         inventoryDto.updateByBarcode(barcode, form);
     }
 }
