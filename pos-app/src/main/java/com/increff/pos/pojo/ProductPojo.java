@@ -15,7 +15,7 @@ public class ProductPojo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String barcode;
 
     @Column(name = "client_id", nullable = false)
@@ -26,7 +26,6 @@ public class ProductPojo {
 
     @Column(nullable = false)
     private Double mrp;
-
     @Column(name = "image_url")
     private String imageUrl;
 }

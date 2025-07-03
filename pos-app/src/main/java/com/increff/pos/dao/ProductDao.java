@@ -27,7 +27,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
                         .orElse(null);
     }
 
-    public List<ProductPojo> getByClientId(Integer clientId) {
+    public List<ProductPojo> getProductsByClientId(Integer clientId) {
         return em.createQuery(SELECT_BY_CLIENT_ID, ProductPojo.class)
                 .setParameter("clientId", clientId)
                         .getResultList();
