@@ -1,7 +1,6 @@
 package com.increff.pos.controller;
 
 import com.increff.pos.dto.OrderDto;
-import com.increff.pos.dto.OrderItemDto;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.form.OrderForm;
@@ -17,8 +16,6 @@ public class OrderController {
 
     @Autowired
     private OrderDto orderDto;
-    @Autowired
-    private OrderItemDto orderItemDto;
 
     @GetMapping
     public List<OrderData> getAll() {
@@ -27,7 +24,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public List<OrderItemData> getItemsByOrderId(@PathVariable Integer id) {
-        return orderItemDto.getByOrderId(id);
+        return orderDto.getItemsByOrderId(id);
     }
 
     @PostMapping

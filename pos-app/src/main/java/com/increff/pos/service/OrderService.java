@@ -34,7 +34,7 @@ public class OrderService {
         }
         return order;
     }
-    public List<OrderPojo> getAll() {
+    public List<OrderPojo> getAllOrders() {
         return orderDao.getAll();
     }
     public List<OrderPojo> getOrdersByDate(LocalDate date) {

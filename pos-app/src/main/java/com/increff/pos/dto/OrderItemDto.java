@@ -1,5 +1,6 @@
 package com.increff.pos.dto;
 
+import com.increff.pos.flow.OrderFlow;
 import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.OrderItemService;
@@ -14,26 +15,9 @@ import java.util.List;
 public class OrderItemDto {
 
     @Autowired
-    private OrderItemService orderItemService;
+    private OrderFlow orderFlow ;
 
-    @Autowired
-    private ProductService productService;
-
-    public List<OrderItemData> getByOrderId(Integer orderId) {
-        List<OrderItemData> out = new ArrayList<>();
-        orderItemService.getByOrderId(orderId).forEach(item -> {
-            ProductPojo p = productService.getCheckProductById(item.getProductId());
-
-            OrderItemData d = new OrderItemData();
-            d.setId(item.getId());
-            d.setOrderId(item.getOrderId());
-            d.setBarcode(p.getBarcode());
-            d.setProductName(p.getName());
-            d.setQuantity(item.getQuantity());
-            d.setSellingPrice(item.getSellingPrice());
-
-            out.add(d);
-        });
-        return out;
+    public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
+        return orderFlow.getOrderItemsByOrderId(orderId);
     }
 }

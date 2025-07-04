@@ -1,6 +1,7 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
+import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.OrderItemPojo;
@@ -10,11 +11,13 @@ import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.OrderItemService;
 import com.increff.pos.service.OrderService;
 import com.increff.pos.service.ProductService;
+import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +65,22 @@ public class OrderFlow {
 
     public OrderPojo getByOrderId(Integer id) {
         return orderService.getCheckByOrderId(id);
+    }
+
+    public List<OrderPojo> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
+    public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
+        List<OrderItemPojo> orderItemPojos = orderItemService.getByOrderId(orderId);
+        return orderItemPojos.stream().map(orderItemPojo -> {
+            ProductPojo productPojo = productService.getCheckProductById(orderItemPojo.getProductId());
+            OrderItemData orderItemData = ConvertUtil.convert(orderItemPojo, OrderItemData.class);
+            orderItemData.setBarcode(productPojo.getBarcode());
+            orderItemData.setProductName(productPojo.getName());
+            return orderItemData;
+        }).collect(Collectors.toList());
+
     }
 
     private List<OrderItemPojo> orderFormToListOfOrderItemPojo(OrderForm orderForm) {

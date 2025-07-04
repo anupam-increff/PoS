@@ -2,6 +2,7 @@ package com.increff.pos.spring;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.*;
@@ -22,19 +23,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/api/auth/login").permitAll()
                 .antMatchers("/api/admin/**").hasAuthority("supervisor")
                 .antMatchers("/api/**").hasAnyAuthority("operator", "supervisor")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
+                .csrf().disable()
+                .cors()
+                .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
                 .logoutSuccessHandler((request, response, auth) -> response.setStatus(200))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID");
-
     }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -58,4 +61,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .withUser("user@example.com").password("userpass").authorities("operator");
     }
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
 }

@@ -2,8 +2,7 @@ package com.increff.pos.controller;
 
 import com.increff.pos.model.form.LoginForm;
 import com.increff.pos.model.data.LoginData;
-import com.increff.pos.util.SecurityUtil;
-import com.increff.pos.util.UserPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 public class AuthController {
 
     private final AuthenticationManager authManager;
@@ -32,7 +31,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(auth);
         session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        User principal = (User) auth.getPrincipal();
 
         LoginData data = new LoginData();
         data.setEmail(principal.getUsername());

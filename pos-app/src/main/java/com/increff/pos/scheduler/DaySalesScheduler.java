@@ -1,28 +1,24 @@
-package com.increff.pos.dto;
+package com.increff.pos.scheduler;
 
 import com.increff.pos.flow.DaySalesFlow;
-import com.increff.pos.pojo.DaySalesPojo;
-import com.increff.pos.service.DaySalesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 @Component
-public class DaySalesDto {
+public class DaySalesScheduler {
+
     @Autowired
     private DaySalesFlow daySalesFlow;
 
-    public List<DaySalesPojo> getByDateRange(LocalDate start, LocalDate end) {
-        return daySalesFlow.getBetween(start, end);
-    }
-    public void generateTodayReport() {
+    @Scheduled(cron = "00 59 23 * * *", zone = "UTC")
+    public void runDailySalesCalculation() {
         ZonedDateTime nowUtc = ZonedDateTime.now(ZoneOffset.UTC);
         LocalDate today = nowUtc.toLocalDate();
         daySalesFlow.calculateDailySales(today);
     }
-
 }
