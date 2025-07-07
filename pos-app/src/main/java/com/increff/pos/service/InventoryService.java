@@ -3,7 +3,6 @@ package com.increff.pos.service;
 import com.increff.pos.dao.InventoryDao;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.InventoryPojo;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +19,46 @@ public class InventoryService {
     @Transactional
     public void updateInventory(Integer productId, Integer quantity) {
         InventoryPojo inventory = getCheckByProductId(productId);
-        inventory.setQuantity(inventory.getQuantity() + quantity);
+        inventory.setQuantity(quantity);
     }
 
-    public List<InventoryPojo> getAll() {
-        return inventoryDao.getAll();
+    @Transactional
+    public void addInventory(Integer productId, Integer quantity) {
+        InventoryPojo inventory = inventoryDao.getByProductId(productId);
+        if (Objects.isNull(inventory)) {
+            InventoryPojo newInventory = new InventoryPojo();
+            newInventory.setProductId(productId);
+            newInventory.setQuantity(quantity);
+            inventoryDao.insert(newInventory);
+        } else {
+            inventory.setQuantity(inventory.getQuantity() + quantity);
+        }
+    }
+
+    public List<InventoryPojo> getAll(int page, int pageSize) {
+        return inventoryDao.getAllPaginated(page, pageSize);
+    }
+
+    public long countAll() {
+        return inventoryDao.countAll();
+    }
+
+    public List<InventoryPojo> searchByBarcode(String barcode, int page, int pageSize) {
+        return inventoryDao.searchByBarcode(barcode, page, pageSize);
+    }
+
+    public long countByBarcodeSearch(String barcode) {
+        return inventoryDao.countByBarcodeSearch(barcode);
     }
 
     public InventoryPojo getCheckByProductId(Integer productId) {
         InventoryPojo inventoryPojo = inventoryDao.getByProductId(productId);
-        if (Objects.isNull(inventoryPojo))
-            throw new ApiException("No Inventory data found for this product ");
+        if (Objects.isNull(inventoryPojo)) throw new ApiException("No Inventory data found for this product");
         return inventoryPojo;
     }
 
+    public InventoryPojo getByProductId(Integer productId) {
+
+        return inventoryDao.getByProductId(productId);
+    }
 }

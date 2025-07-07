@@ -3,6 +3,7 @@ package com.increff.pos.dto;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.flow.InventoryFlow;
 import com.increff.pos.model.data.InventoryData;
+import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.util.TSVUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,12 @@ public class InventoryDto {
         }
     }
 
-    public List<InventoryData> getAll() {
-        return inventoryFlow.getAll();
+    public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
+        return inventoryFlow.getAll(page, pageSize);
+    }
+
+    public PaginatedResponse<InventoryData> searchByBarcode(String barcode, int page, int pageSize) {
+        return inventoryFlow.searchByBarcode(barcode, page, pageSize);
     }
 
     public void updateByBarcode(String barcode, @Valid InventoryForm form) {
@@ -47,5 +52,9 @@ public class InventoryDto {
             throw new ApiException("Barcode mismatch between path and form");
         }
         inventoryFlow.updateInventory(barcode, form.getQuantity());
+    }
+
+    public void add(@Valid InventoryForm form) {
+        inventoryFlow.addInventory(form.getBarcode(), form.getQuantity());
     }
 }

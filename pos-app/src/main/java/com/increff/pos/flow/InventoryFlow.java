@@ -2,6 +2,7 @@ package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.InventoryData;
+import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
@@ -30,19 +31,37 @@ public class InventoryFlow {
         inventoryService.updateInventory(product.getId(), quantity);
     }
 
-    public List<InventoryData> getAll() {
-        return inventoryService.getAll().stream().map(inventoryPojo -> {
-            InventoryData inventoryData = ConvertUtil.convert(inventoryPojo, InventoryData.class);
-            ProductPojo product = productService.getCheckProductById(inventoryPojo.getProductId());
-            inventoryData.setBarcode(product.getBarcode());
-            inventoryData.setName(product.getName());
-            return inventoryData;
-        }).collect(Collectors.toList());
+    @Transactional
+    public void addInventory(String barcode, int quantity) {
+        ProductPojo product = productService.getCheckProductByBarcode(barcode);
+        inventoryService.addInventory(product.getId(), quantity);
+    }
+
+
+    public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
+        List<InventoryPojo> pojos = inventoryService.getAll(page, pageSize);
+        long total = inventoryService.countAll();
+        List<InventoryData> data = pojos.stream().map(this::toData).collect(Collectors.toList());
+        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
+    }
+
+    public PaginatedResponse<InventoryData> searchByBarcode(String barcode, int page, int pageSize) {
+        List<InventoryPojo> pojos = inventoryService.searchByBarcode(barcode, page, pageSize);
+        long total = inventoryService.countByBarcodeSearch(barcode);
+        List<InventoryData> data = pojos.stream().map(this::toData).collect(Collectors.toList());
+        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
+    }
+
+    private InventoryData toData(InventoryPojo pojo) {
+        InventoryData data = ConvertUtil.convert(pojo, InventoryData.class);
+        ProductPojo product = productService.getCheckProductById(pojo.getProductId());
+        data.setBarcode(product.getBarcode());
+        data.setName(product.getName());
+        return data;
     }
 
     public InventoryPojo getByBarcode(String barcode) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
-
         InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
         if (Objects.isNull(inventory)) {
             throw new ApiException("No inventory found for product with barcode: " + barcode);
