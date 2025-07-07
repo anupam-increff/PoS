@@ -52,8 +52,9 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         typedQuery.setParameter("start", startZdt);
         typedQuery.setParameter("end", endZdt);
 
+
         if (query != null && !query.trim().isEmpty()) {
-            typedQuery.setParameter("q", "%" + query.trim() + "%");
+            typedQuery.setParameter("q", query.trim() + "%");
         }
 
         typedQuery.setFirstResult(page * size);
@@ -77,7 +78,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         countQuery.setParameter("end", endZdt);
 
         if (query != null && !query.trim().isEmpty()) {
-            countQuery.setParameter("q",query.trim() + "%");
+            countQuery.setParameter("q", query.trim() + "%");
         }
 
         return countQuery.getSingleResult();
