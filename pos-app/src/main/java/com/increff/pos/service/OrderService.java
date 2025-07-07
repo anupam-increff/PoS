@@ -3,8 +3,8 @@ package com.increff.pos.service;
 import com.increff.pos.dao.OrderDao;
 import com.increff.pos.dao.OrderItemDao;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.OrderItemPojo;
+import com.increff.pos.pojo.OrderPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +18,7 @@ public class OrderService {
 
     @Autowired
     private OrderDao orderDao;
+
     @Autowired
     private OrderItemDao itemDao;
 
@@ -34,13 +35,18 @@ public class OrderService {
         }
         return order;
     }
-    public List<OrderPojo> getAllOrders() {
-        return orderDao.getAll();
+
+    public List<OrderPojo> getAllPaginated(int page, int size) {
+        return orderDao.getAllPaginated(page, size);
     }
     public List<OrderPojo> getOrdersByDate(LocalDate date) {
         return orderDao.getByDate(date);
     }
 
+
+    public long countAll() {
+        return orderDao.countAll();
+    }
 
     public List<OrderItemPojo> getOrderItems(Integer orderId) {
         return itemDao.getByOrderId(orderId);
@@ -53,4 +59,11 @@ public class OrderService {
         orderDao.update(existing);
     }
 
+    public List<OrderPojo> search(LocalDate start, LocalDate end, Boolean invoiceGenerated, int page, int size) {
+        return orderDao.search(start, end, invoiceGenerated, page, size);
+    }
+
+    public long countMatching(LocalDate start, LocalDate end, Boolean invoiceGenerated) {
+        return orderDao.countMatching(start, end, invoiceGenerated);
+    }
 }

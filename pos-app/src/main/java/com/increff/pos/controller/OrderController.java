@@ -3,11 +3,13 @@ package com.increff.pos.controller;
 import com.increff.pos.dto.OrderDto;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.OrderItemData;
+import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.OrderForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,8 +20,11 @@ public class OrderController {
     private OrderDto orderDto;
 
     @GetMapping
-    public List<OrderData> getAll() {
-        return orderDto.getAll();
+    public PaginatedResponse<OrderData> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return orderDto.getAll(page, size);
     }
 
     @GetMapping("/{id}")
@@ -30,5 +35,16 @@ public class OrderController {
     @PostMapping
     public Integer placeOrder(@RequestBody @Valid OrderForm form) {
         return orderDto.placeOrder(form);
+    }
+
+    @GetMapping("/search")
+    public PaginatedResponse<OrderData> searchOrders(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) Boolean invoiceGenerated,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        return orderDto.searchOrders(startDate, endDate, invoiceGenerated, page, size);
     }
 }
