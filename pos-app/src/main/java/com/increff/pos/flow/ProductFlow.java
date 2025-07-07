@@ -1,6 +1,7 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.model.data.ProductData;
+import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ClientService;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Transactional
@@ -23,20 +23,37 @@ public class ProductFlow {
     @Autowired
     private ClientService clientService;
 
-    public void addProduct(ProductPojo productPojo) {
-        ClientPojo client = clientService.getCheckClientById(productPojo.getClientId());
+    public void addProduct(ProductForm form) {
+        ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
+        ClientPojo client = clientService.getCheckClientByName(form.getClientName());
+        productPojo.setClientId(client.getId());
         productService.addProduct(productPojo);
     }
 
-    public List<ProductData> getAllProducts() {
-        List<ProductPojo> productPojos = productService.getAll();
-        return productPojos.stream().map(this::productPojoToProductData).collect(Collectors.toList());
+    public List<ProductPojo> getAllProducts(int page, int pageSize) {
+        return productService.getAll(page, pageSize);
     }
 
-    public List<ProductData> getProductsByClient(String clientName) {
+    public long countAllProducts() {
+        return productService.countAll();
+    }
+
+    public List<ProductPojo> getProductsByClient(String clientName, int page, int pageSize) {
         ClientPojo client = clientService.getCheckClientByName(clientName);
-        List<ProductPojo> productPojos = productService.getProductsByClientId(client.getId());
-        return productPojos.stream().map(this::productPojoToProductData).collect(Collectors.toList());
+        return productService.getProductsByClientId(client.getId(), page, pageSize);
+    }
+
+    public long countProductsByClient(String clientName) {
+        ClientPojo client = clientService.getCheckClientByName(clientName);
+        return productService.countProductsByClientId(client.getId());
+    }
+
+    public List<ProductPojo> searchProductsByBarcode(String barcode, int page, int pageSize) {
+        return productService.searchByBarcode(barcode, page, pageSize);
+    }
+
+    public long countSearchByBarcode(String barcode) {
+        return productService.countSearchByBarcode(barcode);
     }
 
     public ProductData getProductByBarcode(String barcode) {
@@ -44,13 +61,16 @@ public class ProductFlow {
         return productPojoToProductData(productPojo);
     }
 
-    public void updateProduct(Integer id, ProductPojo productPojo) {
+    public void updateProduct(Integer id, ProductForm form) {
+        ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
+        ClientPojo client = clientService.getCheckClientByName(form.getClientName());
+        productPojo.setClientId(client.getId());
         productService.update(id, productPojo);
     }
 
-    private ProductData productPojoToProductData(ProductPojo productPojo) {
+
+    public ProductData productPojoToProductData(ProductPojo productPojo) {
         ProductData productData = ConvertUtil.convert(productPojo, ProductData.class);
-        // Set client name
         ClientPojo client = clientService.getCheckClientById(productPojo.getClientId());
         productData.setClientName(client.getName());
         return productData;

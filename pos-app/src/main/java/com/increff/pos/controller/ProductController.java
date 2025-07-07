@@ -1,6 +1,7 @@
 package com.increff.pos.controller;
 
 import com.increff.pos.dto.ProductDto;
+import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.form.ProductForm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -19,28 +19,41 @@ public class ProductController {
     @Autowired
     private ProductDto productDto;
 
-    @PostMapping()
+    @PostMapping
     public void addProduct(@RequestBody @Valid ProductForm productForm) {
         productDto.addProduct(productForm);
     }
 
-    // Get all or by client
     @GetMapping
-    public List<ProductData> getAll(@RequestParam(required = false) String clientName) {
+    public PaginatedResponse<ProductData> getAll(
+            @RequestParam(required = false) String clientName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
         if (!Objects.isNull(clientName) && !clientName.isEmpty()) {
-            return productDto.getByClient(clientName);
+            return productDto.getByClient(clientName, page, pageSize);
         }
-        return productDto.getAll();
+        return productDto.getAll(page, pageSize);
     }
 
-    @PostMapping(path = "/upload-tsv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void uploadProductMaster(@RequestParam("file") MultipartFile file) {
-        productDto.uploadProductMasterByTsv(file);
+    @GetMapping("/search")
+    public PaginatedResponse<ProductData> searchByBarcode(
+            @RequestParam String barcode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return productDto.searchByBarcode(barcode, page, pageSize);
     }
 
     @GetMapping("/barcode/{barcode}")
     public ProductData getByBarcode(@PathVariable String barcode) {
         return productDto.getByBarcode(barcode);
+    }
+
+
+    @PostMapping(path = "/upload-tsv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void uploadProductMaster(@RequestParam("file") MultipartFile file) {
+        productDto.uploadProductMasterByTsv(file);
     }
 
     @PutMapping("/{id}")

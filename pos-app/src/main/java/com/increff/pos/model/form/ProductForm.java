@@ -15,8 +15,8 @@ public class ProductForm {
     @NotBlank(message = "Barcode must not be blank")
     private String barcode;
 
-    @NotNull(message = "Client ID is required")
-    private Integer clientId;
+    @NotBlank(message = "Client name is required")
+    private String clientName;
 
     @NotBlank(message = "Product name is required")
     private String name;
