@@ -71,12 +71,12 @@ public class OrderFlow {
         return new PaginatedResponse<>(data, page, totalPages, total, size);
     }
 
-    public PaginatedResponse<OrderData> searchOrders(LocalDate start, LocalDate end, Boolean invoiceGenerated, int page, int size) {
-        List<OrderPojo> pojos = orderService.search(start, end, invoiceGenerated, page, size);
-        long total = orderService.countMatching(start, end, invoiceGenerated);
-        int totalPages = (int) Math.ceil((double) total / size);
-        List<OrderData> data = pojos.stream().map(this::convert).collect(Collectors.toList());
-        return new PaginatedResponse<>(data, page, totalPages, total, size);
+    public PaginatedResponse<OrderData> searchOrders(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query, int page, int size) {
+        List<OrderPojo> pojos = orderService.search(startDate, endDate, invoiceGenerated, query, page, size);
+        long totalItems = orderService.countMatching(startDate, endDate, invoiceGenerated, query);
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        List<OrderData> dataList = pojos.stream().map(this::convert).collect(Collectors.toList());
+        return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
     }
 
     public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {

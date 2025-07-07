@@ -25,6 +25,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     private static final String BASE_COUNT_FILTERED = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time >= :start AND o.time < :end";
     private static final String INVOICE_NOT_NULL = " AND o.invoicePath IS NOT NULL";
     private static final String INVOICE_IS_NULL = " AND o.invoicePath IS NULL";
+    private static final String QUERY_CLAUSE = " AND (STR(o.id) LIKE :q)";
     private static final String ORDER_BY_TIME_DESC = " ORDER BY o.time DESC";
 
     public List<OrderPojo> getAllPaginated(int page, int size) {
@@ -35,35 +36,51 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         return em.createQuery(COUNT_ALL, Long.class).getSingleResult();
     }
 
-    public List<OrderPojo> search(LocalDate start, LocalDate end, Boolean invoiceGenerated, int page, int size) {
-        String jpql = BASE_SELECT_FILTERED;
+    public List<OrderPojo> search(LocalDate start, LocalDate end, Boolean invoiceGenerated, String query, int page, int size) {
+        StringBuilder jpql = new StringBuilder(BASE_SELECT_FILTERED);
         if (invoiceGenerated != null) {
-            jpql += invoiceGenerated ? INVOICE_NOT_NULL : INVOICE_IS_NULL;
+            jpql.append(invoiceGenerated ? INVOICE_NOT_NULL : INVOICE_IS_NULL);
         }
-        jpql += ORDER_BY_TIME_DESC;
+        if (query != null && !query.trim().isEmpty()) {
+            jpql.append(QUERY_CLAUSE);
+        }
+        jpql.append(ORDER_BY_TIME_DESC);
 
-        TypedQuery<OrderPojo> query = em.createQuery(jpql, OrderPojo.class);
+        TypedQuery<OrderPojo> typedQuery = em.createQuery(jpql.toString(), OrderPojo.class);
         ZonedDateTime startZdt = start.atStartOfDay().atZone(ZoneOffset.UTC);
         ZonedDateTime endZdt = end.plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC);
-        query.setParameter("start", startZdt);
-        query.setParameter("end", endZdt);
-        query.setFirstResult(page * size);
-        query.setMaxResults(size);
-        return query.getResultList();
+        typedQuery.setParameter("start", startZdt);
+        typedQuery.setParameter("end", endZdt);
+
+        if (query != null && !query.trim().isEmpty()) {
+            typedQuery.setParameter("q", "%" + query.trim() + "%");
+        }
+
+        typedQuery.setFirstResult(page * size);
+        typedQuery.setMaxResults(size);
+        return typedQuery.getResultList();
     }
 
-    public long countMatching(LocalDate start, LocalDate end, Boolean invoiceGenerated) {
-        String jpql = BASE_COUNT_FILTERED;
+    public long countMatching(LocalDate start, LocalDate end, Boolean invoiceGenerated, String query) {
+        StringBuilder jpql = new StringBuilder(BASE_COUNT_FILTERED);
         if (invoiceGenerated != null) {
-            jpql += invoiceGenerated ? INVOICE_NOT_NULL : INVOICE_IS_NULL;
+            jpql.append(invoiceGenerated ? INVOICE_NOT_NULL : INVOICE_IS_NULL);
+        }
+        if (query != null && !query.trim().isEmpty()) {
+            jpql.append(QUERY_CLAUSE);
         }
 
-        TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+        TypedQuery<Long> countQuery = em.createQuery(jpql.toString(), Long.class);
         ZonedDateTime startZdt = start.atStartOfDay().atZone(ZoneOffset.UTC);
         ZonedDateTime endZdt = end.plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC);
-        query.setParameter("start", startZdt);
-        query.setParameter("end", endZdt);
-        return query.getSingleResult();
+        countQuery.setParameter("start", startZdt);
+        countQuery.setParameter("end", endZdt);
+
+        if (query != null && !query.trim().isEmpty()) {
+            countQuery.setParameter("q",query.trim() + "%");
+        }
+
+        return countQuery.getSingleResult();
     }
 
     public List<OrderPojo> getByDate(LocalDate date) {
@@ -71,5 +88,4 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         ZonedDateTime end = start.plusDays(1);
         return em.createQuery("SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end", OrderPojo.class).setParameter("start", start).setParameter("end", end).getResultList();
     }
-
 }

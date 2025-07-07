@@ -42,9 +42,10 @@ public class OrderController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) Boolean invoiceGenerated,
+            @RequestParam(required = false) String query,
             @RequestParam int page,
             @RequestParam int size
     ) {
-        return orderDto.searchOrders(startDate, endDate, invoiceGenerated, page, size);
+        return orderDto.searchOrders(startDate, endDate, invoiceGenerated, query, page, size);
     }
 }

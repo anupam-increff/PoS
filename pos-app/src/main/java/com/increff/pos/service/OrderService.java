@@ -59,11 +59,11 @@ public class OrderService {
         orderDao.update(existing);
     }
 
-    public List<OrderPojo> search(LocalDate start, LocalDate end, Boolean invoiceGenerated, int page, int size) {
-        return orderDao.search(start, end, invoiceGenerated, page, size);
+    public List<OrderPojo> search(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query, int page, int size) {
+        return orderDao.search(startDate, endDate, invoiceGenerated, query, page, size);
     }
 
-    public long countMatching(LocalDate start, LocalDate end, Boolean invoiceGenerated) {
-        return orderDao.countMatching(start, end, invoiceGenerated);
+    public long countMatching(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query) {
+        return orderDao.countMatching(startDate, endDate, invoiceGenerated, query);
     }
 }
