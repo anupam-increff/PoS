@@ -2,25 +2,17 @@ package com.increff.pos.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@Api(tags = "System Information")
 @RestController
-@RequestMapping("/api/about")
-@Api(tags = "About API")
 public class AboutController {
 
-    @ApiOperation(value = "Returns basic application information")
-    @GetMapping
-    public AboutAppData getDetails() {
-        AboutAppData data = new AboutAppData();
-        data.setName("Increff POS");
-        data.setVersion("1.0.0");
-        return data;
-    }
-    @Getter @Setter
-    public static class AboutAppData {
-        private String name;
-        private String version;
+    @ApiOperation("Get application information")
+    @RequestMapping(path = "/api/about", method = RequestMethod.GET)
+    public String about() {
+        return "POS Application v1.0";
     }
 }

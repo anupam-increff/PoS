@@ -2,6 +2,7 @@ package com.increff.pos.controller;
 
 import com.increff.pos.exception.ApiException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +22,14 @@ public class AppRestControllerAdvice {
         return data;
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public MessageData handle(AccessDeniedException e) {
+        MessageData data = new MessageData();
+        data.setMessage("Access denied: You don't have permission to perform this action");
+        return data;
+    }
+
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public MessageData handle(Throwable e) {
@@ -28,6 +37,7 @@ public class AppRestControllerAdvice {
         data.setMessage("An unknown error has occurred - " + e.getMessage());
         return data;
     }
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public MessageData handle(MethodArgumentNotValidException e) {

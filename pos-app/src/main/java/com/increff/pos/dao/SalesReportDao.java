@@ -38,7 +38,6 @@ public class SalesReportDao {
 
         return query.getResultList();
     }
-
     public Long countTotalClients(ZonedDateTime start, ZonedDateTime end, String clientName) {
         String baseCount = "SELECT COUNT(DISTINCT c.name) " + "FROM com.increff.pos.pojo.OrderPojo o " + "JOIN com.increff.pos.pojo.OrderItemPojo oi ON o.id = oi.orderId " + "JOIN com.increff.pos.pojo.ProductPojo p ON oi.productId = p.id " + "JOIN com.increff.pos.pojo.ClientPojo c ON p.clientId = c.id " + "WHERE o.time BETWEEN :start AND :end ";
 

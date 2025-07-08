@@ -4,41 +4,49 @@ import com.increff.pos.dto.ClientDto;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.ClientForm;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
+@Api(tags = "Client Management")
 @RestController
 @RequestMapping("/api/client")
 public class ClientController {
 
     @Autowired
-    private ClientDto dto;
+    private ClientDto clientDto;
 
+    @ApiOperation("Add a new client")
+    @PostMapping
+    public void addClient(@RequestBody @Valid ClientForm form) {
+        clientDto.add(form);
+    }
+
+    @ApiOperation("Get all clients")
     @GetMapping
     public PaginatedResponse<ClientData> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return dto.getAll(page, pageSize);
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return clientDto.getAll(page, pageSize);
     }
 
+    @ApiOperation("Search clients by query")
     @GetMapping("/search")
     public PaginatedResponse<ClientData> searchClients(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return dto.searchClients(query, page, pageSize);
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return clientDto.searchClients(query, page, pageSize);
     }
 
-    @PostMapping
-    public void add(@RequestBody @Valid ClientForm form) {
-        dto.add(form);
-    }
-
+    @ApiOperation("Update client by ID")
     @PutMapping("/{id}")
-    public void update(@PathVariable int id, @RequestBody @Valid ClientForm form) {
-        dto.update(id, form);
+    public void updateClient(@PathVariable Integer id, @RequestBody @Valid ClientForm form) {
+        clientDto.update(id, form);
     }
 }
