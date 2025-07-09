@@ -5,7 +5,6 @@ import com.increff.pos.flow.ProductFlow;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.form.ProductForm;
-import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.util.TSVUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,10 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
-public class ProductDto {
+public class ProductDto extends BaseDto {
+
+    private static final int MAX_ROWS = 5000;
 
     @Autowired
     private ProductFlow productFlow;
@@ -26,29 +26,22 @@ public class ProductDto {
         productFlow.addProduct(productForm);
     }
 
-
     public PaginatedResponse<ProductData> getAll(int page, int pageSize) {
-        List<ProductPojo> pojos = productFlow.getAllProducts(page, pageSize);
+        List<ProductData> products = productFlow.getAllProducts(page, pageSize);
         long total = productFlow.countAllProducts();
-        List<ProductData> data = toDataList(pojos);
-        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
+        return createPaginatedResponse(products, page, pageSize, total);
     }
 
     public PaginatedResponse<ProductData> getByClient(String clientName, int page, int pageSize) {
-        List<ProductPojo> pojos = productFlow.getProductsByClient(clientName, page, pageSize);
+        List<ProductData> products = productFlow.getProductsByClient(clientName, page, pageSize);
         long total = productFlow.countProductsByClient(clientName);
-        List<ProductData> data = pojos.stream()
-                .map(productFlow::productPojoToProductData)
-                .collect(Collectors.toList());
-        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
+        return createPaginatedResponse(products, page, pageSize, total);
     }
 
-
     public PaginatedResponse<ProductData> searchByBarcode(String barcode, int page, int pageSize) {
-        List<ProductPojo> pojos = productFlow.searchProductsByBarcode(barcode, page, pageSize);
+        List<ProductData> products = productFlow.searchProductsByBarcode(barcode, page, pageSize);
         long total = productFlow.countSearchByBarcode(barcode);
-        List<ProductData> data = toDataList(pojos);
-        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
+        return createPaginatedResponse(products, page, pageSize, total);
     }
 
     public ProductData getByBarcode(String barcode) {
@@ -57,28 +50,37 @@ public class ProductDto {
 
     public void uploadProductMasterByTsv(MultipartFile file) {
         List<ProductForm> forms = TSVUtil.readFromTsv(file, ProductForm.class);
+        
+        if (forms.size() > MAX_ROWS) {
+            throw new ApiException("Maximum " + MAX_ROWS + " rows allowed. Found: " + forms.size());
+        }
+        
         List<String> errors = new ArrayList<>();
+        List<ProductForm> errorRows = new ArrayList<>();
+
         int rowNum = 1;
         for (ProductForm form : forms) {
             try {
                 addProduct(form);
             } catch (ApiException e) {
                 errors.add("Row " + rowNum + ": " + e.getMessage());
+                errorRows.add(form);
             } catch (Exception e) {
                 errors.add("Row " + rowNum + ": Unexpected error - " + e.getMessage());
+                errorRows.add(form);
             }
             rowNum++;
         }
+        
         if (!errors.isEmpty()) {
-            throw new ApiException("TSV upload encountered issues:\n" + String.join("\n", errors));
+            // Generate error TSV file
+            byte[] errorTsvBytes = TSVUtil.createTsvFromList(errorRows, ProductForm.class);
+            String errorMessage = "Product TSV upload failed. " + errors.size() + " errors found:\n" + String.join("\n", errors);
+            throw new ApiException(errorMessage + "\nError TSV file generated with " + errorRows.size() + " rows.");
         }
     }
 
     public void update(Integer id, @Valid ProductForm productForm) {
         productFlow.updateProduct(id, productForm);
-    }
-
-    private List<ProductData> toDataList(List<ProductPojo> pojos) {
-        return pojos.stream().map(p -> productFlow.productPojoToProductData(p)).collect(Collectors.toList());
     }
 }

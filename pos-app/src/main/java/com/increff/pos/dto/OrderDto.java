@@ -5,6 +5,7 @@ import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.OrderForm;
+import com.increff.pos.model.form.OrderSearchForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,5 +34,11 @@ public class OrderDto {
         LocalDate startDate = (startDateStr == null) ? LocalDate.of(1970, 1, 1) : LocalDate.parse(startDateStr);
         LocalDate endDate = (endDateStr == null) ? LocalDate.now() : LocalDate.parse(endDateStr);
         return orderFlow.searchOrders(startDate, endDate, invoiceGenerated, query, page, size);
+    }
+
+    public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {
+        LocalDate startDate = LocalDate.parse(form.getStartDate());
+        LocalDate endDate = LocalDate.parse(form.getEndDate());
+        return orderFlow.searchOrders(startDate, endDate, form.getInvoiceGenerated(), null, form.getPage(), form.getSize());
     }
 }

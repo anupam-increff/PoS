@@ -4,14 +4,12 @@ import com.increff.pos.dto.ClientDto;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.ClientForm;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Api(tags = "Client Management")
 @RestController
 @RequestMapping("/api/client")
 public class ClientController {
@@ -21,8 +19,8 @@ public class ClientController {
 
     @ApiOperation("Add a new client")
     @PostMapping
-    public void addClient(@RequestBody @Valid ClientForm form) {
-        clientDto.add(form);
+    public void addClient(@RequestBody @Valid ClientForm clientForm) {
+        clientDto.add(clientForm);
     }
 
     @ApiOperation("Get all clients")
@@ -46,7 +44,7 @@ public class ClientController {
 
     @ApiOperation("Update client by ID")
     @PutMapping("/{id}")
-    public void updateClient(@PathVariable Integer id, @RequestBody @Valid ClientForm form) {
-        clientDto.update(id, form);
+    public void updateClient(@PathVariable Integer id, @RequestBody @Valid ClientForm clientForm) {
+        clientDto.update(id, clientForm);
     }
 }

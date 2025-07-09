@@ -15,17 +15,36 @@ public class SalesReportDao {
     @PersistenceContext
     private EntityManager em;
 
+    private static final String BASE_SALES_QUERY = 
+        "SELECT new com.increff.pos.model.data.SalesReportData(" +
+        "c.name, SUM(oi.quantity), SUM(oi.quantity * oi.sellingPrice)) " +
+        "FROM OrderPojo o " +
+        "JOIN OrderItemPojo oi ON o.id = oi.orderId " +
+        "JOIN ProductPojo p ON oi.productId = p.id " +
+        "JOIN ClientPojo c ON p.clientId = c.id " +
+        "WHERE o.time BETWEEN :start AND :end ";
+
+    private static final String CLIENT_FILTER = "AND LOWER(c.name) LIKE :clientName ";
+    private static final String GROUP_ORDER = "GROUP BY c.name ORDER BY SUM(oi.quantity * oi.sellingPrice) DESC";
+
+    private static final String BASE_COUNT_QUERY = 
+        "SELECT COUNT(DISTINCT c.name) " +
+        "FROM OrderPojo o " +
+        "JOIN OrderItemPojo oi ON o.id = oi.orderId " +
+        "JOIN ProductPojo p ON oi.productId = p.id " +
+        "JOIN ClientPojo c ON p.clientId = c.id " +
+        "WHERE o.time BETWEEN :start AND :end ";
+
     public List<SalesReportData> getSalesReport(ZonedDateTime start, ZonedDateTime end, String clientName, int page, int size) {
-
-        String baseQuery = "SELECT new com.increff.pos.model.data.SalesReportData(" + "c.name, SUM(oi.quantity), SUM(oi.quantity * oi.sellingPrice)) " + "FROM com.increff.pos.pojo.OrderPojo o " + "JOIN com.increff.pos.pojo.OrderItemPojo oi ON o.id = oi.orderId " + "JOIN com.increff.pos.pojo.ProductPojo p ON oi.productId = p.id " + "JOIN com.increff.pos.pojo.ClientPojo c ON p.clientId = c.id " + "WHERE o.time BETWEEN :start AND :end ";
-
+        StringBuilder queryBuilder = new StringBuilder(BASE_SALES_QUERY);
+        
         if (clientName != null && !clientName.trim().isEmpty()) {
-            baseQuery += "AND LOWER(c.name) LIKE :clientName ";
+            queryBuilder.append(CLIENT_FILTER);
         }
+        
+        queryBuilder.append(GROUP_ORDER);
 
-        baseQuery += "GROUP BY c.name ORDER BY SUM(oi.quantity * oi.sellingPrice) DESC";
-
-        TypedQuery<SalesReportData> query = em.createQuery(baseQuery, SalesReportData.class);
+        TypedQuery<SalesReportData> query = em.createQuery(queryBuilder.toString(), SalesReportData.class);
         query.setParameter("start", start);
         query.setParameter("end", end);
 
@@ -38,14 +57,15 @@ public class SalesReportDao {
 
         return query.getResultList();
     }
-    public Long countTotalClients(ZonedDateTime start, ZonedDateTime end, String clientName) {
-        String baseCount = "SELECT COUNT(DISTINCT c.name) " + "FROM com.increff.pos.pojo.OrderPojo o " + "JOIN com.increff.pos.pojo.OrderItemPojo oi ON o.id = oi.orderId " + "JOIN com.increff.pos.pojo.ProductPojo p ON oi.productId = p.id " + "JOIN com.increff.pos.pojo.ClientPojo c ON p.clientId = c.id " + "WHERE o.time BETWEEN :start AND :end ";
 
+    public Long countTotalClients(ZonedDateTime start, ZonedDateTime end, String clientName) {
+        StringBuilder countBuilder = new StringBuilder(BASE_COUNT_QUERY);
+        
         if (clientName != null && !clientName.trim().isEmpty()) {
-            baseCount += "AND LOWER(c.name) LIKE :clientName ";
+            countBuilder.append(CLIENT_FILTER);
         }
 
-        TypedQuery<Long> query = em.createQuery(baseCount, Long.class);
+        TypedQuery<Long> query = em.createQuery(countBuilder.toString(), Long.class);
         query.setParameter("start", start);
         query.setParameter("end", end);
 

@@ -7,13 +7,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+
 public class SalesReportData {
 
     private String client;
-    private long quantity;
-    private double revenue;
+    private Long quantity;
+    private Double revenue;
 
-    public SalesReportData(String client, long quantity, double revenue) {
+    public SalesReportData(String client, Long quantity, Double revenue) {
         this.client = client;
         this.quantity = quantity;
         this.revenue = revenue;

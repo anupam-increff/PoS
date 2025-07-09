@@ -4,18 +4,15 @@ import com.increff.pos.dto.ProductDto;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.form.ProductForm;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.Objects;
 
-@Api(tags = "Product Management")
 @RestController
 @RequestMapping("/api/product")
 public class ProductController {
@@ -33,8 +30,8 @@ public class ProductController {
     @GetMapping
     public PaginatedResponse<ProductData> getAll(
             @RequestParam(required = false) String clientName,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int pageSize
+            @RequestParam(defaultValue = "#{paginationConfig.defaultPage}") int page,
+            @RequestParam(defaultValue = "#{paginationConfig.defaultPageSize}") int pageSize
     ) {
         if (!Objects.isNull(clientName) && !clientName.isEmpty()) {
             return productDto.getByClient(clientName, page, pageSize);
@@ -60,7 +57,6 @@ public class ProductController {
 
     @ApiOperation("Upload product master data via TSV file (Supervisor only)")
     @PostMapping(path = "/upload-tsv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('supervisor')")
     public void uploadProductMaster(@RequestParam("file") MultipartFile file) {
         productDto.uploadProductMasterByTsv(file);
     }

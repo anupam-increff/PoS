@@ -15,14 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class InventoryDto {
+public class InventoryDto extends BaseDto {
+
+    private static final int MAX_ROWS = 5000;
 
     @Autowired
     private InventoryFlow inventoryFlow;
 
     public void processTsvUpload(MultipartFile file) {
         List<InventoryForm> forms = TSVUtil.readFromTsv(file, InventoryForm.class);
+        
+        if (forms.size() > MAX_ROWS) {
+            throw new ApiException("Maximum " + MAX_ROWS + " rows allowed. Found: " + forms.size());
+        }
+        
         List<String> errors = new ArrayList<>();
+        List<InventoryForm> errorRows = new ArrayList<>();
 
         int rowNum = 1;
         for (InventoryForm form : forms) {
@@ -30,12 +38,16 @@ public class InventoryDto {
                 updateByBarcode(form.getBarcode(), form);
             } catch (ApiException e) {
                 errors.add("Row " + rowNum + ": " + e.getMessage());
+                errorRows.add(form);
             }
             rowNum++;
         }
 
         if (!errors.isEmpty()) {
-            throw new ApiException("Inventory TSV upload failed:\n" + String.join("\n", errors));
+            // Generate error TSV file
+            byte[] errorTsvBytes = TSVUtil.createTsvFromList(errorRows, InventoryForm.class);
+            String errorMessage = "Inventory TSV upload failed. " + errors.size() + " errors found:\n" + String.join("\n", errors);
+            throw new ApiException(errorMessage + "\nError TSV file generated with " + errorRows.size() + " rows.");
         }
     }
 

@@ -21,7 +21,6 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Component
 public class OrderFlow {
 
@@ -36,31 +35,66 @@ public class OrderFlow {
 
     @Transactional
     public Integer placeOrder(OrderForm orderForm) {
-        List<OrderItemPojo> orderItemPojos = orderForm.getItems().stream().map(form -> {
-            ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
-            InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
-            if (inventory.getQuantity() < form.getQuantity()) {
-                throw new ApiException("Insufficient inventory for: " + product.getName());
-            }
-            inventory.setQuantity(inventory.getQuantity() - form.getQuantity());
-            OrderItemPojo pojo = new OrderItemPojo();
-            pojo.setProductId(product.getId());
-            pojo.setQuantity(form.getQuantity());
-            pojo.setSellingPrice(form.getSellingPrice());
-            return pojo;
-        }).collect(Collectors.toList());
+        List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
+        double total = calculateTotal(orderItemPojos);
+        OrderPojo order = createOrder(total);
+        Integer orderId = orderService.createOrder(order);
+        saveOrderItems(orderItemPojos, orderId);
+        return orderId;
+    }
 
-        double total = orderItemPojos.stream().mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
+    private List<OrderItemPojo> createOrderItems(OrderForm orderForm) {
+        return orderForm.getItems().stream()
+                .map(this::createOrderItem)
+                .collect(Collectors.toList());
+    }
+
+    private OrderItemPojo createOrderItem(com.increff.pos.model.form.OrderItemForm form) {
+        ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
+        InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
+        
+        validateInventory(inventory, form.getQuantity(), product.getName());
+        updateInventory(inventory, form.getQuantity());
+        
+        return buildOrderItem(product.getId(), form);
+    }
+
+    private void validateInventory(InventoryPojo inventory, Integer quantity, String productName) {
+        if (inventory.getQuantity() < quantity) {
+            throw new ApiException("Insufficient inventory for: " + productName);
+        }
+    }
+
+    private void updateInventory(InventoryPojo inventory, Integer quantity) {
+        inventory.setQuantity(inventory.getQuantity() - quantity);
+    }
+
+    private OrderItemPojo buildOrderItem(Integer productId, com.increff.pos.model.form.OrderItemForm form) {
+        OrderItemPojo pojo = new OrderItemPojo();
+        pojo.setProductId(productId);
+        pojo.setQuantity(form.getQuantity());
+        pojo.setSellingPrice(form.getSellingPrice());
+        return pojo;
+    }
+
+    private double calculateTotal(List<OrderItemPojo> orderItemPojos) {
+        return orderItemPojos.stream()
+                .mapToDouble(i -> i.getSellingPrice() * i.getQuantity())
+                .sum();
+    }
+
+    private OrderPojo createOrder(double total) {
         OrderPojo order = new OrderPojo();
         order.setTime(java.time.ZonedDateTime.now());
         order.setTotal(total);
-        Integer orderId = orderService.createOrder(order);
+        return order;
+    }
 
+    private void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
         for (OrderItemPojo item : orderItemPojos) {
             item.setOrderId(orderId);
             orderItemService.add(item);
         }
-        return orderId;
     }
 
     public PaginatedResponse<OrderData> getAllPaginated(int page, int size) {
@@ -80,13 +114,17 @@ public class OrderFlow {
     }
 
     public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
-        return orderItemService.getByOrderId(orderId).stream().map(item -> {
-            ProductPojo product = productService.getCheckProductById(item.getProductId());
-            OrderItemData data = ConvertUtil.convert(item, OrderItemData.class);
-            data.setBarcode(product.getBarcode());
-            data.setProductName(product.getName());
-            return data;
-        }).collect(Collectors.toList());
+        return orderItemService.getByOrderId(orderId).stream()
+                .map(this::convertToOrderItemData)
+                .collect(Collectors.toList());
+    }
+
+    private OrderItemData convertToOrderItemData(OrderItemPojo item) {
+        ProductPojo product = productService.getCheckProductById(item.getProductId());
+        OrderItemData data = ConvertUtil.convert(item, OrderItemData.class);
+        data.setBarcode(product.getBarcode());
+        data.setProductName(product.getName());
+        return data;
     }
 
     private OrderData convert(OrderPojo pojo) {

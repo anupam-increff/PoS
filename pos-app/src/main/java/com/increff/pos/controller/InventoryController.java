@@ -1,26 +1,27 @@
 package com.increff.pos.controller;
 
+import com.increff.pos.config.PaginationConfig;
 import com.increff.pos.dto.InventoryDto;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.InventoryForm;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-@Api(tags = "Inventory Management")
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
 
     @Autowired
     private InventoryDto inventoryDto;
+    
+    @Autowired
+    private PaginationConfig paginationConfig;
 
     @ApiOperation("Get all inventory items")
     @GetMapping
@@ -39,7 +40,6 @@ public class InventoryController {
 
     @ApiOperation("Upload inventory data via TSV file (Supervisor only)")
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('supervisor')")
     public void uploadInventory(@RequestParam("file") MultipartFile file) {
         inventoryDto.processTsvUpload(file);
     }

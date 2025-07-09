@@ -20,6 +20,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     private static final String SELECT_BY_BARCODE = "SELECT p FROM ProductPojo p WHERE p.barcode = :barcode";
     private static final String SEARCH_BY_BARCODE = "SELECT p FROM ProductPojo p WHERE LOWER(p.barcode) LIKE :pattern ORDER BY p.barcode ASC";
     private static final String COUNT_SEARCH_BY_BARCODE = "SELECT COUNT(p) FROM ProductPojo p WHERE LOWER(p.barcode) LIKE :pattern";
+    private static final String SELECT_BY_CLIENT_ID = "SELECT p FROM ProductPojo p WHERE p.clientId = :clientId ORDER BY p.name ASC";
 
     public ProductPojo getByBarcode(String barcode) {
         return em.createQuery(SELECT_BY_BARCODE, ProductPojo.class)
@@ -31,10 +32,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     }
 
     public List<ProductPojo> getAllPaged(int page, int pageSize) {
-        return em.createQuery(SELECT_ALL, ProductPojo.class)
-                .setFirstResult(page * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList();
+        return getPaginatedResults(SELECT_ALL, page, pageSize);
     }
 
     public long countAll() {
@@ -42,7 +40,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     }
 
     public List<ProductPojo> getByClientIdPaged(Integer clientId, int page, int pageSize) {
-        return em.createQuery("SELECT p FROM ProductPojo p WHERE p.clientId = :clientId ORDER BY p.name ASC", ProductPojo.class)
+        return em.createQuery(SELECT_BY_CLIENT_ID, ProductPojo.class)
                 .setParameter("clientId", clientId)
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ClientDto {
+public class ClientDto extends BaseDto {
 
     @Autowired
     private ClientService clientService;
@@ -27,25 +27,17 @@ public class ClientDto {
     public PaginatedResponse<ClientData> getAll(int page, int pageSize) {
         List<ClientPojo> pojos = clientService.getAllClients(page, pageSize);
         long totalItems = clientService.countAll();
-        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
-
-        List<ClientData> dataList = pojos.stream()
+        return createPaginatedResponse(pojos.stream()
                 .map(p -> ConvertUtil.convert(p, ClientData.class))
-                .collect(Collectors.toList());
-
-        return new PaginatedResponse<>(dataList, page, totalPages, totalItems, pageSize);
+                .collect(Collectors.toList()), page, pageSize, totalItems);
     }
 
     public PaginatedResponse<ClientData> searchClients(String query, int page, int pageSize) {
         List<ClientPojo> pojos = clientService.searchClients(query, page, pageSize);
         long totalItems = clientService.countByQuery(query);
-        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
-
-        List<ClientData> dataList = pojos.stream()
+        return createPaginatedResponse(pojos.stream()
                 .map(p -> ConvertUtil.convert(p, ClientData.class))
-                .collect(Collectors.toList());
-
-        return new PaginatedResponse<>(dataList, page, totalPages, totalItems, pageSize);
+                .collect(Collectors.toList()), page, pageSize, totalItems);
     }
 
     public void update(int id, ClientForm form) {

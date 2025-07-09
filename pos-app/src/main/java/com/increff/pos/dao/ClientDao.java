@@ -14,6 +14,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
     private static final String COUNT_ALL = "SELECT COUNT(c) FROM ClientPojo c";
     private static final String SEARCH_BY_QUERY = "SELECT c FROM ClientPojo c WHERE LOWER(c.name) LIKE :pattern ORDER BY c.name ASC";
     private static final String COUNT_BY_QUERY = "SELECT COUNT(c) FROM ClientPojo c WHERE LOWER(c.name) LIKE :pattern";
+    private static final String SELECT_ALL_ORDERED = "SELECT c FROM ClientPojo c ORDER BY c.name ASC";
 
     public ClientDao() {
         super(ClientPojo.class);
@@ -33,11 +34,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
     }
 
     public List<ClientPojo> getAllPaged(int page, int pageSize) {
-        String jpql = "SELECT c FROM ClientPojo c ORDER BY c.name ASC";
-        return em.createQuery(jpql, ClientPojo.class)
-                .setFirstResult(page * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList();
+        return getPaginatedResults(SELECT_ALL_ORDERED, page, pageSize);
     }
 
     public long countByQuery(String query) {

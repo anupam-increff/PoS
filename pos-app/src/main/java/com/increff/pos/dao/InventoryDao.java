@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 @Transactional
+
+
 public class InventoryDao extends AbstractDao<InventoryPojo> {
 
     public InventoryDao() {

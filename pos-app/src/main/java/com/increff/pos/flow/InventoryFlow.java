@@ -59,13 +59,4 @@ public class InventoryFlow {
         data.setName(product.getName());
         return data;
     }
-
-    public InventoryPojo getByBarcode(String barcode) {
-        ProductPojo product = productService.getCheckProductByBarcode(barcode);
-        InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
-        if (Objects.isNull(inventory)) {
-            throw new ApiException("No inventory found for product with barcode: " + barcode);
-        }
-        return inventory;
-    }
 }

@@ -40,23 +40,45 @@ public class InvoiceFlow {
     @Transactional
     public void generateInvoice(Integer orderId) throws Exception {
         OrderPojo orderPojo = getOrderById(orderId);
+        validateInvoiceNotExists(orderPojo, orderId);
+        
+        String path = buildInvoicePath(orderId);
+        orderPojo.setInvoicePath(path);
+        
+        byte[] pdfBytes = generatePdfBytes(orderId);
+        saveInvoiceFile(path, pdfBytes);
+    }
+
+    private void validateInvoiceNotExists(OrderPojo orderPojo, Integer orderId) {
         if (!Objects.isNull(orderPojo.getInvoicePath())) {
             throw new ApiException("Invoice was already generated for order with Id : " + orderId + " try downloading!");
         }
-        String path = "invoices/order-" + orderId + ".pdf";
-        orderPojo.setInvoicePath(path);
-        OrderData orderData = ConvertUtil.convert(orderPojo, OrderData.class);
-        List<OrderItemPojo> orderItemPojos = orderService.getOrderItems(orderId);
-        List<OrderItemData> orderItemDataList = orderItemPojos.stream().map(orderItemPojo -> ConvertUtil.convert(orderItemPojo, OrderItemData.class)).collect(Collectors.toList());
-        String base64Pdf = InvoiceGenerator.generate(orderData, orderItemDataList);
-        byte[] decodedPdf = Base64.getDecoder().decode(base64Pdf);
+    }
 
+    private String buildInvoicePath(Integer orderId) {
+        return "invoices/order-" + orderId + ".pdf";
+    }
+
+    private byte[] generatePdfBytes(Integer orderId) throws Exception {
+        OrderData orderData = ConvertUtil.convert(getOrderById(orderId), OrderData.class);
+        List<OrderItemData> orderItemDataList = getOrderItemDataList(orderId);
+        String base64Pdf = InvoiceGenerator.generate(orderData, orderItemDataList);
+        return Base64.getDecoder().decode(base64Pdf);
+    }
+
+    private List<OrderItemData> getOrderItemDataList(Integer orderId) {
+        List<OrderItemPojo> orderItemPojos = orderService.getOrderItems(orderId);
+        return orderItemPojos.stream()
+                .map(orderItemPojo -> ConvertUtil.convert(orderItemPojo, OrderItemData.class))
+                .collect(Collectors.toList());
+    }
+
+    private void saveInvoiceFile(String path, byte[] pdfBytes) {
         try {
             Files.createDirectories(Paths.get("././invoices"));
-            Files.write(Paths.get(path), decodedPdf);
+            Files.write(Paths.get(path), pdfBytes);
         } catch (Exception e) {
-            throw new ApiException( e.getMessage());
+            throw new ApiException(e.getMessage());
         }
-
     }
 }
