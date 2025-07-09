@@ -1,6 +1,7 @@
 package com.increff.pos.util;
 
 import com.increff.pos.exception.ApiException;
+import com.increff.pos.model.data.ErrorTSVData;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -82,6 +83,29 @@ public class TSVUtil {
         }
     }
 
+    public static byte[] createErrorTsvFromList(List<ErrorTSVData> errorDataList) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
+             CSVPrinter printer = CSVFormat.TDF.print(writer)) {
+            
+            if (!errorDataList.isEmpty()) {
+                ErrorTSVData firstItem = errorDataList.get(0);
+                String[] headers = getErrorHeadersFromObject(firstItem);
+                printer.printRecord((Object[]) headers);
+                
+                for (ErrorTSVData item : errorDataList) {
+                    String[] values = getErrorValuesFromObject(item);
+                    printer.printRecord((Object[]) values);
+                }
+            }
+            
+            printer.flush();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new ApiException("Error creating error TSV file: " + e.getMessage(), e);
+        }
+    }
+
     private static <T> String[] getHeadersFromObject(T obj) {
         // This is a simplified version - in a real implementation, you might want to use reflection
         // or have specific implementations for each type
@@ -107,5 +131,27 @@ public class TSVUtil {
             return new String[]{form.getName()};
         }
         return new String[]{obj.toString()};
+    }
+
+    private static String[] getErrorHeadersFromObject(ErrorTSVData obj) {
+        if (obj.getBarcode() != null && obj.getName() != null && obj.getClientName() != null && obj.getMrp() != null) {
+            return new String[]{"barcode", "name", "clientName", "mrp", "errorMessage"};
+        } else if (obj.getBarcode() != null && obj.getQuantity() != null) {
+            return new String[]{"barcode", "quantity", "errorMessage"};
+        } else if (obj.getName() != null) {
+            return new String[]{"name", "errorMessage"};
+        }
+        return new String[]{"data", "errorMessage"};
+    }
+
+    private static String[] getErrorValuesFromObject(ErrorTSVData obj) {
+        if (obj.getBarcode() != null && obj.getName() != null && obj.getClientName() != null && obj.getMrp() != null) {
+            return new String[]{obj.getBarcode(), obj.getName(), obj.getClientName(), obj.getMrp(), obj.getErrorMessage()};
+        } else if (obj.getBarcode() != null && obj.getQuantity() != null) {
+            return new String[]{obj.getBarcode(), obj.getQuantity(), obj.getErrorMessage()};
+        } else if (obj.getName() != null) {
+            return new String[]{obj.getName(), obj.getErrorMessage()};
+        }
+        return new String[]{obj.toString(), obj.getErrorMessage()};
     }
 }

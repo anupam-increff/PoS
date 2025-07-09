@@ -41,13 +41,13 @@ public class InventoryController {
     @ApiOperation("Upload inventory data via TSV file (Supervisor only)")
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void uploadInventory(@RequestParam("file") MultipartFile file) {
-        inventoryDto.processTsvUpload(file);
+        inventoryDto.uploadInventoryByTsv(file);
     }
 
     @ApiOperation("Add new inventory item")
     @PostMapping
     public void addInventory(@RequestBody @Valid InventoryForm form) {
-        inventoryDto.add(form);
+        inventoryDto.addInventory(form);
     }
 
     @ApiOperation("Update inventory by barcode")

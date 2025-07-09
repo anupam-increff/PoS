@@ -19,10 +19,4 @@ public class DaySalesDto {
     public List<DaySalesPojo> getByDateRange(LocalDate start, LocalDate end) {
         return daySalesFlow.getBetween(start, end);
     }
-    public void generateTodayReport() {
-        ZonedDateTime nowUtc = ZonedDateTime.now(ZoneOffset.UTC);
-        LocalDate today = nowUtc.toLocalDate();
-        daySalesFlow.calculateDailySales(today);
-    }
-
 }

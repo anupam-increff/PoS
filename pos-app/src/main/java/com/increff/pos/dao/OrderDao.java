@@ -22,12 +22,6 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     private static final String SELECT_ALL_PAGINATED = "SELECT o FROM OrderPojo o ORDER BY o.time DESC";
     private static final String COUNT_ALL = "SELECT COUNT(o) FROM OrderPojo o";
 
-    private static final String BASE_SELECT_FILTERED = "SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end";
-    private static final String BASE_COUNT_FILTERED = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time >= :start AND o.time < :end";
-    private static final String INVOICE_NOT_NULL = " AND o.invoicePath IS NOT NULL";
-    private static final String INVOICE_IS_NULL = " AND o.invoicePath IS NULL";
-    private static final String ORDER_BY_TIME_DESC = " ORDER BY o.time DESC";
-
     public List<OrderPojo> getAllPaginated(int page, int size) {
         return getPaginatedResults(SELECT_ALL_PAGINATED, page, size);
     }
@@ -36,42 +30,43 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         return em.createQuery(COUNT_ALL, Long.class).getSingleResult();
     }
 
-    public List<OrderPojo> searchByForm(OrderSearchForm form) {
-        LocalDate start = LocalDate.parse(form.getStartDate());
-        LocalDate end = LocalDate.parse(form.getEndDate());
-        return search(start, end, form.getInvoiceGenerated(), null, form.getPage(), form.getSize());
-    }
 
     public List<OrderPojo> search(LocalDate start, LocalDate end, Boolean invoiceGenerated, String query, int page, int size) {
-        StringBuilder jpql = new StringBuilder(BASE_SELECT_FILTERED);
+        return buildDynamicQuery(start, end, invoiceGenerated, page, size);
+    }
+
+    private List<OrderPojo> buildDynamicQuery(LocalDate start, LocalDate end, Boolean invoiceGenerated, int page, int size) {
+        StringBuilder jpql = new StringBuilder("SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end");
         
         if (invoiceGenerated != null) {
-            jpql.append(invoiceGenerated ? INVOICE_NOT_NULL : INVOICE_IS_NULL);
+            jpql.append(invoiceGenerated ? " AND o.invoicePath IS NOT NULL" : " AND o.invoicePath IS NULL");
         }
         
-        jpql.append(ORDER_BY_TIME_DESC);
+        jpql.append(" ORDER BY o.time DESC");
 
-        TypedQuery<OrderPojo> typedQuery = em.createQuery(jpql.toString(), OrderPojo.class);
+        TypedQuery<OrderPojo> query = em.createQuery(jpql.toString(), OrderPojo.class);
         ZonedDateTime startZdt = start.atStartOfDay().atZone(ZoneOffset.UTC);
         ZonedDateTime endZdt = end.plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC);
-        typedQuery.setParameter("start", startZdt);
-        typedQuery.setParameter("end", endZdt);
-
-        typedQuery.setFirstResult(page * size);
-        typedQuery.setMaxResults(size);
-        return typedQuery.getResultList();
+        
+        query.setParameter("start", startZdt);
+        query.setParameter("end", endZdt);
+        query.setFirstResult(page * size);
+        query.setMaxResults(size);
+        
+        return query.getResultList();
     }
 
     public long countMatching(LocalDate start, LocalDate end, Boolean invoiceGenerated, String query) {
-        StringBuilder jpql = new StringBuilder(BASE_COUNT_FILTERED);
+        StringBuilder jpql = new StringBuilder("SELECT COUNT(o) FROM OrderPojo o WHERE o.time >= :start AND o.time < :end");
         
         if (invoiceGenerated != null) {
-            jpql.append(invoiceGenerated ? INVOICE_NOT_NULL : INVOICE_IS_NULL);
+            jpql.append(invoiceGenerated ? " AND o.invoicePath IS NOT NULL" : " AND o.invoicePath IS NULL");
         }
 
         TypedQuery<Long> countQuery = em.createQuery(jpql.toString(), Long.class);
         ZonedDateTime startZdt = start.atStartOfDay().atZone(ZoneOffset.UTC);
         ZonedDateTime endZdt = end.plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC);
+        
         countQuery.setParameter("start", startZdt);
         countQuery.setParameter("end", endZdt);
 
