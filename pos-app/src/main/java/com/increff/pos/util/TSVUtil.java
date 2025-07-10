@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,45 +19,72 @@ import java.util.*;
 @Component
 public class TSVUtil {
 
-    private static Validator validator;
+    private static TSVUtil instance;
+    private final Validator validator;
 
+    @Autowired
     public TSVUtil(Validator validator) {
-        TSVUtil.validator = validator;
+        this.validator = validator;
+        TSVUtil.instance = this;
     }
 
     public static <T> List<T> readFromTsv(MultipartFile file, Class<T> clazz) {
         try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8)) {
             CSVParser parser = CSVFormat.TDF.withFirstRecordAsHeader().parse(reader);
             List<T> list = new ArrayList<>();
-            List<String> errors = new ArrayList<>();
 
-            int rowNum = 1;
             for (CSVRecord record : parser) {
                 T obj = TSVRowMapper.map(record, clazz);
-                Set<ConstraintViolation<T>> violations = validator.validate(obj);
-
-                if (!violations.isEmpty()) {
-                    for (ConstraintViolation<T> violation : violations) {
-                        errors.add("Row " + rowNum + ": " +
-                                violation.getPropertyPath() + " - " + violation.getMessage());
-                    }
-                } else {
-                    list.add(obj);
-                }
-
-                rowNum++;
-            }
-
-            if (!errors.isEmpty()) {
-                throw new ApiException("TSV validation failed:\n" + String.join("\n", errors));
+                list.add(obj);
             }
 
             return list;
-        } catch (ApiException e) {
-            throw e;
         } catch (Exception e) {
             throw new ApiException("Error processing TSV file: " + e.getMessage() , e);
         }
+    }
+
+    public static <T> List<ErrorTSVData> validateAndGetErrors(List<T> dataList, Class<T> clazz) {
+        if (instance == null || instance.validator == null) {
+            throw new ApiException("TSVUtil not properly initialized. Validator is null.");
+        }
+        
+        List<ErrorTSVData> errorDataList = new ArrayList<>();
+        
+        for (int i = 0; i < dataList.size(); i++) {
+            T item = dataList.get(i);
+            Set<ConstraintViolation<T>> violations = instance.validator.validate(item);
+            
+            if (!violations.isEmpty()) {
+                String errorMessage = "Row " + (i + 1) + ": ";
+                List<String> errors = new ArrayList<>();
+                for (ConstraintViolation<T> violation : violations) {
+                    errors.add(violation.getPropertyPath() + " - " + violation.getMessage());
+                }
+                errorMessage += String.join(", ", errors);
+                
+                // Create ErrorTSVData based on the class type
+                if (clazz.getSimpleName().equals("ProductForm")) {
+                    com.increff.pos.model.form.ProductForm form = (com.increff.pos.model.form.ProductForm) item;
+                    errorDataList.add(new ErrorTSVData(
+                        form.getBarcode() != null ? form.getBarcode() : "",
+                        form.getName() != null ? form.getName() : "",
+                        form.getClientName() != null ? form.getClientName() : "",
+                        form.getMrp() != null ? form.getMrp().toString() : "",
+                        errorMessage
+                    ));
+                } else if (clazz.getSimpleName().equals("InventoryForm")) {
+                    com.increff.pos.model.form.InventoryForm form = (com.increff.pos.model.form.InventoryForm) item;
+                    errorDataList.add(new ErrorTSVData(
+                        form.getBarcode() != null ? form.getBarcode() : "",
+                        form.getQuantity() != null ? form.getQuantity().toString() : "",
+                        errorMessage
+                    ));
+                }
+            }
+        }
+        
+        return errorDataList;
     }
 
     public static <T> byte[] createTsvFromList(List<T> dataList, Class<T> clazz) {
@@ -122,13 +150,21 @@ public class TSVUtil {
     private static <T> String[] getValuesFromObject(T obj) {
         if (obj instanceof com.increff.pos.model.form.ProductForm) {
             com.increff.pos.model.form.ProductForm form = (com.increff.pos.model.form.ProductForm) obj;
-            return new String[]{form.getBarcode(), form.getName(), form.getClientName(), form.getMrp().toString()};
+            return new String[]{
+                form.getBarcode() != null ? form.getBarcode() : "",
+                form.getName() != null ? form.getName() : "",
+                form.getClientName() != null ? form.getClientName() : "",
+                form.getMrp() != null ? form.getMrp().toString() : ""
+            };
         } else if (obj instanceof com.increff.pos.model.form.InventoryForm) {
             com.increff.pos.model.form.InventoryForm form = (com.increff.pos.model.form.InventoryForm) obj;
-            return new String[]{form.getBarcode(), form.getQuantity().toString()};
+            return new String[]{
+                form.getBarcode() != null ? form.getBarcode() : "",
+                form.getQuantity() != null ? form.getQuantity().toString() : ""
+            };
         } else if (obj instanceof com.increff.pos.model.form.ClientForm) {
             com.increff.pos.model.form.ClientForm form = (com.increff.pos.model.form.ClientForm) obj;
-            return new String[]{form.getName()};
+            return new String[]{form.getName() != null ? form.getName() : ""};
         }
         return new String[]{obj.toString()};
     }

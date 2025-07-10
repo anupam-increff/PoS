@@ -31,7 +31,7 @@ public class InventoryService {
             newInventory.setQuantity(quantity);
             inventoryDao.insert(newInventory);
         } else {
-            inventory.setQuantity(inventory.getQuantity() + quantity);
+            throw new ApiException("Inventory already exists for this product/barcode");
         }
     }
 
@@ -57,8 +57,4 @@ public class InventoryService {
         return inventoryPojo;
     }
 
-    public InventoryPojo getByProductId(Integer productId) {
-
-        return inventoryDao.getByProductId(productId);
-    }
 }

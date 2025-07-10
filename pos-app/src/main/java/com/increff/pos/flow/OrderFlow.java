@@ -54,7 +54,7 @@ public class OrderFlow {
         InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
         
         validateInventory(inventory, form.getQuantity(), product.getName());
-        updateInventory(inventory, form.getQuantity());
+        inventory.setQuantity(inventory.getQuantity() - form.getQuantity());
         
         return buildOrderItem(product.getId(), form);
     }
@@ -65,9 +65,6 @@ public class OrderFlow {
         }
     }
 
-    private void updateInventory(InventoryPojo inventory, Integer quantity) {
-        inventory.setQuantity(inventory.getQuantity() - quantity);
-    }
 
     private OrderItemPojo buildOrderItem(Integer productId, com.increff.pos.model.form.OrderItemForm form) {
         OrderItemPojo pojo = new OrderItemPojo();
@@ -79,8 +76,7 @@ public class OrderFlow {
 
     private double calculateTotal(List<OrderItemPojo> orderItemPojos) {
         return orderItemPojos.stream()
-                .mapToDouble(i -> i.getSellingPrice() * i.getQuantity())
-                .sum();
+                .mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
     }
 
     private OrderPojo createOrder(double total) {

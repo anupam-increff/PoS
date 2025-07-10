@@ -79,10 +79,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
    public CorsConfigurationSource corsConfigurationSource() {
        CorsConfiguration configuration = new CorsConfiguration();
        configuration.addAllowedOrigin("http://localhost:4200"); // Frontend URL
-       configuration.addAllowedMethod("*"); // GET, POST, PUT, etc.
+       configuration.addAllowedOrigin("http://localhost:3000"); // Alternative frontend URL
+       configuration.addAllowedOrigin("http://127.0.0.1:4200"); // Alternative frontend URL
+       configuration.addAllowedOrigin("http://127.0.0.1:3000"); // Alternative frontend URL
+       configuration.addAllowedMethod("*"); // GET, POST, PUT, DELETE, OPTIONS, etc.
        configuration.addAllowedHeader("*");
        configuration.setAllowCredentials(true); // Important for cookies (JSESSIONID)
        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
+       configuration.addExposedHeader("Content-Disposition"); // For file downloads
 
        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
        source.registerCorsConfiguration("/**", configuration);

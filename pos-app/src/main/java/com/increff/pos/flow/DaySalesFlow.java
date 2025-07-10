@@ -6,6 +6,7 @@ import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.DaySalesService;
 import com.increff.pos.service.OrderItemService;
 import com.increff.pos.service.OrderService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,13 +63,10 @@ public class DaySalesFlow {
         return new SalesMetrics(totalItems, totalRevenue);
     }
 
+    @AllArgsConstructor
     private static class SalesMetrics {
         int itemCount;
         double revenue;
 
-        SalesMetrics(int itemCount, double revenue) {
-            this.itemCount = itemCount;
-            this.revenue = revenue;
-        }
     }
 }

@@ -54,6 +54,15 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         props.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         props.put("hibernate.show_sql", "true");
         props.put("hibernate.hbm2ddl.auto", "update");
+        props.put("hibernate.bytecode.use_reflection_optimizer", "false");
+        props.put("hibernate.bytecode.provider", "none");
+        props.put("hibernate.bytecode.enhancement", "false");
+        props.put("hibernate.bytecode.enhancement.use_reflection_optimizer", "false");
+        props.put("hibernate.bytecode.enhancement.use_lazy_loading", "false");
+        props.put("hibernate.bytecode.enhancement.use_dirty_tracking", "false");
+        props.put("hibernate.jdbc.batch_size", "20");
+        props.put("hibernate.order_inserts", "true");
+        props.put("hibernate.order_updates", "true");
 
         emf.setJpaProperties(props);
         return emf;

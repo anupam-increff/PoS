@@ -21,7 +21,7 @@
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <mysql.version>8.0.33</mysql.version>
     <commons-dbcp.version>1.4</commons-dbcp.version>
-    <hibernate.version>5.4.0.Final</hibernate.version>
+    <hibernate.version>5.3.20.Final</hibernate.version>
   </properties>
 
   <dependencies>
@@ -67,6 +67,20 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Mockito for testing -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>4.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>4.11.0</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Spring test -->
     <dependency>
       <groupId>org.springframework</groupId>
@@ -92,7 +106,7 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>5.4.0.Final</version>
+      <version>5.3.20.Final</version>
     </dependency>
 
     <!-- JPA API -->

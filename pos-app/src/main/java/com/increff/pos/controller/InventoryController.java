@@ -4,6 +4,7 @@ import com.increff.pos.config.PaginationConfig;
 import com.increff.pos.dto.InventoryDto;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
+import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.InventoryForm;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,8 @@ public class InventoryController {
 
     @ApiOperation("Upload inventory data via TSV file (Supervisor only)")
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void uploadInventory(@RequestParam("file") MultipartFile file) {
-        inventoryDto.uploadInventoryByTsv(file);
+    public TSVUploadResponse uploadInventory(@RequestParam("file") MultipartFile file) {
+        return inventoryDto.uploadInventoryByTsv(file);
     }
 
     @ApiOperation("Add new inventory item")

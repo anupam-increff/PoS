@@ -1,5 +1,7 @@
 package com.increff.pos.model.data;
 
+import com.increff.pos.model.form.InventoryForm;
+import com.increff.pos.model.form.ProductForm;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,5 +32,17 @@ public class ErrorTSVData {
     public ErrorTSVData(String name, String errorMessage) {
         this.name = name;
         this.errorMessage = errorMessage;
+    }
+
+    public static ErrorTSVData fromForm(Object form, String errorMessage) {
+        if (form instanceof ProductForm) {
+            ProductForm pf = (ProductForm) form;
+            return new ErrorTSVData(pf.getBarcode(), pf.getName(), pf.getClientName(), pf.getMrp() != null ? pf.getMrp().toString() : "", errorMessage);
+        } else if (form instanceof InventoryForm) {
+            InventoryForm inf = (InventoryForm) form;
+            return new ErrorTSVData(inf.getBarcode(), inf.getQuantity() != null ? inf.getQuantity().toString() : "", errorMessage);
+        } else {
+            return new ErrorTSVData("", errorMessage);
+        }
     }
 } 

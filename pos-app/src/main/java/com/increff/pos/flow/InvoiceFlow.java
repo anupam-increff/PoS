@@ -9,7 +9,6 @@ import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.InvoiceService;
 import com.increff.pos.service.OrderService;
 import com.increff.pos.util.ConvertUtil;
-import org.apache.fop.apps.FOPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +37,7 @@ public class InvoiceFlow {
     }
 
     @Transactional
-    public void generateInvoice(Integer orderId) throws Exception {
+    public void generateInvoice(Integer orderId){
         OrderPojo orderPojo = getOrderById(orderId);
         validateInvoiceNotExists(orderPojo, orderId);
         
@@ -59,11 +58,16 @@ public class InvoiceFlow {
         return "invoices/order-" + orderId + ".pdf";
     }
 
-    private byte[] generatePdfBytes(Integer orderId) throws Exception {
+    private byte[] generatePdfBytes(Integer orderId){
         OrderData orderData = ConvertUtil.convert(getOrderById(orderId), OrderData.class);
         List<OrderItemData> orderItemDataList = getOrderItemDataList(orderId);
-        String base64Pdf = InvoiceGenerator.generate(orderData, orderItemDataList);
-        return Base64.getDecoder().decode(base64Pdf);
+        try {
+            String base64Pdf = InvoiceGenerator.generate(orderData, orderItemDataList);
+            return Base64.getDecoder().decode(base64Pdf);
+        }
+        catch (Exception e){
+            throw new ApiException("Failed to generate invoice :" +e.getMessage());
+        }
     }
 
     private List<OrderItemData> getOrderItemDataList(Integer orderId) {

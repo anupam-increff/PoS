@@ -3,6 +3,7 @@ package com.increff.pos.controller;
 import com.increff.pos.dto.ProductDto;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.ProductData;
+import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.ProductForm;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class ProductController {
     @GetMapping
     public PaginatedResponse<ProductData> getAll(
             @RequestParam(required = false) String clientName,
-            @RequestParam(defaultValue = "#{paginationConfig.defaultPage}") int page,
-            @RequestParam(defaultValue = "#{paginationConfig.defaultPageSize}") int pageSize
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize
     ) {
         if (!Objects.isNull(clientName) && !clientName.isEmpty()) {
             return productDto.getByClient(clientName, page, pageSize);
@@ -57,8 +58,8 @@ public class ProductController {
 
     @ApiOperation("Upload product master data via TSV file (Supervisor only)")
     @PostMapping(path = "/upload-tsv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void uploadProductMaster(@RequestParam("file") MultipartFile file) {
-        productDto.uploadProductMasterByTsv(file);
+    public TSVUploadResponse uploadProductMaster(@RequestParam("file") MultipartFile file) {
+        return productDto.uploadProductMasterByTsv(file);
     }
 
     @ApiOperation("Update product by ID")
