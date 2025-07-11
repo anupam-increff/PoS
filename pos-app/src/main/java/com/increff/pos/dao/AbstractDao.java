@@ -3,6 +3,8 @@ package com.increff.pos.dao;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Map;
+
 public abstract class AbstractDao<T> {
 
     @PersistenceContext
@@ -33,10 +35,15 @@ public abstract class AbstractDao<T> {
     public long countAll() {
         return em.createQuery("SELECT COUNT(*) FROM " + clazz.getSimpleName(), Long.class).getSingleResult();
     }
-    
-    protected List<T> getPaginatedResults(String query, int page, int pageSize) {
-        return em.createQuery(query, clazz)
-                .setFirstResult(page * pageSize)
+
+    protected List<T> getPaginatedResults(String jpql, int page, int pageSize, Map<String, Object> params) {
+        javax.persistence.TypedQuery<T> query = em.createQuery(jpql, clazz);
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        return query.setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
     }

@@ -16,14 +16,15 @@ import com.increff.pos.util.TSVUtil;
 import com.increff.pos.util.BulkUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
+@Transactional(rollbackFor = ApiException.class)
 public class InventoryFlow {
 
     @Autowired
@@ -35,13 +36,11 @@ public class InventoryFlow {
     @Autowired
     private TSVDownloadService tsvDownloadService;
 
-    @Transactional
     public void updateInventory(String barcode, int quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
         inventoryService.updateInventory(product.getId(), quantity);
     }
 
-    @Transactional
     public void addInventory(String barcode, int quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
         inventoryService.addInventory(product.getId(), quantity);
@@ -49,8 +48,7 @@ public class InventoryFlow {
 
     public TSVUploadResponse bulkUploadInventory(List<InventoryForm> forms) {
         return BulkUploadUtil.processBulkUpload(
-            forms,
-            InventoryForm.class,
+            forms, InventoryForm.class,
             form -> {
                 ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
                 inventoryService.addInventory(product.getId(), form.getQuantity());

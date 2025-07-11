@@ -15,14 +15,14 @@ import com.increff.pos.util.TSVUtil;
 import com.increff.pos.util.BulkUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@Transactional
+@Transactional(rollbackFor = ApiException.class)
 public class ProductFlow {
 
     @Autowired

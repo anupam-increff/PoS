@@ -6,7 +6,7 @@ import com.increff.pos.pojo.InventoryPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,13 +16,13 @@ public class InventoryService {
     @Autowired
     private InventoryDao inventoryDao;
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public void updateInventory(Integer productId, Integer quantity) {
         InventoryPojo inventory = getCheckByProductId(productId);
         inventory.setQuantity(quantity);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public void addInventory(Integer productId, Integer quantity) {
         InventoryPojo inventory = inventoryDao.getByProductId(productId);
         if (Objects.isNull(inventory)) {

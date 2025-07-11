@@ -25,12 +25,8 @@ public class InvoiceController {
     }
 
     @ApiOperation("Generate invoice for order")
-    @PostMapping("/generate/{orderId}")
+    @GetMapping("/generate/{orderId}")
     public void generateInvoice(@PathVariable Integer orderId) {
-        try {
-            invoiceDto.generateInvoice(orderId);
-        } catch (Exception e) {
-            throw new ApiException("Failed to generate invoice: " + e.getMessage());
-        }
+        invoiceDto.generateInvoice(orderId);
     }
 }

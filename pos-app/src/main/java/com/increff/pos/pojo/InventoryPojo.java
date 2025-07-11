@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "inventory")
+@Table(name = "inventory", uniqueConstraints = @UniqueConstraint(columnNames = "productId"))
 @Getter @Setter
 public class InventoryPojo {
     @Id

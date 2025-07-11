@@ -5,6 +5,7 @@ import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.OrderForm;
+import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
@@ -16,12 +17,14 @@ import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Component
+@Transactional(rollbackFor = ApiException.class)
 public class OrderFlow {
 
     @Autowired
@@ -33,7 +36,6 @@ public class OrderFlow {
     @Autowired
     private OrderItemService orderItemService;
 
-    @Transactional
     public Integer placeOrder(OrderForm orderForm) {
         List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
         double total = calculateTotal(orderItemPojos);
@@ -43,19 +45,33 @@ public class OrderFlow {
         return orderId;
     }
 
+    public PaginatedResponse<OrderData> searchOrders(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query, int page, int size) {
+        List<OrderPojo> pojos = orderService.search(startDate, endDate, invoiceGenerated, query, page, size);
+        long totalItems = orderService.countMatching(startDate, endDate, invoiceGenerated, query);
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        List<OrderData> dataList = pojos.stream().map(this::convert).collect(Collectors.toList());
+        return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
+    }
+
+    public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
+        return orderItemService.getByOrderId(orderId).stream()
+                .map(this::convertToOrderItemData)
+                .collect(Collectors.toList());
+    }
+
     private List<OrderItemPojo> createOrderItems(OrderForm orderForm) {
         return orderForm.getItems().stream()
                 .map(this::createOrderItem)
                 .collect(Collectors.toList());
     }
 
-    private OrderItemPojo createOrderItem(com.increff.pos.model.form.OrderItemForm form) {
+    private OrderItemPojo createOrderItem(OrderItemForm form) {
         ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
         InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
-        
+
         validateInventory(inventory, form.getQuantity(), product.getName());
         inventory.setQuantity(inventory.getQuantity() - form.getQuantity());
-        
+
         return buildOrderItem(product.getId(), form);
     }
 
@@ -66,7 +82,7 @@ public class OrderFlow {
     }
 
 
-    private OrderItemPojo buildOrderItem(Integer productId, com.increff.pos.model.form.OrderItemForm form) {
+    private OrderItemPojo buildOrderItem(Integer productId, OrderItemForm form) {
         OrderItemPojo pojo = new OrderItemPojo();
         pojo.setProductId(productId);
         pojo.setQuantity(form.getQuantity());
@@ -101,19 +117,6 @@ public class OrderFlow {
         return new PaginatedResponse<>(data, page, totalPages, total, size);
     }
 
-    public PaginatedResponse<OrderData> searchOrders(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query, int page, int size) {
-        List<OrderPojo> pojos = orderService.search(startDate, endDate, invoiceGenerated, query, page, size);
-        long totalItems = orderService.countMatching(startDate, endDate, invoiceGenerated, query);
-        int totalPages = (int) Math.ceil((double) totalItems / size);
-        List<OrderData> dataList = pojos.stream().map(this::convert).collect(Collectors.toList());
-        return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
-    }
-
-    public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
-        return orderItemService.getByOrderId(orderId).stream()
-                .map(this::convertToOrderItemData)
-                .collect(Collectors.toList());
-    }
 
     private OrderItemData convertToOrderItemData(OrderItemPojo item) {
         ProductPojo product = productService.getCheckProductById(item.getProductId());

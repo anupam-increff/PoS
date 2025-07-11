@@ -15,7 +15,7 @@ public class DaySalesScheduler {
     @Autowired
     private DaySalesFlow daySalesFlow;
 
-    @Scheduled(cron = "00 59 23 * * *", zone = "UTC")
+    @Scheduled(cron = "0 59 23 * * *", zone = "UTC")
     public void runDailySalesCalculation() {
         ZonedDateTime nowUtc = ZonedDateTime.now(ZoneOffset.UTC);
         LocalDate today = nowUtc.toLocalDate();

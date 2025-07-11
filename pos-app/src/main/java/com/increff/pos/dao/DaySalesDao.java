@@ -3,12 +3,13 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.DaySalesPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import com.increff.pos.exception.ApiException;
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-@Transactional
+@Transactional(rollbackFor = ApiException.class)
 public class DaySalesDao extends AbstractDao<DaySalesPojo> {
     private static final String GET_ORDERS_BETWEEN_DATES = "SELECT d FROM DaySalesPojo d WHERE d.date BETWEEN :start AND :end ORDER BY d.date";
 

@@ -14,7 +14,7 @@ public class DaySalesPojo {
     @Id
     private LocalDate date;
 
-    private int invoicedOrdersCount;
-    private int invoicedItemsCount;
-    private double totalRevenue;
+    private Integer invoicedOrdersCount;
+    private Integer invoicedItemsCount;
+    private Double totalRevenue;
 }

@@ -9,8 +9,8 @@ import com.increff.pos.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import com.increff.pos.exception.ApiException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,26 +26,28 @@ public class DaySalesFlow {
     @Autowired
     private DaySalesService daySalesService;
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public void calculateDailySales(LocalDate date) {
         if (daySalesService.getByDate(date) != null) return;
 
         List<OrderPojo> orders = orderService.getOrdersByDate(date);
-        int orderCount = orders.size();
-
         SalesMetrics metrics = computeSalesMetrics(orders);
+        
+        DaySalesPojo dailySales = createDailySalesRecord(date, orders.size(), metrics);
+        daySalesService.insert(dailySales);
+    }
 
+    public List<DaySalesPojo> getBetween(LocalDate start, LocalDate end) {
+        return daySalesService.getBetween(start, end);
+    }
+
+    private DaySalesPojo createDailySalesRecord(LocalDate date, int orderCount, SalesMetrics metrics) {
         DaySalesPojo sales = new DaySalesPojo();
         sales.setDate(date);
         sales.setInvoicedOrdersCount(orderCount);
         sales.setInvoicedItemsCount(metrics.itemCount);
         sales.setTotalRevenue(metrics.revenue);
-
-        daySalesService.insert(sales);
-    }
-
-    public List<DaySalesPojo> getBetween(LocalDate start, LocalDate end) {
-        return daySalesService.getBetween(start, end);
+        return sales;
     }
 
     private SalesMetrics computeSalesMetrics(List<OrderPojo> orders) {
@@ -67,6 +69,5 @@ public class DaySalesFlow {
     private static class SalesMetrics {
         int itemCount;
         double revenue;
-
     }
 }

@@ -5,11 +5,12 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import com.increff.pos.exception.ApiException;
 import java.util.List;
 
 @Repository
-@Transactional
+@Transactional(rollbackFor = ApiException.class)
 public class OrderItemDao extends AbstractDao<OrderItemPojo> {
 
     public OrderItemDao() {

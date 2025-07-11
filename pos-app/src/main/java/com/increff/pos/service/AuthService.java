@@ -21,35 +21,9 @@ public class AuthService {
     private AuthenticationManager authManager;
 
     public LoginData login(LoginForm form, HttpSession session) {
-        try {
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                    form.getEmail(), form.getPassword()
-            );
-
-            Authentication auth = authManager.authenticate(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-
-            LoginData data = new LoginData();
-            
-            // Handle both UserPrincipal and default User types
-            if (auth.getPrincipal() instanceof UserPrincipal) {
-                UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
-                data.setEmail(principal.getEmail());
-                data.setRole(principal.getRole());
-            } else if (auth.getPrincipal() instanceof User) {
-                User user = (User) auth.getPrincipal();
-                data.setEmail(user.getUsername());
-                data.setRole(user.getAuthorities().iterator().next().getAuthority());
-            } else {
-                data.setEmail(auth.getName());
-                data.setRole(auth.getAuthorities().iterator().next().getAuthority());
-            }
-            
-            return data;
-        } catch (Exception e) {
-            throw new ApiException("Invalid credentials");
-        }
+        Authentication auth = authenticateUser(form);
+        setSecurityContext(auth, session);
+        return buildLoginData(auth);
     }
 
     public void logout(HttpSession session) {
@@ -59,5 +33,46 @@ public class AuthService {
 
     public boolean isSessionValid(HttpSession session) {
         return session.getAttribute("SPRING_SECURITY_CONTEXT") != null;
+    }
+
+    private Authentication authenticateUser(LoginForm form) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+                form.getEmail(), form.getPassword()
+        );
+        return authManager.authenticate(token);
+    }
+
+    private void setSecurityContext(Authentication auth, HttpSession session) {
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+    }
+
+    private LoginData buildLoginData(Authentication auth) {
+        LoginData data = new LoginData();
+        
+        if (auth.getPrincipal() instanceof UserPrincipal) {
+            populateFromUserPrincipal(data, (UserPrincipal) auth.getPrincipal());
+        } else if (auth.getPrincipal() instanceof User) {
+            populateFromUser(data, (User) auth.getPrincipal());
+        } else {
+            populateFromAuthentication(data, auth);
+        }
+        
+        return data;
+    }
+
+    private void populateFromUserPrincipal(LoginData data, UserPrincipal principal) {
+        data.setEmail(principal.getEmail());
+        data.setRole(principal.getRole());
+    }
+
+    private void populateFromUser(LoginData data, User user) {
+        data.setEmail(user.getUsername());
+        data.setRole(user.getAuthorities().iterator().next().getAuthority());
+    }
+
+    private void populateFromAuthentication(LoginData data, Authentication auth) {
+        data.setEmail(auth.getName());
+        data.setRole(auth.getAuthorities().iterator().next().getAuthority());
     }
 } 

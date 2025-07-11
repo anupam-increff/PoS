@@ -6,7 +6,7 @@ import com.increff.pos.pojo.ProductPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ public class ProductService {
     @Autowired
     private ProductDao dao;
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public void addProduct(ProductPojo p) {
         if (!Objects.isNull(getProductByBarcode(p.getBarcode()))) {
             throw new ApiException("Product with same barcode : " + p.getBarcode() + " already exists !");
@@ -67,7 +67,7 @@ public class ProductService {
         return dao.countByBarcodeSearch(barcode);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public void update(Integer id, ProductPojo newProductPojo) {
         ProductPojo productPojo = getCheckProductById(id);
         productPojo.setName(newProductPojo.getName());

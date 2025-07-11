@@ -7,8 +7,8 @@ import com.increff.pos.pojo.OrderPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import com.increff.pos.exception.ApiException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -18,17 +18,17 @@ public class DaySalesService {
 
     @Autowired private DaySalesDao daySalesDao;
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public void insert(DaySalesPojo pojo) {
         daySalesDao.insert(pojo);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public DaySalesPojo getByDate(LocalDate date) {
         return daySalesDao.getByDate(date);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public List<DaySalesPojo> getBetween(LocalDate start, LocalDate end) {
         return daySalesDao.getBetween(start, end);
     }

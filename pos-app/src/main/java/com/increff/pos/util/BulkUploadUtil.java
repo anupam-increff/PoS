@@ -44,7 +44,7 @@ public class BulkUploadUtil {
                 validationErrors.size(), 
                 errorMessages
             );
-            response.setDownloadUrl("/api/tsv/download/" + fileId);
+            response.setDownloadUrl("/tsv/download/" + fileId);
             return response;
         }
 
@@ -52,20 +52,18 @@ public class BulkUploadUtil {
         List<String> errors = new ArrayList<>();
         List<ErrorTSVData> errorDataList = new ArrayList<>();
         List<T> successForms = new ArrayList<>();
-        int rowNum = 1;
         
         for (T form : forms) {
             try {
                 processor.apply(form);
                 successForms.add(form);
             } catch (ApiException e) {
-                errors.add("Row " + rowNum + ": " + e.getMessage());
+                errors.add(e.getMessage());
                 errorDataList.add(ErrorTSVData.fromForm(form, e.getMessage()));
             } catch (Exception e) {
-                errors.add("Row " + rowNum + ": Unexpected error - " + e.getMessage());
+                errors.add(": Unexpected error - " + e.getMessage());
                 errorDataList.add(ErrorTSVData.fromForm(form, e.getMessage()));
             }
-            rowNum++;
         }
 
         if (!errors.isEmpty()) {
@@ -77,7 +75,7 @@ public class BulkUploadUtil {
                 errors.size(), 
                 errors
             );
-            response.setDownloadUrl("/api/tsv/download/" + fileId);
+            response.setDownloadUrl("/tsv/download/" + fileId);
             return response;
         } else {
             byte[] successTsvBytes = TSVUtil.createTsvFromList(successForms, formClass);
@@ -86,7 +84,7 @@ public class BulkUploadUtil {
                 "Successfully processed " + successForms.size() + " rows", 
                 successForms.size()
             );
-            response.setDownloadUrl("/api/tsv/download/" + fileId);
+            response.setDownloadUrl("/tsv/download/" + fileId);
             return response;
         }
     }

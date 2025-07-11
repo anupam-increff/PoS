@@ -8,7 +8,7 @@ import com.increff.pos.pojo.OrderPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +22,7 @@ public class OrderService {
     @Autowired
     private OrderItemDao itemDao;
 
-    @Transactional
+    @Transactional(rollbackFor = ApiException.class)
     public Integer createOrder(OrderPojo orderPojo) {
         orderDao.insert(orderPojo);
         return orderPojo.getId();

@@ -3,9 +3,8 @@ package com.increff.pos.pojo;
 import lombok.Getter;
 import lombok.Setter;
 import javax.persistence.*;
-
 @Entity
-@Table(name = "order_item")
+@Table(name = "order_item", uniqueConstraints = @UniqueConstraint(columnNames = {"orderId","productId"}))
 @Getter
 @Setter
 public class OrderItemPojo {

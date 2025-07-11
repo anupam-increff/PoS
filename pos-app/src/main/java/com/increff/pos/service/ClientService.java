@@ -6,13 +6,13 @@ import com.increff.pos.pojo.ClientPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional
+@Transactional(rollbackFor = ApiException.class)
 public class ClientService {
 
     @Autowired
@@ -25,9 +25,6 @@ public class ClientService {
         clientDao.insert(clientPojo);
     }
 
-    public List<ClientPojo> getAllClients() {
-        return new ArrayList<>(clientDao.getAll());
-    }
 
     public List<ClientPojo> getAllClients(int page, int pageSize) {
         return clientDao.getAllPaged(page, pageSize);

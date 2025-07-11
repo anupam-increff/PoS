@@ -2,7 +2,6 @@ package com.increff.pos.dto;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.flow.InventoryFlow;
-import com.increff.pos.model.data.ErrorTSVData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.TSVUploadResponse;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -49,11 +47,8 @@ public class InventoryDto extends BaseDto {
         return inventoryFlow.bulkUploadInventory(forms);
     }
 
-    public void updateByBarcode(String barcode, @Valid InventoryForm inventoryForm) {
-        if (!barcode.equals(inventoryForm.getBarcode())) {
-            throw new ApiException("Barcode mismatch between path and form");
-        }
-        inventoryFlow.updateInventory(barcode, inventoryForm.getQuantity());
+    public void updateByBarcode( @Valid InventoryForm inventoryForm) {
+        inventoryFlow.updateInventory(inventoryForm.getBarcode(),inventoryForm.getQuantity());
     }
 
 }
