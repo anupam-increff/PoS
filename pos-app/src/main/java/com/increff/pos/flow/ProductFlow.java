@@ -1,23 +1,17 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.ErrorTSVData;
 import com.increff.pos.model.data.ProductData;
-import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ClientService;
 import com.increff.pos.service.ProductService;
-import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ConvertUtil;
-import com.increff.pos.util.TSVUtil;
-import com.increff.pos.util.BulkUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,31 +25,11 @@ public class ProductFlow {
     @Autowired
     private ClientService clientService;
 
-    @Autowired
-    private TSVDownloadService tsvDownloadService;
-
     public void addProduct(ProductForm form) {
         ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
         ClientPojo client = clientService.getCheckClientByName(form.getClientName());
         productPojo.setClientId(client.getId());
         productService.addProduct(productPojo);
-    }
-
-    public TSVUploadResponse bulkUploadProducts(List<ProductForm> forms) {
-        return BulkUploadUtil.processBulkUpload(
-            forms,
-            ProductForm.class,
-            form -> {
-                ProductPojo productPojo =ConvertUtil.convert(form,ProductPojo.class);
-                ClientPojo client = clientService.getCheckClientByName(form.getClientName());
-                productPojo.setClientId(client.getId());
-                productService.addProduct(productPojo);
-                return null;
-            },
-            tsvDownloadService,
-            "error_upload",
-            "product_upload"
-        );
     }
 
     public List<ProductData> getAllProducts(int page, int pageSize) {
@@ -88,8 +62,8 @@ public class ProductFlow {
     }
 
     public ProductData getProductByBarcode(String barcode) {
-        ProductPojo productPojo = productService.getCheckProductByBarcode(barcode);
-        return convertToProductData(productPojo);
+        ProductPojo product = productService.getCheckProductByBarcode(barcode);
+        return convertToProductData(product);
     }
 
     public void updateProduct(Integer id, ProductForm form) {
@@ -99,10 +73,17 @@ public class ProductFlow {
         productService.update(id, productPojo);
     }
 
-    private ProductData convertToProductData(ProductPojo productPojo) {
-        ProductData productData = ConvertUtil.convert(productPojo, ProductData.class);
-        ClientPojo client = clientService.getCheckClientById(productPojo.getClientId());
-        productData.setClientName(client.getName());
-        return productData;
+    private ProductData convertToProductData(ProductPojo product) {
+        ClientPojo client = clientService.getCheckClientById(product.getClientId());
+        
+        ProductData data = new ProductData();
+        data.setId(product.getId());
+        data.setBarcode(product.getBarcode());
+        data.setName(product.getName());
+        data.setMrp(product.getMrp());
+        data.setImageUrl(product.getImageUrl());
+        data.setClientName(client.getName());
+        
+        return data;
     }
 }

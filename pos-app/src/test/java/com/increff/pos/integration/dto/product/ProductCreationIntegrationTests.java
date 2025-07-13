@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 import com.increff.pos.model.data.TSVUploadResponse;
@@ -386,5 +387,193 @@ public class ProductCreationIntegrationTests {
         ProductPojo dbProduct1 = productDao.getByBarcode(uniqueBarcode1);
         assertNotNull(dbProduct1);
         assertEquals("Product 1", dbProduct1.getName());
+    }
+
+    @Test
+    public void testBulkUploadProductsWithNegativeMrp() throws ApiException {
+        // Arrange - Create client using DAO
+        String uniqueClientName = getUniqueClientName("TestClient");
+        ClientPojo client = TestData.clientWithoutId(uniqueClientName);
+        clientDao.insert(client);
+        client = clientDao.getClientByName(uniqueClientName);
+        
+        String uniqueBarcode = getUniqueBarcode("BARCODE-1");
+        List<ProductForm> forms = Arrays.asList(
+            TestData.productForm(uniqueBarcode, "Product 1", client.getName(), -99.99) // Negative MRP
+        );
+        
+        // Act
+        TSVUploadResponse result = productDto.uploadProductMasterByTsv(createMockMultipartFile(forms));
+        
+        // Assert
+        assertNotNull(result);
+        assertFalse(result.isSuccess());
+        assertTrue(result.getMessage().contains("Validation failed"));
+        assertEquals(1, result.getErrorRows());
+        assertNotNull(result.getDownloadUrl());
+    }
+
+    @Test
+    public void testBulkUploadProductsWithNullValues() throws ApiException {
+        // Arrange - Create forms with null values
+        List<ProductForm> forms = Arrays.asList(
+            TestData.productForm("BARCODE-1", null, "Client1", 99.99), // Null name
+            TestData.productForm("BARCODE-2", "Product 2", null, 88.88) // Null client
+        );
+        
+        // Act
+        TSVUploadResponse result = productDto.uploadProductMasterByTsv(createMockMultipartFile(forms));
+        
+        // Assert
+        assertNotNull(result);
+        assertFalse(result.isSuccess());
+        assertTrue(result.getMessage().contains("Validation failed"));
+        assertEquals(2, result.getErrorRows());
+        assertNotNull(result.getDownloadUrl());
+    }
+
+    @Test
+    public void testBulkUploadProductsMaxRowsExceeded() throws ApiException {
+        // Arrange - Create more than 5000 forms
+        List<ProductForm> forms = new ArrayList<>();
+        for (int i = 0; i < 5001; i++) {
+            forms.add(TestData.productForm("BARCODE-" + i, "Product " + i, "Client1", 99.99));
+        }
+        
+        // Act
+        TSVUploadResponse result = productDto.uploadProductMasterByTsv(createMockMultipartFile(forms));
+        
+        // Assert
+        assertNotNull(result);
+        assertFalse(result.isSuccess());
+        assertTrue(result.getMessage().contains("Maximum 5000 rows allowed"));
+        assertEquals(5001, result.getErrorRows());
+    }
+
+    @Test
+    public void testBulkUploadProductsWithMixedValidAndInvalid() throws ApiException {
+        // Arrange - Create client using DAO
+        String uniqueClientName = getUniqueClientName("TestClient");
+        ClientPojo client = TestData.clientWithoutId(uniqueClientName);
+        clientDao.insert(client);
+        client = clientDao.getClientByName(uniqueClientName);
+        
+        String uniqueBarcode1 = getUniqueBarcode("BARCODE-1");
+        String uniqueBarcode2 = getUniqueBarcode("BARCODE-2");
+        
+        List<ProductForm> forms = Arrays.asList(
+            TestData.productForm(uniqueBarcode1, "Product 1", client.getName(), 99.99), // Valid
+            TestData.productForm("", "Product 2", client.getName(), 88.88), // Invalid barcode
+            TestData.productForm(uniqueBarcode2, "", client.getName(), 77.77) // Invalid name
+        );
+        
+        // Act
+        TSVUploadResponse result = productDto.uploadProductMasterByTsv(createMockMultipartFile(forms));
+        
+        // Assert
+        assertNotNull(result);
+        assertFalse(result.isSuccess());
+        assertTrue(result.getMessage().contains("Validation failed"));
+        assertEquals(2, result.getErrorRows());
+        assertNotNull(result.getDownloadUrl());
+    }
+
+    @Test
+    public void testBulkUploadProductsWithEmptyFieldsAndExtraColumns() throws ApiException {
+        // Arrange - Create client using DAO
+        String uniqueClientName = getUniqueClientName("TestClient");
+        ClientPojo client = TestData.clientWithoutId(uniqueClientName);
+        clientDao.insert(client);
+        client = clientDao.getClientByName(uniqueClientName);
+        
+        // Create a TSV string with empty fields and extra columns
+        String tsvContent = "barcode\tclientName\tname\tmrp\timageUrl\textraColumn\n" +
+                "JUICE1\t" + client.getName() + "\tLime Juice\t50\t\textraValue\n" +  // Empty imageUrl
+                "PIZ1\t" + client.getName() + "\tPizza\t100\thttps://example.com/image.jpg\textraValue\n" +  // Complete
+                "COFFEE1\t" + client.getName() + "\tCappuccino\t299\t\textraValue";  // Empty imageUrl again
+        
+        MultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+            "file", "test.tsv", "text/tab-separated-values", tsvContent.getBytes()
+        );
+        
+        // Act
+        TSVUploadResponse result = productDto.uploadProductMasterByTsv(file);
+        
+        // Assert - Should succeed despite empty imageUrl fields and extra columns
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals("Successfully processed 3 rows", result.getMessage());
+        assertEquals(3, result.getSuccessRows());
+        
+        // Verify products were created correctly
+        ProductPojo dbProduct1 = productDao.getByBarcode("JUICE1");
+        ProductPojo dbProduct2 = productDao.getByBarcode("PIZ1");
+        ProductPojo dbProduct3 = productDao.getByBarcode("COFFEE1");
+        
+        assertNotNull(dbProduct1);
+        assertNotNull(dbProduct2);
+        assertNotNull(dbProduct3);
+        
+        assertEquals("Lime Juice", dbProduct1.getName());
+        assertEquals("Pizza", dbProduct2.getName());
+        assertEquals("Cappuccino", dbProduct3.getName());
+        
+        assertEquals(50.0, dbProduct1.getMrp(), 0.01);
+        assertEquals(100.0, dbProduct2.getMrp(), 0.01);
+        assertEquals(299.0, dbProduct3.getMrp(), 0.01);
+        
+        // Check imageUrl handling - should be null for empty fields
+        assertNull(dbProduct1.getImageUrl());
+        assertEquals("https://example.com/image.jpg", dbProduct2.getImageUrl());
+        assertNull(dbProduct3.getImageUrl());
+    }
+
+    @Test
+    public void testBulkUploadProductsWithDifferentColumnOrder() throws ApiException {
+        // Arrange - Create client using DAO
+        String uniqueClientName = getUniqueClientName("TestClient");
+        ClientPojo client = TestData.clientWithoutId(uniqueClientName);
+        clientDao.insert(client);
+        client = clientDao.getClientByName(uniqueClientName);
+        
+        // Create a TSV string with different column order (name, mrp, barcode, clientName, imageUrl)
+        String tsvContent = "name\tmrp\tbarcode\tclientName\timageUrl\n" +
+                "Lime Juice\t50\tJUICE2\t" + client.getName() + "\thttps://example.com/juice.jpg\n" +
+                "Pizza\t100\tPIZ2\t" + client.getName() + "\thttps://example.com/pizza.jpg\n" +
+                "Cappuccino\t299\tCOFFEE2\t" + client.getName() + "\t";  // Empty imageUrl
+        
+        MultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+            "file", "test.tsv", "text/tab-separated-values", tsvContent.getBytes()
+        );
+        
+        // Act
+        TSVUploadResponse result = productDto.uploadProductMasterByTsv(file);
+        
+        // Assert - Should succeed with different column order
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals("Successfully processed 3 rows", result.getMessage());
+        assertEquals(3, result.getSuccessRows());
+        
+        // Verify products were created correctly despite different column order
+        ProductPojo dbProduct1 = productDao.getByBarcode("JUICE2");
+        ProductPojo dbProduct2 = productDao.getByBarcode("PIZ2");
+        ProductPojo dbProduct3 = productDao.getByBarcode("COFFEE2");
+        
+        assertNotNull(dbProduct1);
+        assertNotNull(dbProduct2);
+        assertNotNull(dbProduct3);
+        
+        assertEquals("Lime Juice", dbProduct1.getName());
+        assertEquals("Pizza", dbProduct2.getName());
+        assertEquals("Cappuccino", dbProduct3.getName());
+        
+        assertEquals(50.0, dbProduct1.getMrp(), 0.01);
+        assertEquals(100.0, dbProduct2.getMrp(), 0.01);
+        assertEquals(299.0, dbProduct3.getMrp(), 0.01);
+        
+        assertEquals("https://example.com/juice.jpg", dbProduct1.getImageUrl());
+        assertEquals("https://example.com/pizza.jpg", dbProduct2.getImageUrl());
+        assertNull(dbProduct3.getImageUrl());
     }
 } 

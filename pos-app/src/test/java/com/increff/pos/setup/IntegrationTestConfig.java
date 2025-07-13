@@ -36,19 +36,16 @@ import java.util.Properties;
     "com.increff.pos.flow",
     "com.increff.pos.util"
 })
-@PropertySource("classpath:db.properties")
 public class IntegrationTestConfig {
-
-    @Autowired
-    private Environment env;
 
     @Bean
     public DataSource dataSource() {
+        // Use H2 in-memory database for tests
         org.apache.commons.dbcp.BasicDataSource ds = new org.apache.commons.dbcp.BasicDataSource();
-        ds.setDriverClassName(env.getProperty("jdbc.driver"));
-        ds.setUrl(env.getProperty("jdbc.url"));
-        ds.setUsername(env.getProperty("jdbc.user"));
-        ds.setPassword(env.getProperty("jdbc.pass"));
+        ds.setDriverClassName("org.h2.Driver");
+        ds.setUrl("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+        ds.setUsername("sa");
+        ds.setPassword("");
         return ds;
     }
 
@@ -56,15 +53,15 @@ public class IntegrationTestConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
-        emf.setPackagesToScan("com.increff.pos.pojo");
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-
-        Properties props = new Properties();
-        props.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
-        props.put("hibernate.show_sql", "true");
-        props.put("hibernate.hbm2ddl.auto", "update");
-
-        emf.setJpaProperties(props);
+        emf.setPackagesToScan("com.increff.pos.pojo");
+        
+        Properties properties = new Properties();
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        properties.setProperty("hibernate.show_sql", "false");
+        emf.setJpaProperties(properties);
+        
         return emf;
     }
 
@@ -80,12 +77,12 @@ public class IntegrationTestConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-            .username("testuser")
-            .password(passwordEncoder().encode("password"))
-            .roles("USER")
+        UserDetails supervisor = User.withUsername("admin@example.com")
+            .password(passwordEncoder().encode("adminpass"))
+            .roles("supervisor")
             .build();
-        return new InMemoryUserDetailsManager(user);
+        
+        return new InMemoryUserDetailsManager(supervisor);
     }
 
     @Bean

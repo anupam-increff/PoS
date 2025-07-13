@@ -1,26 +1,18 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.ErrorTSVData;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
-import com.increff.pos.model.data.TSVUploadResponse;
-import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.ProductService;
-import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ConvertUtil;
-import com.increff.pos.util.TSVUtil;
-import com.increff.pos.util.BulkUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,9 +25,6 @@ public class InventoryFlow {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private TSVDownloadService tsvDownloadService;
-
     public void updateInventory(String barcode, int quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
         inventoryService.updateInventory(product.getId(), quantity);
@@ -44,20 +33,6 @@ public class InventoryFlow {
     public void addInventory(String barcode, int quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
         inventoryService.addInventory(product.getId(), quantity);
-    }
-
-    public TSVUploadResponse bulkUploadInventory(List<InventoryForm> forms) {
-        return BulkUploadUtil.processBulkUpload(
-            forms, InventoryForm.class,
-            form -> {
-                ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
-                inventoryService.addInventory(product.getId(), form.getQuantity());
-                return null;
-            },
-            tsvDownloadService,
-            "inventory_upload",
-            "inventory_upload"
-        );
     }
 
     public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
@@ -75,8 +50,8 @@ public class InventoryFlow {
     }
 
     private InventoryData toData(InventoryPojo pojo) {
-        InventoryData data = ConvertUtil.convert(pojo, InventoryData.class);
         ProductPojo product = productService.getCheckProductById(pojo.getProductId());
+        InventoryData data = ConvertUtil.convert(pojo, InventoryData.class);
         data.setBarcode(product.getBarcode());
         data.setName(product.getName());
         return data;

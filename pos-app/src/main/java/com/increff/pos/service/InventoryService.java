@@ -31,7 +31,7 @@ public class InventoryService {
             newInventory.setQuantity(quantity);
             inventoryDao.insert(newInventory);
         } else {
-            throw new ApiException("Inventory already exists for this product/barcode");
+            updateInventory(productId,inventory.getQuantity()+quantity);
         }
     }
 
