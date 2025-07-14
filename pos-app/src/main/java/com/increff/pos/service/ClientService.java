@@ -19,12 +19,20 @@ public class ClientService {
     private ClientDao clientDao;
 
     public void addClient(ClientPojo clientPojo) {
+        // Validate client name
+        if (clientPojo.getName() == null || clientPojo.getName().trim().isEmpty()) {
+            throw new ApiException("Client name cannot be blank");
+        }
+        
+        // Trim the name to remove leading/trailing whitespace
+        String trimmedName = clientPojo.getName().trim();
+        clientPojo.setName(trimmedName);
+        
         if (!Objects.isNull(clientDao.getClientByName(clientPojo.getName()))) {
             throw new ApiException("Client with name already exists");
         }
         clientDao.insert(clientPojo);
     }
-
 
     public List<ClientPojo> getAllClients(int page, int pageSize) {
         return clientDao.getAllPaged(page, pageSize);
@@ -53,23 +61,30 @@ public class ClientService {
     public ClientPojo getCheckClientById(Integer id) {
         ClientPojo client = clientDao.getById(id);
         if (Objects.isNull(client)) {
-            throw new ApiException("Client with Id " + id + " does not exist");
+            throw new ApiException("Client with id " + id + " does not exist");
         }
         return client;
     }
 
     public void update(int id, ClientPojo clientPojo) {
-        ClientPojo existing = getCheckClientById(id);
-
-        if (existing.getName().equals(clientPojo.getName())) {
-            throw new ApiException("Client Name already set with the requested name");
+        // Validate client name
+        if (clientPojo.getName() == null || clientPojo.getName().trim().isEmpty()) {
+            throw new ApiException("Client name cannot be blank");
         }
-
-        ClientPojo duplicate = clientDao.getClientByName(clientPojo.getName());
-        if (!Objects.isNull(duplicate) && !duplicate.getId().equals(id)) {
-            throw new ApiException("Client Name already used by another client");
+        
+        // Trim the name to remove leading/trailing whitespace
+        String trimmedName = clientPojo.getName().trim();
+        clientPojo.setName(trimmedName);
+        
+        ClientPojo existingClient = getCheckClientById(id);
+        
+        // Check if another client with the same name already exists (excluding current client)
+        ClientPojo clientWithSameName = clientDao.getClientByName(clientPojo.getName());
+        if (clientWithSameName != null && !clientWithSameName.getId().equals(id)) {
+            throw new ApiException("Client with name already exists");
         }
-
-        existing.setName(clientPojo.getName());
+        
+        existingClient.setName(clientPojo.getName());
+        clientDao.update(existingClient);
     }
 }

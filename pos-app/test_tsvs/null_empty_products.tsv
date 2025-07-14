@@ -1,0 +1,10 @@
+barcode	clientName	name	mrp	imageUrl
+				
+BC101				
+	TestClient1			
+ 	 	 	 	 
+  BC102  	  TestClient2  	  Product Name  	  100.50  	  
+BC103	TestClient3	Valid Product	50.0	
+BC104	TestClient1		75.25	https://example.com/image.jpg
+BC105	"Test	Client"	"Product
+Name"	100.0	

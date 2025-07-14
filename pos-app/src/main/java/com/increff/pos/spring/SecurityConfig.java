@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.*;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -40,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                .antMatchers("/api/product/upload-tsv").hasAuthority("supervisor")
                .antMatchers("/api/inventory/upload").hasAuthority("supervisor")
                // Update endpoints - supervisor only
-               .antMatchers(HttpMethod.PUT, "/api/client/**").hasAuthority("supervisor")
+               .antMatchers( "/api/invoice/**").hasAuthority("supervisor")
                .antMatchers(HttpMethod.PUT, "/api/product/**").hasAuthority("supervisor")
                .antMatchers(HttpMethod.PUT, "/api/inventory/**").hasAuthority("supervisor")
                // Admin endpoints
@@ -79,9 +80,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
    public CorsConfigurationSource corsConfigurationSource() {
        CorsConfiguration configuration = new CorsConfiguration();
        configuration.addAllowedOrigin("http://localhost:4200"); // Frontend URL
-       configuration.addAllowedOrigin("http://localhost:3000"); // Alternative frontend URL
-       configuration.addAllowedOrigin("http://127.0.0.1:4200"); // Alternative frontend URL
-       configuration.addAllowedOrigin("http://127.0.0.1:3000"); // Alternative frontend URL
        configuration.addAllowedMethod("*"); // GET, POST, PUT, DELETE, OPTIONS, etc.
        configuration.addAllowedHeader("*");
        configuration.setAllowCredentials(true); // Important for cookies (JSESSIONID)
@@ -109,8 +107,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
    }
    
    @Bean
-   public org.springframework.security.web.AuthenticationEntryPoint authenticationEntryPoint() {
-       return new org.springframework.security.web.AuthenticationEntryPoint() {
+   public AuthenticationEntryPoint authenticationEntryPoint() {
+       return new AuthenticationEntryPoint() {
            @Override
            public void commence(HttpServletRequest request, HttpServletResponse response,
                               org.springframework.security.core.AuthenticationException authException)

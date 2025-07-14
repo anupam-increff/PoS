@@ -53,6 +53,14 @@ public class OrderFlow {
         return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
     }
 
+    public PaginatedResponse<OrderData> getAllPaginated(int page, int size) {
+        List<OrderPojo> all = orderService.getAllPaginated(page, size);
+        long total = orderService.countAll();
+        int totalPages = (int) Math.ceil((double) total / size);
+        List<OrderData> data = all.stream().map(this::convert).collect(Collectors.toList());
+        return new PaginatedResponse<>(data, page, totalPages, total, size);
+    }
+
     public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
         return orderItemService.getByOrderId(orderId).stream()
                 .map(this::convertToOrderItemData)
@@ -67,6 +75,7 @@ public class OrderFlow {
 
     private OrderItemPojo createOrderItem(OrderItemForm form) {
         ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
+        validateSellingPrice(form.getSellingPrice(), product);
         InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
 
         validateInventory(inventory, form.getQuantity(), product.getName());
@@ -78,6 +87,12 @@ public class OrderFlow {
     private void validateInventory(InventoryPojo inventory, Integer quantity, String productName) {
         if (inventory.getQuantity() < quantity) {
             throw new ApiException("Insufficient inventory for: " + productName);
+        }
+    }
+
+    private void validateSellingPrice(Double sellingPrice, ProductPojo product) {
+        if (sellingPrice > product.getMrp()) {
+            throw new ApiException("Selling price for product " + product.getName() + " cannot be greater than its mrp " + product.getMrp());
         }
     }
 
@@ -108,15 +123,6 @@ public class OrderFlow {
             orderItemService.add(item);
         }
     }
-
-    public PaginatedResponse<OrderData> getAllPaginated(int page, int size) {
-        List<OrderPojo> all = orderService.getAllPaginated(page, size);
-        long total = orderService.countAll();
-        int totalPages = (int) Math.ceil((double) total / size);
-        List<OrderData> data = all.stream().map(this::convert).collect(Collectors.toList());
-        return new PaginatedResponse<>(data, page, totalPages, total, size);
-    }
-
 
     private OrderItemData convertToOrderItemData(OrderItemPojo item) {
         ProductPojo product = productService.getCheckProductById(item.getProductId());

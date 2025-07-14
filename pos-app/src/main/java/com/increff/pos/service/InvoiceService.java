@@ -106,7 +106,7 @@ public class InvoiceService {
     }
 
     private String generateInvoicePath(Integer orderId) {
-        return "invoices/order-" + orderId + ".pdf";
+        return "../invoices/order-" + orderId + ".pdf";
     }
 
     private byte[] generatePdfDocument(OrderData orderData, List<OrderItemData> itemDataList) {

@@ -1,0 +1,7 @@
+barcode	clientName	name	mrp	imageUrl
+BC201 TestClient1 Product 1 100.0 https://example.com/image1.jpg
+BC202 TestClient2 Product 2 200.0 https://example.com/image2.jpg
+BC203	TestClient3	Product 3	300.0	https://example.com/image3.jpg	extra_column
+BC204	TestClient1	Product 4	400.0	https://example.com/image4.jpg	extra1	extra2
+BC205	TestClient2	Product 5
+BC206	TestClient3

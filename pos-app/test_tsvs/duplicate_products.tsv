@@ -1,0 +1,8 @@
+barcode	clientName	name	mrp	imageUrl
+DUPLICATE1	TestClient1	Product A	100.0	
+DUPLICATE1	TestClient2	Product B	200.0	
+DUPLICATE1	TestClient3	Product C	300.0	
+DUPLICATE2	TestClient1	Same Product	150.0	
+DUPLICATE2	TestClient2	Same Product	150.0	
+UNIQUE1	TestClient1	Unique Product 1	50.0	
+UNIQUE2	TestClient2	Unique Product 2	75.0	

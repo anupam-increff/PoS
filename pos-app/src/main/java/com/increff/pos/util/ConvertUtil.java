@@ -3,6 +3,7 @@ package com.increff.pos.util;
 import com.increff.pos.exception.ApiException;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 public class ConvertUtil {
 
@@ -26,14 +27,19 @@ public class ConvertUtil {
                             sf.getType().equals(tf.getType())) {
 
                         tf.setAccessible(true);
-                        tf.set(target, value);
+                        if (tf.getType() == String.class && !Objects.isNull(value)) {
+                            // trim string values
+                            tf.set(target, value.toString().trim());
+                        } else {
+                            tf.set(target, value);
+                        }
                         break;
                     }
                 }
             }
             return target;
-        } catch (Exception e) {
-            throw new ApiException("Failed to convert: " + e.getMessage());
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new ApiException("Failed to convert: Error type " + e.getClass() + " with error " + e.getMessage());
         }
     }
 }
