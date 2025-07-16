@@ -5,6 +5,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrderSearchForm {
+    private String query;
     private String startDate;
     private String endDate;
     private Boolean invoiceGenerated;

@@ -14,5 +14,14 @@ public class ClientPojo {
 
     @Column(name = "name", nullable = false)
     private String name;
+    
+    @Column(name = "email")
+    private String email;
+    
+    @Column(name = "website")
+    private String website;
+    
+    @Column(name = "phone")
+    private String phone;
 }
 

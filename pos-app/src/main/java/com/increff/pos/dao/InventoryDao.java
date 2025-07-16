@@ -14,7 +14,7 @@ import java.util.Map;
 public class InventoryDao extends AbstractDao<InventoryPojo> {
 
     private static final String SELECT_BY_PRODUCT_ID = "SELECT i FROM InventoryPojo i WHERE i.productId = :pid";
-    private static final String SELECT_ALL = "SELECT i FROM InventoryPojo i ORDER BY i.id ASC";
+    private static final String SELECT_ALL = "SELECT i FROM InventoryPojo i ORDER BY i.quantity DESC";
     private static final String SEARCH_BY_BARCODE_OR_NAME = "SELECT i FROM InventoryPojo i JOIN ProductPojo p ON i.productId = p.id WHERE LOWER(p.barcode) LIKE :searchTerm OR LOWER(p.name) LIKE :searchTerm";
     private static final String COUNT_BY_BARCODE_OR_NAME = "SELECT COUNT(i) FROM InventoryPojo i JOIN ProductPojo p ON i.productId = p.id WHERE LOWER(p.barcode) LIKE :searchTerm OR LOWER(p.name) LIKE :searchTerm";
 

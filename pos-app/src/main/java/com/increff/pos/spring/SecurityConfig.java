@@ -4,11 +4,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -37,15 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                .csrf().disable()
                .authorizeRequests()
                .antMatchers("/api/auth/login").permitAll()
-               // Upload endpoints - supervisor only
-               .antMatchers("/api/product/upload-tsv").hasAuthority("supervisor")
-               .antMatchers("/api/inventory/upload").hasAuthority("supervisor")
                // Update endpoints - supervisor only
                .antMatchers( "/api/invoice/**").hasAuthority("supervisor")
                .antMatchers(HttpMethod.PUT, "/api/product/**").hasAuthority("supervisor")
                .antMatchers(HttpMethod.PUT, "/api/inventory/**").hasAuthority("supervisor")
                // Admin endpoints
-               .antMatchers("/api/admin/**").hasAuthority("supervisor")
                .antMatchers("/api/reports/**").hasAuthority("supervisor")
                .antMatchers("/api/report/**").hasAuthority("supervisor")
                // General API access
@@ -82,7 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        configuration.addAllowedOrigin("http://localhost:4200"); // Frontend URL
        configuration.addAllowedMethod("*"); // GET, POST, PUT, DELETE, OPTIONS, etc.
        configuration.addAllowedHeader("*");
-       configuration.setAllowCredentials(true); // Important for cookies (JSESSIONID)
+       configuration.setAllowCredentials(true); // Important for cookies (JSESSIONID)in producr
        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
        configuration.addExposedHeader("Content-Disposition"); // For file downloads
 
@@ -96,7 +95,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        return new AccessDeniedHandler() {
            @Override
            public void handle(HttpServletRequest request, HttpServletResponse response,
-                           org.springframework.security.access.AccessDeniedException accessDeniedException)
+                           AccessDeniedException accessDeniedException)
                    throws IOException, ServletException {
                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -111,7 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        return new AuthenticationEntryPoint() {
            @Override
            public void commence(HttpServletRequest request, HttpServletResponse response,
-                              org.springframework.security.core.AuthenticationException authException)
+                              AuthenticationException authException)
                    throws IOException, ServletException {
                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -126,7 +125,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        return new AuthenticationFailureHandler() {
            @Override
            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                            org.springframework.security.core.AuthenticationException exception)
+                                            AuthenticationException exception)
                    throws IOException, ServletException {
                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -141,7 +140,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        return new AuthenticationSuccessHandler() {
            @Override
            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                            org.springframework.security.core.Authentication authentication)
+                                            Authentication authentication)
                    throws IOException, ServletException {
                response.setStatus(HttpServletResponse.SC_OK);
                response.setContentType(MediaType.APPLICATION_JSON_VALUE);

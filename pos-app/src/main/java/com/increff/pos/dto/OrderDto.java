@@ -34,6 +34,6 @@ public class OrderDto {
     public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {
         LocalDate startDate = LocalDate.parse(form.getStartDate());
         LocalDate endDate = LocalDate.parse(form.getEndDate());
-        return orderFlow.searchOrders(startDate, endDate, form.getInvoiceGenerated(), null, form.getPage(), form.getSize());
+        return orderFlow.searchOrders(startDate, endDate, form.getInvoiceGenerated(), form.getQuery(), form.getPage(), form.getSize());
     }
 }

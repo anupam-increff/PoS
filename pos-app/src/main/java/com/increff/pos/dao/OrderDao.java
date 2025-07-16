@@ -9,44 +9,29 @@ import javax.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(rollbackFor = ApiException.class)
 public class OrderDao extends AbstractDao<OrderPojo> {
-
-    private static final String SELECT_ALL_PAGINATED = "SELECT o FROM OrderPojo o ORDER BY o.time DESC";
-    private static final String SELECT_BY_DATE_RANGE = "SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end ORDER BY o.time DESC";
-    private static final String COUNT_BY_DATE_RANGE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time >= :start AND o.time < :end";
-    private static final String SELECT_BY_INVOICE_STATUS = "SELECT o FROM OrderPojo o WHERE o.invoicePath IS NULL ORDER BY o.time DESC";
-    private static final String SELECT_BY_INVOICE_STATUS_GENERATED = "SELECT o FROM OrderPojo o WHERE o.invoicePath IS NOT NULL ORDER BY o.time DESC";
-    private static final String COUNT_BY_INVOICE_STATUS = "SELECT COUNT(o) FROM OrderPojo o WHERE o.invoicePath IS NULL";
-    private static final String COUNT_BY_INVOICE_STATUS_GENERATED = "SELECT COUNT(o) FROM OrderPojo o WHERE o.invoicePath IS NOT NULL";
-    private static final String SELECT_BY_DATE_AND_INVOICE_STATUS = "SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end AND o.invoicePath IS NULL ORDER BY o.time DESC";
-    private static final String SELECT_BY_DATE_AND_INVOICE_STATUS_GENERATED = "SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end AND o.invoicePath IS NOT NULL ORDER BY o.time DESC";
-    private static final String COUNT_BY_DATE_AND_INVOICE_STATUS = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time >= :start AND o.time < :end AND o.invoicePath IS NULL";
-    private static final String COUNT_BY_DATE_AND_INVOICE_STATUS_GENERATED = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time >= :start AND o.time < :end AND o.invoicePath IS NOT NULL";
 
     public OrderDao() {
         super(OrderPojo.class);
     }
 
     public List<OrderPojo> getAllPaginated(int page, int size) {
-        return getPaginatedResults(SELECT_ALL_PAGINATED, page, size, null);
+        return getPaginatedResults("SELECT o FROM OrderPojo o ORDER BY o.time DESC", page, size, null);
     }
 
     public List<OrderPojo> search(LocalDate start, LocalDate end, Boolean invoiceGenerated, String query, int page, int size) {
-        String jpql = getSearchQuery(start, end, invoiceGenerated);
-        Map<String, Object> params = buildSearchParams(start, end, invoiceGenerated);
+        String jpql = buildQuery(false, start, end, invoiceGenerated, query);
+        Map<String, Object> params = buildParams(start, end, query);
         return getPaginatedResults(jpql, page, size, params);
     }
 
     public long countMatching(LocalDate start, LocalDate end, Boolean invoiceGenerated, String query) {
-        String jpql = getCountQuery(start, end, invoiceGenerated);
-        Map<String, Object> params = buildSearchParams(start, end, invoiceGenerated);
-        
+        String jpql = buildQuery(true, start, end, invoiceGenerated, query);
+        Map<String, Object> params = buildParams(start, end, query);
         TypedQuery<Long> countQuery = em.createQuery(jpql, Long.class);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             countQuery.setParameter(entry.getKey(), entry.getValue());
@@ -57,48 +42,53 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     public List<OrderPojo> getByDate(LocalDate date) {
         ZonedDateTime start = date.atStartOfDay(ZoneOffset.UTC);
         ZonedDateTime end = start.plusDays(1);
-        return em.createQuery(SELECT_BY_DATE_RANGE, OrderPojo.class)
+        return em.createQuery("SELECT o FROM OrderPojo o WHERE o.time >= :start AND o.time < :end ORDER BY o.time DESC", OrderPojo.class)
                 .setParameter("start", start)
                 .setParameter("end", end)
                 .getResultList();
     }
 
-    // --- Private Utility Methods ---
+    // --- Dynamic JPQL builder ---
 
-    private String getSearchQuery(LocalDate start, LocalDate end, Boolean invoiceGenerated) {
-        if (start != null && end != null && invoiceGenerated != null) {
-            return invoiceGenerated ? SELECT_BY_DATE_AND_INVOICE_STATUS_GENERATED : SELECT_BY_DATE_AND_INVOICE_STATUS;
-        } else if (start != null && end != null) {
-            return SELECT_BY_DATE_RANGE;
-        } else if (invoiceGenerated != null) {
-            return invoiceGenerated ? SELECT_BY_INVOICE_STATUS_GENERATED : SELECT_BY_INVOICE_STATUS;
-        } else {
-            return SELECT_ALL_PAGINATED;
+    private String buildQuery(boolean isCount, LocalDate start, LocalDate end, Boolean invoiceGenerated, String query) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(isCount ? "SELECT COUNT(o) FROM OrderPojo o WHERE 1=1" : "SELECT o FROM OrderPojo o WHERE 1=1");
+
+        if (start != null && end != null) {
+            sb.append(" AND o.time >= :start AND o.time < :end");
         }
+
+        if (invoiceGenerated != null) {
+            sb.append(invoiceGenerated
+                    ? " AND o.invoicePath IS NOT NULL"
+                    : " AND o.invoicePath IS NULL");
+        }
+
+        if (query != null && !query.trim().isEmpty()) {
+            sb.append(" AND STR(o.id) LIKE :query");
+        }
+
+        if (!isCount) {
+            sb.append(" ORDER BY o.time DESC");
+        }
+
+        return sb.toString();
     }
 
-    private String getCountQuery(LocalDate start, LocalDate end, Boolean invoiceGenerated) {
-        if (start != null && end != null && invoiceGenerated != null) {
-            return invoiceGenerated ? COUNT_BY_DATE_AND_INVOICE_STATUS_GENERATED : COUNT_BY_DATE_AND_INVOICE_STATUS;
-        } else if (start != null && end != null) {
-            return COUNT_BY_DATE_RANGE;
-        } else if (invoiceGenerated != null) {
-            return invoiceGenerated ? COUNT_BY_INVOICE_STATUS_GENERATED : COUNT_BY_INVOICE_STATUS;
-        } else {
-            return "SELECT COUNT(o) FROM OrderPojo o";
-        }
-    }
-
-    private Map<String, Object> buildSearchParams(LocalDate start, LocalDate end, Boolean invoiceGenerated) {
+    private Map<String, Object> buildParams(LocalDate start, LocalDate end, String query) {
         Map<String, Object> params = new HashMap<>();
-        
+
         if (start != null && end != null) {
             ZonedDateTime startZdt = start.atStartOfDay(ZoneOffset.UTC);
             ZonedDateTime endZdt = end.plusDays(1).atStartOfDay(ZoneOffset.UTC);
             params.put("start", startZdt);
             params.put("end", endZdt);
         }
-        
+
+        if (query != null && !query.trim().isEmpty()) {
+            params.put("query", "%" + query.trim() + "%");
+        }
+
         return params;
     }
 }
