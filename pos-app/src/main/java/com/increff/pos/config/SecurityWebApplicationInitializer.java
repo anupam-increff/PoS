@@ -1,4 +1,4 @@
-package com.increff.pos.spring;
+package com.increff.pos.config;
 
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 

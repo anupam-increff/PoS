@@ -9,7 +9,6 @@ import com.increff.pos.model.form.OrderSearchForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -32,8 +31,6 @@ public class OrderDto {
 
 
     public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {
-        LocalDate startDate = LocalDate.parse(form.getStartDate());
-        LocalDate endDate = LocalDate.parse(form.getEndDate());
-        return orderFlow.searchOrders(startDate, endDate, form.getInvoiceGenerated(), form.getQuery(), form.getPage(), form.getSize());
+        return orderFlow.searchOrders(form.getStartDate(), form.getEndDate(), form.getInvoiceGenerated(), form.getQuery(), form.getPage(), form.getSize());
     }
 }

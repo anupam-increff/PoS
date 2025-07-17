@@ -13,7 +13,7 @@ public class ConvertUtil {
         }
 
         try {
-            T target = targetClass.newInstance(); // for Java 1.8
+            T target = targetClass.newInstance();
 
             Field[] sourceFields = source.getClass().getDeclaredFields();
             Field[] targetFields = targetClass.getDeclaredFields();

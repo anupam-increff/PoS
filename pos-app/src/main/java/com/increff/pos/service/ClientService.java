@@ -12,22 +12,12 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional(rollbackFor = ApiException.class)
 public class ClientService {
 
     @Autowired
     private ClientDao clientDao;
-
+    @Transactional(rollbackFor = ApiException.class)
     public void addClient(ClientPojo clientPojo) {
-        // Validate client name
-        if (clientPojo.getName() == null || clientPojo.getName().trim().isEmpty()) {
-            throw new ApiException("Client name cannot be blank");
-        }
-        
-        // Trim the name to remove leading/trailing whitespace
-        String trimmedName = clientPojo.getName().trim();
-        clientPojo.setName(trimmedName);
-        
         if (!Objects.isNull(clientDao.getClientByName(clientPojo.getName()))) {
             throw new ApiException("Client with name already exists");
         }
@@ -65,26 +55,14 @@ public class ClientService {
         }
         return client;
     }
-
+    @Transactional(rollbackFor = ApiException.class)
     public void update(int id, ClientPojo clientPojo) {
-        // Validate client name
-        if (clientPojo.getName() == null || clientPojo.getName().trim().isEmpty()) {
-            throw new ApiException("Client name cannot be blank");
-        }
-        
-        // Trim the name to remove leading/trailing whitespace
-        String trimmedName = clientPojo.getName().trim();
-        clientPojo.setName(trimmedName);
-        
         ClientPojo existingClient = getCheckClientById(id);
-        
         // Check if another client with the same name already exists (excluding current client)
         ClientPojo clientWithSameName = clientDao.getClientByName(clientPojo.getName());
         if (clientWithSameName != null && !clientWithSameName.getId().equals(id)) {
             throw new ApiException("Client with name already exists");
         }
-        
         existingClient.setName(clientPojo.getName());
-        clientDao.update(existingClient);
     }
 }

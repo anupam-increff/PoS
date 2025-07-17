@@ -6,8 +6,6 @@ import com.increff.pos.service.DaySalesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -16,7 +14,7 @@ public class DaySalesDto {
     @Autowired
     private DaySalesFlow daySalesFlow;
 
-    public List<DaySalesPojo> getByDateRange(LocalDate start, LocalDate end) {
+    public List<DaySalesPojo> getByDateRange(ZonedDateTime start, ZonedDateTime end) {
         return daySalesFlow.getBetween(start, end);
     }
 }

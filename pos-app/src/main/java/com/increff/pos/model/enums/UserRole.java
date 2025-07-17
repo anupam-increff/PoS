@@ -1,4 +1,5 @@
 package com.increff.pos.model.enums;
 
-public class UserRoleEnum {
+public enum UserRole {
+    SUPERVISOR, OPERATOR
 }

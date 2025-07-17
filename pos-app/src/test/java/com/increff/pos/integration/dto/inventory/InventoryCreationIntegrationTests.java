@@ -255,7 +255,7 @@ public class InventoryCreationIntegrationTests {
         assertEquals(100, dbInventory1.getQuantity().intValue());
 
         // Act - Update inventory through DTO method
-        inventoryDto.updateByBarcode(updateForm);
+        inventoryDto.updateInventoryByBarcode(updateForm.getBarcode(),updateForm);
 
         // Assert - Verify updated inventory
         InventoryPojo dbInventory2 = inventoryDao.getByProductId(product.getId());

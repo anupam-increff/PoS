@@ -24,7 +24,7 @@ public class DaySalesScheduler {
     public void runDailySalesCalculation() {
         try {
             ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
-            LocalDate today = now.toLocalDate();
+            ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("Asia/Kolkata"));
             
             logger.info("Starting daily sales calculation for date: {}", today);
             daySalesFlow.calculateDailySales(today);
@@ -37,12 +37,12 @@ public class DaySalesScheduler {
     // Manual method to generate reports for past dates
     public void generatePastReports(int daysBack) {
         try {
-            LocalDate endDate = LocalDate.now();
-            LocalDate startDate = endDate.minusDays(daysBack);
+            ZonedDateTime endDate = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+            ZonedDateTime startDate = endDate.minusDays(daysBack);
             
             logger.info("Generating sales reports from {} to {}", startDate, endDate);
             
-            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            for (ZonedDateTime date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
                 if (daySalesFlow.getBetween(date, date).isEmpty()) {
                     logger.info("Generating report for missing date: {}", date);
                     daySalesFlow.calculateDailySales(date);
@@ -56,11 +56,11 @@ public class DaySalesScheduler {
     }
     
     // Method to generate reports for a specific date range
-    public void generateReportsForDateRange(LocalDate startDate, LocalDate endDate) {
+    public void generateReportsForDateRange(ZonedDateTime startDate, ZonedDateTime endDate) {
         try {
             logger.info("Generating sales reports for date range: {} to {}", startDate, endDate);
             
-            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            for (ZonedDateTime date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
                 daySalesFlow.calculateDailySales(date);
             }
             

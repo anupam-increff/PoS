@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 @Repository
-@Transactional(rollbackFor = ApiException.class)
+@Transactional
 public class OrderDao extends AbstractDao<OrderPojo> {
 
     public OrderDao() {

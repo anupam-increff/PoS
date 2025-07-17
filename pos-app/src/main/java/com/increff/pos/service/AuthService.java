@@ -3,76 +3,103 @@ package com.increff.pos.service;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.LoginData;
 import com.increff.pos.model.form.LoginForm;
+import com.increff.pos.model.form.SignupForm;
+import com.increff.pos.pojo.UserPojo;
 import com.increff.pos.util.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.Collections;
 
 @Service
 public class AuthService {
 
+    private static final String USER_PRINCIPAL = "userPrincipal";
+
     @Autowired
-    private AuthenticationManager authManager;
+    private UserService userService;
+
+    public LoginData signup(SignupForm form, HttpSession session) {
+        // Validate form
+        if (form.getEmail() == null || form.getEmail().trim().isEmpty()) {
+            throw new ApiException("Email is required");
+        }
+        
+        if (form.getPassword() == null || form.getPassword().trim().isEmpty()) {
+            throw new ApiException("Password is required");
+        }
+        
+        if (!form.getPassword().equals(form.getConfirmPassword())) {
+            throw new ApiException("Password and confirm password do not match");
+        }
+
+        // Create user using UserService
+        UserPojo user = userService.signup(form.getEmail(), form.getPassword());
+        
+        // Create session and Spring Security context
+        return createUserSession(user, session);
+    }
 
     public LoginData login(LoginForm form, HttpSession session) {
-        Authentication auth = authenticateUser(form);
-        setSecurityContext(auth, session);
-        return buildLoginData(auth);
+        // Validate form
+        if (form.getEmail() == null || form.getEmail().trim().isEmpty()) {
+            throw new ApiException("Email is required");
+        }
+        
+        if (form.getPassword() == null || form.getPassword().trim().isEmpty()) {
+            throw new ApiException("Password is required");
+        }
+
+        // Authenticate using UserService
+        UserPojo user = userService.login(form.getEmail(), form.getPassword());
+        
+        // Create session and Spring Security context
+        return createUserSession(user, session);
+    }
+
+    private LoginData createUserSession(UserPojo user, HttpSession session) {
+        String role = user.getRole().toString().toLowerCase();
+        String roleWithPrefix = "ROLE_" + role.toUpperCase();
+        
+        // Create session
+        session.setAttribute(USER_PRINCIPAL, user.getEmail());
+        session.setAttribute("userRole", role);
+        
+        // Set Spring Security context
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(roleWithPrefix);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+            user.getEmail(), 
+            null, 
+            Collections.singletonList(authority)
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
+        LoginData loginData = new LoginData();
+        loginData.setEmail(user.getEmail());
+        loginData.setRole(role);
+        return loginData;
     }
 
     public void logout(HttpSession session) {
+        session.removeAttribute(USER_PRINCIPAL);
         session.invalidate();
         SecurityContextHolder.clearContext();
     }
 
     public boolean isSessionValid(HttpSession session) {
-        return session.getAttribute("SPRING_SECURITY_CONTEXT") != null;
+        String email = (String) session.getAttribute(USER_PRINCIPAL);
+        return email != null;
     }
 
-    private Authentication authenticateUser(LoginForm form) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                form.getEmail(), form.getPassword()
-        );
-        return authManager.authenticate(token);
+    public String getCurrentUserEmail(HttpSession session) {
+        return (String) session.getAttribute(USER_PRINCIPAL);
     }
-
-    private void setSecurityContext(Authentication auth, HttpSession session) {
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-    }
-
-    private LoginData buildLoginData(Authentication auth) {
-        LoginData data = new LoginData();
-        
-        if (auth.getPrincipal() instanceof UserPrincipal) {
-            populateFromUserPrincipal(data, (UserPrincipal) auth.getPrincipal());
-        } else if (auth.getPrincipal() instanceof User) {
-            populateFromUser(data, (User) auth.getPrincipal());
-        } else {
-            populateFromAuthentication(data, auth);
-        }
-        
-        return data;
-    }
-
-    private void populateFromUserPrincipal(LoginData data, UserPrincipal principal) {
-        data.setEmail(principal.getEmail());
-        data.setRole(principal.getRole());
-    }
-
-    private void populateFromUser(LoginData data, User user) {
-        data.setEmail(user.getUsername());
-        data.setRole(user.getAuthorities().iterator().next().getAuthority());
-    }
-
-    private void populateFromAuthentication(LoginData data, Authentication auth) {
-        data.setEmail(auth.getName());
-        data.setRole(auth.getAuthorities().iterator().next().getAuthority());
+    
+    public String getCurrentUserRole(HttpSession session) {
+        return (String) session.getAttribute("userRole");
     }
 } 

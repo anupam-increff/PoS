@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-@Transactional(rollbackFor = ApiException.class)
+@Transactional
 public class DaySalesDao extends AbstractDao<DaySalesPojo> {
     private static final String GET_ORDERS_BETWEEN_DATES = "SELECT d FROM DaySalesPojo d WHERE d.date BETWEEN :start AND :end ORDER BY d.date";
 

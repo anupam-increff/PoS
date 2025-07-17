@@ -9,8 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.increff.pos.exception.ApiException;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -24,13 +23,13 @@ public class DaySalesService {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public DaySalesPojo getByDate(LocalDate date) {
-        return daySalesDao.getByDate(date);
+    public DaySalesPojo getByDate(ZonedDateTime date) {
+        return daySalesDao.getByDate(date.toLocalDate());
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public List<DaySalesPojo> getBetween(LocalDate start, LocalDate end) {
-        return daySalesDao.getBetween(start, end);
+    public List<DaySalesPojo> getBetween(ZonedDateTime start, ZonedDateTime end) {
+        return daySalesDao.getBetween(start.toLocalDate(), end.toLocalDate());
     }
 }
 

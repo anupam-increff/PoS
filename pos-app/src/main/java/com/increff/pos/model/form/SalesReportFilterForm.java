@@ -16,5 +16,5 @@ public class SalesReportFilterForm {
     @NotNull(message = "End date is required")
     private ZonedDateTime endDate;
 
-    private String clientName; // optional
+    private String clientName;
 }

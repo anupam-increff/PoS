@@ -2,15 +2,18 @@ package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.ProductData;
+import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ClientService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.TSVUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +27,10 @@ public class ProductFlow {
 
     @Autowired
     private ClientService clientService;
+
+    public TSVUploadResponse processProductTSV(MultipartFile file) {
+        return TSVUtil.processTSV(file, ProductForm.class, this::addProduct, "All products added successfully:");
+    }
 
     public void addProduct(ProductForm form) {
         ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
@@ -75,13 +82,7 @@ public class ProductFlow {
 
     private ProductData convertToProductData(ProductPojo product) {
         ClientPojo client = clientService.getCheckClientById(product.getClientId());
-        
-        ProductData data = new ProductData();
-        data.setId(product.getId());
-        data.setBarcode(product.getBarcode());
-        data.setName(product.getName());
-        data.setMrp(product.getMrp());
-        data.setImageUrl(product.getImageUrl());
+        ProductData data = ConvertUtil.convert(product,ProductData.class);
         data.setClientName(client.getName());
         
         return data;

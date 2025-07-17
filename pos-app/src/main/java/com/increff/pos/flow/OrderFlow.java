@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,7 @@ public class OrderFlow {
         return orderId;
     }
 
-    public PaginatedResponse<OrderData> searchOrders(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query, int page, int size) {
+    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
         List<OrderPojo> pojos = orderService.search(startDate, endDate, invoiceGenerated, query, page, size);
         long totalItems = orderService.countMatching(startDate, endDate, invoiceGenerated, query);
         int totalPages = (int) Math.ceil((double) totalItems / size);
@@ -112,7 +113,7 @@ public class OrderFlow {
 
     private OrderPojo createOrder(double total) {
         OrderPojo order = new OrderPojo();
-        order.setTime(java.time.ZonedDateTime.now());
+        order.setTime(ZonedDateTime.now());
         order.setTotal(total);
         return order;
     }

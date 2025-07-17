@@ -1,4 +1,8 @@
 package com.increff.pos.model.enums;
 
-public class InvoiceStatusEnum {
+public enum InvoiceStatus {
+    GENERATED,
+    SENT,
+    PAID,
+    CANCELLED
 }

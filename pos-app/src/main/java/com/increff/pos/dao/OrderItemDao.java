@@ -10,7 +10,7 @@ import com.increff.pos.exception.ApiException;
 import java.util.List;
 
 @Repository
-@Transactional(rollbackFor = ApiException.class)
+@Transactional
 public class OrderItemDao extends AbstractDao<OrderItemPojo> {
 
     public OrderItemDao() {

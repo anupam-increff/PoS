@@ -7,7 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ErrorTSVData {
+public class ErrorTSVData
+{
     private String barcode;
     private String name;
     private String clientName;

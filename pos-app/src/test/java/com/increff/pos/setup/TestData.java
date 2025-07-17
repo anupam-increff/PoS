@@ -112,7 +112,7 @@ public final class TestData {
         return form;
     }
     
-    public static OrderSearchForm orderSearchForm(String startDate, String endDate, Boolean invoiceGenerated) {
+    public static OrderSearchForm orderSearchForm(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated) {
         OrderSearchForm form = new OrderSearchForm();
         form.setStartDate(startDate);
         form.setEndDate(endDate);
@@ -151,18 +151,18 @@ public final class TestData {
     }
     
     /* ---------- DaySales ---------- */
-    public static DaySalesPojo daySales(LocalDate date) {
+    public static DaySalesPojo daySales(ZonedDateTime date) {
         DaySalesPojo daySales = new DaySalesPojo();
-        daySales.setDate(date);
+        daySales.setReportDate(date);
         daySales.setInvoicedOrdersCount(10);
         daySales.setInvoicedItemsCount(50);
         daySales.setTotalRevenue(1000.0);
         return daySales;
     }
     
-    public static DaySalesPojo daySalesWithoutId(LocalDate date) {
+    public static DaySalesPojo daySalesWithoutId(ZonedDateTime date) {
         DaySalesPojo daySales = new DaySalesPojo();
-        daySales.setDate(date);
+        daySales.setReportDate(date);
         daySales.setInvoicedOrdersCount(10);
         daySales.setInvoicedItemsCount(50);
         daySales.setTotalRevenue(1000.0);

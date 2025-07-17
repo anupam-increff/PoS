@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @RestController
@@ -22,8 +22,8 @@ public class DaySalesController {
             @RequestParam("start") String start,
             @RequestParam("end") String end
     ) {
-        LocalDate startDate = LocalDate.parse(start.trim());
-        LocalDate endDate = LocalDate.parse(end.trim());
+        ZonedDateTime startDate = ZonedDateTime.parse(start.trim());
+        ZonedDateTime endDate = ZonedDateTime.parse(end.trim());
         return dto.getByDateRange(startDate, endDate);
     }
 }

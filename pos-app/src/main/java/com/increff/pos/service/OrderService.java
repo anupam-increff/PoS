@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,8 +40,8 @@ public class OrderService {
     public List<OrderPojo> getAllPaginated(int page, int size) {
         return orderDao.getAllPaginated(page, size);
     }
-    public List<OrderPojo> getOrdersByDate(LocalDate date) {
-        return orderDao.getByDate(date);
+    public List<OrderPojo> getOrdersByDate(ZonedDateTime date) {
+        return orderDao.getByDate(date.toLocalDate());
     }
 
 
@@ -56,14 +57,13 @@ public class OrderService {
         OrderPojo existing = getCheckByOrderId(id);
         existing.setInvoicePath(newPojo.getInvoicePath());
         existing.setTotal(newPojo.getTotal());
-        orderDao.update(existing);
     }
 
-    public List<OrderPojo> search(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query, int page, int size) {
-        return orderDao.search(startDate, endDate, invoiceGenerated, query, page, size);
+    public List<OrderPojo> search(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
+        return orderDao.search(startDate.toLocalDate(), endDate.toLocalDate(), invoiceGenerated, query, page, size);
     }
 
-    public long countMatching(LocalDate startDate, LocalDate endDate, Boolean invoiceGenerated, String query) {
-        return orderDao.countMatching(startDate, endDate, invoiceGenerated, query);
+    public long countMatching(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query) {
+        return orderDao.countMatching(startDate.toLocalDate(), endDate.toLocalDate(), invoiceGenerated, query);
     }
 }

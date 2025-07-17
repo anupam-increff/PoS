@@ -2,6 +2,7 @@ package com.increff.pos.controller;
 
 import com.increff.pos.dto.AuthDto;
 import com.increff.pos.model.form.LoginForm;
+import com.increff.pos.model.form.SignupForm;
 import com.increff.pos.model.data.LoginData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,13 @@ public class AuthController {
 
    @Autowired
    private AuthDto authDto;
+
+   @ApiOperation("User signup")
+   @PostMapping("/signup")
+   public ResponseEntity<LoginData> signup(@RequestBody SignupForm form, HttpSession session) {
+       LoginData data = authDto.signup(form, session);
+       return ResponseEntity.ok(data);
+   }
 
    @ApiOperation("User login")
    @PostMapping("/login")

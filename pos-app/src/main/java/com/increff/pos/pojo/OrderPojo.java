@@ -10,13 +10,18 @@ import java.time.ZonedDateTime;
 @Table(name = "orders")
 @Getter
 @Setter
-public class OrderPojo {
+public class OrderPojo extends BaseEntity {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(name = "order_time", nullable = false)
     private ZonedDateTime time;
+    
+    @Column(name = "invoice_path", length = 500)
     private String invoicePath;
-    private double total;
+    
+    @Column(name = "total", nullable = false)
+    private Double total;
 }

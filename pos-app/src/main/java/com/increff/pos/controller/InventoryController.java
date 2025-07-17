@@ -54,6 +54,6 @@ public class InventoryController {
     @ApiOperation("Update inventory by barcode")
     @PutMapping
     public void updateInventory(@RequestBody @Valid InventoryForm form) {
-        inventoryDto.updateByBarcode(form);
+        inventoryDto.updateInventoryByBarcode(form.getBarcode(), form);
     }
 }

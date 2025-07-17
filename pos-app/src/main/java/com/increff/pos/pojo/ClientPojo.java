@@ -5,23 +5,16 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "client", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
-@Getter @Setter
-public class ClientPojo {
+@Table(name = "clients", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+@Getter 
+@Setter
+public class ClientPojo extends BaseEntity {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
-    
-    @Column(name = "email")
-    private String email;
-    
-    @Column(name = "website")
-    private String website;
-    
-    @Column(name = "phone")
-    private String phone;
 }
 

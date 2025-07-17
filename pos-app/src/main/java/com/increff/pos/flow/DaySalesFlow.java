@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.increff.pos.exception.ApiException;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -27,7 +27,7 @@ public class DaySalesFlow {
     private DaySalesService daySalesService;
 
     @Transactional(rollbackFor = ApiException.class)
-    public void calculateDailySales(LocalDate date) {
+    public void calculateDailySales(ZonedDateTime date) {
         if (daySalesService.getByDate(date) != null) return;
 
         List<OrderPojo> orders = orderService.getOrdersByDate(date);
@@ -37,13 +37,13 @@ public class DaySalesFlow {
         daySalesService.insert(dailySales);
     }
 
-    public List<DaySalesPojo> getBetween(LocalDate start, LocalDate end) {
+    public List<DaySalesPojo> getBetween(ZonedDateTime start, ZonedDateTime end) {
         return daySalesService.getBetween(start, end);
     }
 
-    private DaySalesPojo createDailySalesRecord(LocalDate date, int orderCount, SalesMetrics metrics) {
+    private DaySalesPojo createDailySalesRecord(ZonedDateTime date, int orderCount, SalesMetrics metrics) {
         DaySalesPojo sales = new DaySalesPojo();
-        sales.setDate(date);
+        sales.setReportDate(date);
         sales.setInvoicedOrdersCount(orderCount);
         sales.setInvoicedItemsCount(metrics.itemCount);
         sales.setTotalRevenue(metrics.revenue);
