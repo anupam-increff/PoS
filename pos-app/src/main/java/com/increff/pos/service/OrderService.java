@@ -7,9 +7,8 @@ import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +40,7 @@ public class OrderService {
         return orderDao.getAllPaginated(page, size);
     }
     public List<OrderPojo> getOrdersByDate(ZonedDateTime date) {
-        return orderDao.getByDate(date.toLocalDate());
+        return orderDao.getByDate(date);
     }
 
 
@@ -60,10 +59,10 @@ public class OrderService {
     }
 
     public List<OrderPojo> search(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
-        return orderDao.search(startDate.toLocalDate(), endDate.toLocalDate(), invoiceGenerated, query, page, size);
+        return orderDao.search(startDate, endDate, invoiceGenerated, query, page, size);
     }
 
     public long countMatching(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query) {
-        return orderDao.countMatching(startDate.toLocalDate(), endDate.toLocalDate(), invoiceGenerated, query);
+        return orderDao.countMatching(startDate, endDate, invoiceGenerated, query);
     }
 }

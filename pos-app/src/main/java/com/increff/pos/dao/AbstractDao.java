@@ -47,4 +47,12 @@ public abstract class AbstractDao<T> {
                 .setMaxResults(pageSize)
                 .getResultList();
     }
+    protected String escapeLikePattern(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+    }
 }

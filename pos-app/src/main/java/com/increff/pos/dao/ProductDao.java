@@ -58,17 +58,4 @@ public class ProductDao extends AbstractDao<ProductPojo> {
                 getSingleResult();
     }
 
-    /**
-     * Escapes SQL wildcards in user input to prevent SQL injection in LIKE queries
-     * @param input The user input string
-     * @return The escaped string safe for use in LIKE queries
-     */
-    private String escapeLikePattern(String input) {
-        if (input == null) {
-            return null;
-        }
-        return input.replace("\\", "\\\\")
-                   .replace("%", "\\%")
-                   .replace("_", "\\_");
-    }
 }

@@ -24,12 +24,12 @@ public class DaySalesService {
 
     @Transactional(rollbackFor = ApiException.class)
     public DaySalesPojo getByDate(ZonedDateTime date) {
-        return daySalesDao.getByDate(date.toLocalDate());
+        return daySalesDao.getByDate(date);
     }
 
     @Transactional(rollbackFor = ApiException.class)
     public List<DaySalesPojo> getBetween(ZonedDateTime start, ZonedDateTime end) {
-        return daySalesDao.getBetween(start.toLocalDate(), end.toLocalDate());
+        return daySalesDao.getBetween(start, end);
     }
 }
 

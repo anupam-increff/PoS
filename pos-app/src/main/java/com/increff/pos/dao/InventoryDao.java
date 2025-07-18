@@ -41,17 +41,4 @@ public class InventoryDao extends AbstractDao<InventoryPojo> {
         return em.createQuery(COUNT_BY_BARCODE_OR_NAME, Long.class).setParameter("searchTerm", "%" + escapeLikePattern(searchTerm.toLowerCase()) + "%").getSingleResult();
     }
 
-    /**
-     * Escapes SQL wildcards in user input to prevent SQL injection in LIKE queries
-     * @param input The user input string
-     * @return The escaped string safe for use in LIKE queries
-     */
-    private String escapeLikePattern(String input) {
-        if (input == null) {
-            return null;
-        }
-        return input.replace("\\", "\\\\")
-                   .replace("%", "\\%")
-                   .replace("_", "\\_");
-    }
 }
