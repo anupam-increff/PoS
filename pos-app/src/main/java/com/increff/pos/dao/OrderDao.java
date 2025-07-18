@@ -15,10 +15,10 @@ import java.util.Map;
 @Transactional
 public class OrderDao extends AbstractDao<OrderPojo> {
 
-    private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.time DESC";
-    private static final String SEARCH_BASE = "SELECT o FROM OrderPojo o WHERE o.time BETWEEN :start AND :end";
-    private static final String COUNT_BASE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time BETWEEN :start AND :end";
-    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE o.time >= :startOfDay AND o.time < :endOfDay ORDER BY o.time DESC";
+    private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.placedAt DESC";
+    private static final String SEARCH_BASE = "SELECT o FROM OrderPojo o WHERE o.placedAt BETWEEN :start AND :end";
+    private static final String COUNT_BASE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.placedAt BETWEEN :start AND :end";
+    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE o.placedAt >= :startOfDay AND o.placedAt < :endOfDay ORDER BY o.placedAt DESC";
 
     public OrderDao() {
         super(OrderPojo.class);
@@ -59,9 +59,9 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         
         if (invoiceGenerated != null) {
             if (invoiceGenerated) {
-                jpql.append(" AND o.invoicePath IS NOT NULL");
+                jpql.append(" AND o.invoiceGenerated = true");
             } else {
-                jpql.append(" AND o.invoicePath IS NULL");
+                jpql.append(" AND o.invoiceGenerated = false");
             }
         }
         
@@ -71,7 +71,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         }
         
         if (!isCount) {
-            jpql.append(" ORDER BY o.time DESC");
+            jpql.append(" ORDER BY o.placedAt DESC");
         }
         
         return jpql.toString();

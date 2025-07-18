@@ -60,10 +60,37 @@ public class TSVUtil {
     }
 
     /**
+     * Create TSV from list of String[] rows directly.
+     */
+    public static byte[] createTsvFromRows(List<String[]> rows, String[] headers) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
+             CSVPrinter printer = CSVFormat.TDF.print(writer)) {
+
+            if (headers != null && headers.length > 0) {
+                printer.printRecord((Object[]) headers);
+            }
+
+            for (String[] row : rows) {
+                printer.printRecord((Object[]) row);
+            }
+
+            printer.flush();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new ApiException("Error creating TSV file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Extract values from object using reflection
      */
     private static String[] getValuesFromObject(Object obj) {
         if (obj == null) return new String[0];
+
+        if (obj instanceof String) {
+            return new String[]{(String) obj};
+        }
         
         Class<?> clazz = obj.getClass();
         Field[] fields = clazz.getDeclaredFields();

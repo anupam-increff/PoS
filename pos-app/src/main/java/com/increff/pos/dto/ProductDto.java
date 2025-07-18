@@ -13,6 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.ArrayList;
 import com.increff.pos.util.TSVUtil;
+import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ValidationUtil;
 import com.increff.pos.exception.ApiException;
 
@@ -21,6 +22,9 @@ public class ProductDto extends BaseDto {
 
     @Autowired
     private ProductFlow productFlow;
+
+    @Autowired
+    private TSVDownloadService tsvDownloadService;
 
     public void addProduct(@Valid ProductForm productForm) {
         productFlow.addProduct(productForm);
@@ -75,19 +79,21 @@ public class ProductDto extends BaseDto {
             // Step 3: Return response based on results
             if (!failureList.isEmpty()) {
                 // Create error TSV for download
-                String[] errorHeaders = {"Row", "Error", "Barcode", "Name", "ClientName", "MRP"};
-                List<String> errorData = new ArrayList<>();
+                String[] errorHeaders = {"Error"};
+                List<String[]> errorRows = new ArrayList<>();
                 for (String error : failureList) {
-                    errorData.add(error);
+                    errorRows.add(new String[]{error});
                 }
-                byte[] errorTsv = TSVUtil.createTsvFromList(errorData, errorHeaders);
-                
-                return TSVUploadResponse.error(
+                byte[] errorTsv = TSVUtil.createTsvFromRows(errorRows, errorHeaders);
+                String fileId = tsvDownloadService.storeTSVFile(errorTsv, "product_upload_errors.tsv");
+                TSVUploadResponse resp = TSVUploadResponse.error(
                     "TSV processing completed with errors. " + successList.size() + " products added successfully.",
                     formList.size(),
                     failureList.size(),
                     failureList
                 );
+                resp.setDownloadUrl("/api/tsv/download/" + fileId);
+                return resp;
             } else {
                 return TSVUploadResponse.success(
                     "All " + successList.size() + " products added successfully",

@@ -4,9 +4,9 @@ import com.increff.invoice.InvoiceGenerator;
 import com.increff.invoice.model.OrderData;
 import com.increff.invoice.model.OrderItemData;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.pojo.OrderItemPojo;
-import com.increff.pos.pojo.OrderPojo;
-import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.model.enums.InvoiceStatus;
+import com.increff.pos.pojo.*;
+import com.increff.pos.dao.InvoiceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,11 +28,16 @@ public class InvoiceService {
     private OrderService orderService;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private InvoiceDao invoiceDao;
 
-    public byte[] downloadInvoice(String invoicePath) {
-        validateInvoicePath(invoicePath);
+    public byte[] downloadInvoice(Integer orderId) {
+        InvoicePojo invoice = invoiceDao.getByOrderId(orderId);
+        if (invoice == null) {
+            throw new ApiException("Invoice not generated for order id: " + orderId);
+        }
         try {
-            return Files.readAllBytes(Paths.get(invoicePath));
+            return Files.readAllBytes(Paths.get(invoice.getFilePath()));
         } catch (IOException e) {
             throw new ApiException("Invoice could not be read: " + e.getMessage());
         }
@@ -41,31 +46,32 @@ public class InvoiceService {
     @Transactional(rollbackFor = ApiException.class)
     public void generateInvoice(Integer orderId) {
         OrderPojo order = orderService.getCheckByOrderId(orderId);
-        validateOrderForInvoiceGeneration(order, orderId);
-        
+
+        if (Boolean.TRUE.equals(order.getInvoiceGenerated())) {
+            throw new ApiException("Invoice already exists for order ID: " + orderId);
+        }
+
         List<OrderItemPojo> orderItems = orderItemService.getByOrderId(orderId);
         List<OrderItemData> itemDataList = buildOrderItemDataList(orderItems);
         double calculatedTotal = calculateOrderTotal(orderItems);
-        
+
         OrderData orderData = buildOrderData(order, calculatedTotal);
         String invoicePath = generateInvoicePath(orderId);
-        
+
         byte[] pdfBytes = generatePdfDocument(orderData, itemDataList);
         saveInvoiceToFile(invoicePath, pdfBytes);
-        
-        updateOrderWithInvoice(order, invoicePath, calculatedTotal);
-    }
 
-    private void validateInvoicePath(String invoicePath) {
-        if (Objects.isNull(invoicePath)) {
-            throw new ApiException("No invoice was generated or associated for this order");
-        }
-    }
+        // Persist invoice record
+        InvoicePojo invoice = new InvoicePojo();
+        invoice.setOrderId(orderId);
+        invoice.setFilePath(invoicePath);
+        invoice.setGeneratedAt(java.time.ZonedDateTime.now());
+        invoice.setTotalAmount(calculatedTotal);
+        invoice.setStatus(InvoiceStatus.GENERATED);
+        invoiceDao.insert(invoice);
 
-    private void validateOrderForInvoiceGeneration(OrderPojo order, Integer orderId) {
-        if (!Objects.isNull(order.getInvoicePath())) {
-            throw new ApiException("Invoice already exists for order ID: " + orderId);
-        }
+        // update order status
+        order.setInvoiceGenerated(true);
     }
 
     private List<OrderItemData> buildOrderItemDataList(List<OrderItemPojo> orderItems) {
@@ -100,13 +106,13 @@ public class InvoiceService {
     private OrderData buildOrderData(OrderPojo order, double total) {
         OrderData orderData = new OrderData();
         orderData.setId(order.getId());
-        orderData.setTime(order.getTime());
+        orderData.setTime(order.getPlacedAt());
         orderData.setTotal(total);
         return orderData;
     }
 
     private String generateInvoicePath(Integer orderId) {
-        return "../invoices/order-" + orderId + ".pdf";
+        return "./invoices/order-" + orderId + ".pdf";
     }
 
     private byte[] generatePdfDocument(OrderData orderData, List<OrderItemData> itemDataList) {
@@ -129,9 +135,5 @@ public class InvoiceService {
         }
     }
 
-    private void updateOrderWithInvoice(OrderPojo order, String invoicePath, double total) {
-        order.setInvoicePath(invoicePath);
-        order.setTotal(total);
-        orderService.update(order.getId(), order);
-    }
+    // updateOrderWithInvoice no longer needed as order status handled inline
 }

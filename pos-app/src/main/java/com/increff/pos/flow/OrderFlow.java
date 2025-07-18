@@ -114,7 +114,8 @@ public class OrderFlow {
 
     private OrderPojo createOrder(double total) {
         OrderPojo order = new OrderPojo();
-        order.setTime(ZonedDateTime.now());
+        order.setPlacedAt(ZonedDateTime.now());
+        order.setInvoiceGenerated(false);
         order.setTotal(total);
         return order;
     }

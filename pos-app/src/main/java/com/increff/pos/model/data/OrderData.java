@@ -15,8 +15,8 @@ import java.time.ZonedDateTime;
 public class OrderData {
 
     private Integer id;
-    private ZonedDateTime time;
-    private String invoicePath;
+    private ZonedDateTime placedAt;
+    private Boolean invoiceGenerated;
     private double total;
 
 }

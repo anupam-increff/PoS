@@ -54,7 +54,7 @@ public class OrderService {
 
     public void update(Integer id, OrderPojo newPojo) {
         OrderPojo existing = getCheckByOrderId(id);
-        existing.setInvoicePath(newPojo.getInvoicePath());
+        existing.setInvoiceGenerated(newPojo.getInvoiceGenerated());
         existing.setTotal(newPojo.getTotal());
     }
 

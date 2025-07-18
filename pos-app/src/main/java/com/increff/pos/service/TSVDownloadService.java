@@ -20,12 +20,5 @@ public class TSVDownloadService {
     public byte[] getTSVFile(String fileId) {
         return tsvFiles.get(fileId);
     }
-    
-    public void removeTSVFile(String fileId) {
-        tsvFiles.remove(fileId);
-    }
-    
-    public boolean hasTSVFile(String fileId) {
-        return tsvFiles.containsKey(fileId);
-    }
+
 } 

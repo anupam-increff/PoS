@@ -16,11 +16,11 @@ public class OrderPojo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "order_time", nullable = false)
-    private ZonedDateTime time;
-    
-    @Column(name = "invoice_path", length = 500)
-    private String invoicePath;
+    @Column(name = "placed_at", nullable = false)
+    private ZonedDateTime placedAt;
+
+    @Column(name = "invoice_generated", nullable = false)
+    private Boolean invoiceGenerated = false;
     
     @Column(name = "total", nullable = false)
     private Double total;

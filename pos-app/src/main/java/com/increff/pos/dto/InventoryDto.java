@@ -7,6 +7,7 @@ import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.util.TSVUtil;
+import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ public class InventoryDto extends BaseDto {
 
     @Autowired
     private InventoryFlow inventoryFlow;
+
+    @Autowired
+    private TSVDownloadService tsvDownloadService;
 
     public void addInventory(@Valid InventoryForm inventoryForm) {
         inventoryFlow.addInventory(inventoryForm.getBarcode(), inventoryForm.getQuantity());
@@ -37,11 +41,11 @@ public class InventoryDto extends BaseDto {
     public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
         try {
             List<InventoryForm> formList = TSVUtil.readFromTsv(file, InventoryForm.class);
-            
+
             if (formList.isEmpty()) {
                 throw new ApiException("TSV file is empty or has no valid data");
             }
-            
+
             List<String> successList = new ArrayList<>();
             List<String> failureList = new ArrayList<>();
 
@@ -57,18 +61,20 @@ public class InventoryDto extends BaseDto {
             }
 
             if (!failureList.isEmpty()) {
-                return TSVUploadResponse.error(
-                    "TSV processing completed with errors. " + successList.size() + " inventory items updated successfully.",
-                    formList.size(),
-                    failureList.size(),
-                    failureList
-                );
+                String[] errorHeaders = {"Error"};
+                List<String[]> errorRows = new ArrayList<>();
+                for (String error : failureList) {
+                    errorRows.add(new String[]{error});
+                }
+                byte[] errorTsv = TSVUtil.createTsvFromRows(errorRows, errorHeaders);
+                String fileId = tsvDownloadService.storeTSVFile(errorTsv, "inventory_upload_errors.tsv");
+                TSVUploadResponse resp = TSVUploadResponse.error("TSV processing completed with errors. " + successList.size() + " inventory items updated successfully.", formList.size(), failureList.size(), failureList);
+                resp.setDownloadUrl("/api/tsv/download/" + fileId);
+                return resp;
             } else {
-                return TSVUploadResponse.success(
-                    "All " + successList.size() + " inventory items updated successfully", successList.size()
-                );
+                return TSVUploadResponse.success("All " + successList.size() + " inventory items updated successfully", successList.size());
             }
-            
+
         } catch (Exception e) {
             throw new ApiException("Failed to process TSV file: " + e.getMessage(), e);
         }
