@@ -135,5 +135,4 @@ public class InvoiceService {
         }
     }
 
-    // updateOrderWithInvoice no longer needed as order status handled inline
 }

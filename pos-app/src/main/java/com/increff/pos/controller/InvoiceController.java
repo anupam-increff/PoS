@@ -1,7 +1,6 @@
 package com.increff.pos.controller;
 
 import com.increff.pos.dto.InvoiceDto;
-import com.increff.pos.exception.ApiException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +16,7 @@ public class InvoiceController {
     @ApiOperation("Download invoice for order")
     @GetMapping("/{orderId}")
     public ResponseEntity<byte[]> downloadInvoice(@PathVariable Integer orderId) {
-        try {
-            return invoiceDto.downloadInvoice(orderId);
-        } catch (Exception e) {
-            throw new ApiException("Failed to download invoice: " + e.getMessage());
-        }
+        return invoiceDto.downloadInvoice(orderId);
     }
 
     @ApiOperation("Generate invoice for order")

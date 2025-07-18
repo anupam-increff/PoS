@@ -75,15 +75,10 @@ public class ProductFlow {
 
     private ProductData convertToProductData(ProductPojo product) {
         ClientPojo client = clientService.getCheckClientById(product.getClientId());
-        
-        ProductData data = new ProductData();
-        data.setId(product.getId());
-        data.setBarcode(product.getBarcode());
-        data.setName(product.getName());
-        data.setMrp(product.getMrp());
-        data.setImageUrl(product.getImageUrl());
+
+        ProductData data = ConvertUtil.convert(product, ProductData.class);
         data.setClientName(client.getName());
-        
+
         return data;
     }
 }

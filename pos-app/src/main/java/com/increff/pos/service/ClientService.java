@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class ClientService {
 
     @Autowired
     private ClientDao clientDao;
-    @Transactional(rollbackFor = ApiException.class)
     public void addClient(ClientPojo clientPojo) {
         if (!Objects.isNull(clientDao.getClientByName(clientPojo.getName()))) {
             throw new ApiException("Client with name already exists");
@@ -55,7 +55,6 @@ public class ClientService {
         }
         return client;
     }
-    @Transactional(rollbackFor = ApiException.class)
     public void update(int id, ClientPojo clientPojo) {
         ClientPojo existingClient = getCheckClientById(id);
         // Check if another client with the same name already exists (excluding current client)

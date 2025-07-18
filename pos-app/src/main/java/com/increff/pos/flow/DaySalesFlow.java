@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class DaySalesFlow {
 
     @Autowired
@@ -26,7 +27,6 @@ public class DaySalesFlow {
     @Autowired
     private DaySalesService daySalesService;
 
-    @Transactional(rollbackFor = ApiException.class)
     public void calculateDailySales(ZonedDateTime date) {
         if (daySalesService.getByDate(date) != null) return;
 

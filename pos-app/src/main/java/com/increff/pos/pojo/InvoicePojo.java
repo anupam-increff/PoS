@@ -30,7 +30,7 @@ public class InvoicePojo extends BaseEntity {
     private Double totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private InvoiceStatus status = InvoiceStatus.GENERATED;
+    @Column(name = "status", nullable = false)
+    private InvoiceStatus status = InvoiceStatus.NOT_GENERATED;
 
 } 

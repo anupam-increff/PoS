@@ -16,7 +16,6 @@ public class ProductService {
     @Autowired
     private ProductDao dao;
 
-    @Transactional(rollbackFor = ApiException.class)
     public void addProduct(ProductPojo p) {
         if (!Objects.isNull(getProductByBarcode(p.getBarcode()))) {
             throw new ApiException("Product with same barcode : " + p.getBarcode() + " already exists !");
@@ -67,7 +66,6 @@ public class ProductService {
         return dao.countByBarcodeSearch(barcode);
     }
 
-    @Transactional(rollbackFor = ApiException.class)
     public void update(Integer id, ProductPojo newProductPojo) {
         ProductPojo productPojo = getCheckProductById(id);
         productPojo.setName(newProductPojo.getName());

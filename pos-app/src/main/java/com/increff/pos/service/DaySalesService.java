@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class DaySalesService {
 
     @Autowired private DaySalesDao daySalesDao;

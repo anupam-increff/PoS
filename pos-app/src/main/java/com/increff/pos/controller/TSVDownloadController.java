@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/api/tsv")
 public class TSVDownloadController {
@@ -20,18 +22,18 @@ public class TSVDownloadController {
     public ResponseEntity<byte[]> downloadTsv(@PathVariable String fileId) {
         try {
             byte[] tsvBytes = tsvDownloadService.getTSVFile(fileId);
-            
-            if (tsvBytes == null) {
+
+            if (Objects.isNull(tsvBytes)) {
                 throw new ApiException("File not found or expired");
             }
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.valueOf("text/tab-separated-values"));
             headers.setContentDispositionFormData("attachment", "upload_result.tsv");
             headers.setContentLength(tsvBytes.length);
-            
+
             return new ResponseEntity<>(tsvBytes, headers, HttpStatus.OK);
-            
+
         } catch (Exception e) {
             throw new ApiException("Error downloading TSV file: " + e.getMessage());
         }

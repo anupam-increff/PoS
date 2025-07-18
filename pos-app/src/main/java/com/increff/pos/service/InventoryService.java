@@ -7,22 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class InventoryService {
 
     @Autowired
     private InventoryDao inventoryDao;
 
-    @Transactional(rollbackFor = ApiException.class)
     public void updateInventory(Integer productId, Integer quantity) {
         InventoryPojo inventory = getCheckByProductId(productId);
         inventory.setQuantity(quantity);
     }
 
-    @Transactional(rollbackFor = ApiException.class)
     public void addInventory(Integer productId, Integer quantity) {
         InventoryPojo inventory = inventoryDao.getByProductId(productId);
         if (Objects.isNull(inventory)) {
@@ -31,7 +31,7 @@ public class InventoryService {
             newInventory.setQuantity(quantity);
             inventoryDao.insert(newInventory);
         } else {
-            updateInventory(productId,inventory.getQuantity()+quantity);
+            updateInventory(productId, inventory.getQuantity() + quantity);
         }
     }
 
