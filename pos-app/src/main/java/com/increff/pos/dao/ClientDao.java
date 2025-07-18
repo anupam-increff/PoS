@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@Transactional
 public class ClientDao extends AbstractDao<ClientPojo> {
 
     private static final String SELECT_BY_NAME = "SELECT c FROM ClientPojo c WHERE LOWER(c.name) = :name";

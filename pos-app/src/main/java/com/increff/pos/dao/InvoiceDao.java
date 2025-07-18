@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Transactional
 public class InvoiceDao extends AbstractDao<InvoicePojo> {
 
     private static final String SELECT_BY_ORDER = "SELECT i FROM InvoicePojo i WHERE i.orderId = :orderId";

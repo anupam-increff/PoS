@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@Transactional
 public class OrderDao extends AbstractDao<OrderPojo> {
 
     private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.placedAt DESC";

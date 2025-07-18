@@ -92,7 +92,7 @@ public class ProductDto extends BaseDto {
                     failureList.size(),
                     failureList
                 );
-                resp.setDownloadUrl("/api/tsv/download/" + fileId);
+                resp.setDownloadUrl("/tsv/download/" + fileId);
                 return resp;
             } else {
                 return TSVUploadResponse.success(
@@ -104,5 +104,8 @@ public class ProductDto extends BaseDto {
         } catch (Exception e) {
             throw new ApiException("Failed to process TSV file: " + e.getMessage(), e);
         }
+    }
+    public void update(Integer id, @Valid ProductForm productForm) {
+        productFlow.updateProduct(id, productForm);
     }
 }

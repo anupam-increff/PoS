@@ -69,7 +69,7 @@ public class InventoryDto extends BaseDto {
                 byte[] errorTsv = TSVUtil.createTsvFromRows(errorRows, errorHeaders);
                 String fileId = tsvDownloadService.storeTSVFile(errorTsv, "inventory_upload_errors.tsv");
                 TSVUploadResponse resp = TSVUploadResponse.error("TSV processing completed with errors. " + successList.size() + " inventory items updated successfully.", formList.size(), failureList.size(), failureList);
-                resp.setDownloadUrl("/api/tsv/download/" + fileId);
+                resp.setDownloadUrl("/tsv/download/" + fileId);
                 return resp;
             } else {
                 return TSVUploadResponse.success("All " + successList.size() + " inventory items updated successfully", successList.size());

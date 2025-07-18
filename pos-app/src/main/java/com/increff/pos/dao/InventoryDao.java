@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@Transactional
 public class InventoryDao extends AbstractDao<InventoryPojo> {
 
     private static final String SELECT_BY_PRODUCT_ID = "SELECT i FROM InventoryPojo i WHERE i.productId = :pid";

@@ -36,7 +36,7 @@ public class InventoryController {
     }
 
     @ApiOperation("Upload inventory data via TSV file (Supervisor only)")
-    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/upload-tsv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public TSVUploadResponse uploadInventory(@RequestParam("file") MultipartFile file) {
         return inventoryDto.uploadInventoryByTsv(file);
     }

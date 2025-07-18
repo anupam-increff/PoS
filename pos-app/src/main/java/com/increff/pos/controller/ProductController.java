@@ -65,7 +65,6 @@ public class ProductController {
     @ApiOperation("Update product by ID")
     @PutMapping("/{id}")
     public void updateProduct(@PathVariable Integer id, @RequestBody @Valid ProductForm productForm) {
-        // TODO: Implement update method in ProductDto
-        throw new UnsupportedOperationException("Product update not implemented yet");
+        productDto.update(id, productForm);
     }
 }

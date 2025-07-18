@@ -8,7 +8,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
-@Transactional
 public class DaySalesDao extends AbstractDao<DaySalesPojo> {
 
     public DaySalesDao() {

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@Transactional
 public class ProductDao extends AbstractDao<ProductPojo> {
 
     private static final String SELECT_ALL = "SELECT p FROM ProductPojo p ORDER BY p.name ASC";

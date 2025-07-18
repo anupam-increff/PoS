@@ -24,10 +24,6 @@ public abstract class AbstractDao<T> {
         return em.find(clazz, id);
     }
 
-    public void update(T entity) {
-        em.merge(entity);
-    }
-
     public List<T> getAll() {
         return em.createQuery("FROM " + clazz.getSimpleName(), clazz).getResultList();
     }

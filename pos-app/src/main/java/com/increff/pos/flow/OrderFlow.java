@@ -112,7 +112,7 @@ public class OrderFlow {
                 .mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
     }
 
-    private OrderPojo createOrder(double total) {
+    private OrderPojo createOrder(Double total) {
         OrderPojo order = new OrderPojo();
         order.setPlacedAt(ZonedDateTime.now());
         order.setInvoiceGenerated(false);
