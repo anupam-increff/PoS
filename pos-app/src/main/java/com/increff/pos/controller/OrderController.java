@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.ZonedDateTime;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/order")
@@ -46,5 +48,20 @@ public class OrderController {
     @PostMapping("/search")
     public PaginatedResponse<OrderData> searchOrders(@RequestBody @Valid OrderSearchForm form) {
         return orderDto.searchOrdersByForm(form);
+    }
+
+    @ApiOperation("Search orders with filters (GET variant)")
+    @GetMapping("/search")
+    public PaginatedResponse<OrderData> searchOrdersGet(
+            @RequestParam(required = false) String query,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam(required = false) Boolean invoiceGenerated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ZonedDateTime start = ZonedDateTime.parse(startDate.trim());
+        ZonedDateTime end = ZonedDateTime.parse(endDate.trim());
+        return orderDto.searchOrders(start, end, invoiceGenerated, query, page, size);
     }
 }

@@ -9,6 +9,7 @@ import com.increff.pos.model.form.OrderSearchForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Component
@@ -29,8 +30,11 @@ public class OrderDto {
         return orderFlow.getOrderItemsByOrderId(id);
     }
 
+    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query, int page, int size){
+        return orderFlow.searchOrders(start, end, invoiceGenerated, query, page, size);
+    }
 
-    public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {
-        return orderFlow.searchOrders(form.getStartDate(), form.getEndDate(), form.getInvoiceGenerated(), form.getQuery(), form.getPage(), form.getSize());
+    public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form){
+         return orderFlow.searchOrders(form.getStartDate(), form.getEndDate(), form.getInvoiceGenerated(), form.getQuery(), form.getPage(), form.getSize());
     }
 }

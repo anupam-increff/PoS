@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 @Component
 public class InventoryDto extends BaseDto {
@@ -41,6 +42,7 @@ public class InventoryDto extends BaseDto {
     public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
         try {
             List<InventoryForm> formList = TSVUtil.readFromTsv(file, InventoryForm.class);
+            List<String[]> rawRows = TSVUtil.readRawRows(file);
 
             if (formList.isEmpty()) {
                 throw new ApiException("TSV file is empty or has no valid data");
@@ -54,18 +56,17 @@ public class InventoryDto extends BaseDto {
                 try {
                     ValidationUtil.validate(form);
                     inventoryFlow.addInventory(form.getBarcode(), form.getQuantity());
-                    successList.add("Row " + (i + 1) + ": Inventory updated successfully");
+                    successList.add("Row " + (i + 1));
                 } catch (ApiException e) {
-                    failureList.add("Row " + (i + 1) + ": " + e.getMessage());
+                    String[] row = Arrays.copyOf(rawRows.get(i), rawRows.get(i).length + 1);
+                    row[row.length - 1] = e.getMessage();
+                    failureList.add(String.join("\t", row));
                 }
             }
 
             if (!failureList.isEmpty()) {
-                String[] errorHeaders = {"Error"};
-                List<String[]> errorRows = new ArrayList<>();
-                for (String error : failureList) {
-                    errorRows.add(new String[]{error});
-                }
+                String[] errorHeaders = {"Barcode","Quantity","Error"};
+                List<String[]> errorRows = failureList.stream().map(s->s.split("\t",-1)).collect(java.util.stream.Collectors.toList());
                 byte[] errorTsv = TSVUtil.createTsvFromRows(errorRows, errorHeaders);
                 String fileId = tsvDownloadService.storeTSVFile(errorTsv, "inventory_upload_errors.tsv");
                 TSVUploadResponse resp = TSVUploadResponse.error("TSV processing completed with errors. " + successList.size() + " inventory items updated successfully.", formList.size(), failureList.size(), failureList);

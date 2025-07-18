@@ -16,6 +16,7 @@ import com.increff.pos.util.TSVUtil;
 import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ValidationUtil;
 import com.increff.pos.exception.ApiException;
+import java.util.Arrays;
 
 @Component
 public class ProductDto extends BaseDto {
@@ -56,6 +57,7 @@ public class ProductDto extends BaseDto {
         try {
             // Step 1: Convert TSV to list of forms
             List<ProductForm> formList = TSVUtil.readFromTsv(file, ProductForm.class);
+            List<String[]> rawRows = TSVUtil.readRawRows(file);
             
             if (formList.isEmpty()) {
                 throw new ApiException("TSV file is empty or has no valid data");
@@ -70,20 +72,20 @@ public class ProductDto extends BaseDto {
                 try {
                     ValidationUtil.validate(form);
                     productFlow.addProduct(form);
-                    successList.add("Row " + (i + 1) + ": Product added successfully");
+                    successList.add("Row " + (i + 1));
                 } catch (ApiException e) {
-                    failureList.add("Row " + (i + 1) + ": " + e.getMessage());
+                    // Combine original row values + error message
+                    String[] row = Arrays.copyOf(rawRows.get(i), rawRows.get(i).length + 1);
+                    row[row.length - 1] = e.getMessage();
+                    failureList.add(String.join("\t", row));
                 }
             }
             
             // Step 3: Return response based on results
             if (!failureList.isEmpty()) {
                 // Create error TSV for download
-                String[] errorHeaders = {"Error"};
-                List<String[]> errorRows = new ArrayList<>();
-                for (String error : failureList) {
-                    errorRows.add(new String[]{error});
-                }
+                String[] errorHeaders = {"Barcode","ClientName","Name","MRP","Error"};
+                List<String[]> errorRows = failureList.stream().map(s->s.split("\t",-1)).collect(java.util.stream.Collectors.toList());
                 byte[] errorTsv = TSVUtil.createTsvFromRows(errorRows, errorHeaders);
                 String fileId = tsvDownloadService.storeTSVFile(errorTsv, "product_upload_errors.tsv");
                 TSVUploadResponse resp = TSVUploadResponse.error(

@@ -27,6 +27,6 @@ public class ProductPojo extends BaseEntity {
     @Column(nullable = false)
     private Double mrp;
     
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url")
     private String imageUrl;
 }
