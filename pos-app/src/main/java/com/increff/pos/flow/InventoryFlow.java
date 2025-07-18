@@ -3,18 +3,14 @@ package com.increff.pos.flow;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
-import com.increff.pos.model.data.TSVUploadResponse;
-import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
-import com.increff.pos.util.TSVUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,12 +24,6 @@ public class InventoryFlow {
 
     @Autowired
     private ProductService productService;
-
-    public TSVUploadResponse processInventoryTSV(MultipartFile file) {
-        return TSVUtil.processTSV(file, InventoryForm.class, 
-            form -> addInventory(form.getBarcode(), form.getQuantity()),
-            "All inventory items updated successfully:");
-    }
 
     public void updateInventory(String barcode, int quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);

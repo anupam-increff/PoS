@@ -1,6 +1,5 @@
 package com.increff.pos.setup;
 
-import com.increff.pos.config.PaginationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -108,10 +107,6 @@ public class IntegrationTestConfig {
         return new ProviderManager(java.util.Arrays.asList(provider));
     }
 
-    @Bean
-    public PaginationConfig paginationConfig() {
-        return new PaginationConfig();
-    }
 
     @Bean
     public Validator validator() {

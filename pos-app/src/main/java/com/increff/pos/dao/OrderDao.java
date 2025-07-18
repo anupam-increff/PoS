@@ -18,7 +18,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.time DESC";
     private static final String SEARCH_BASE = "SELECT o FROM OrderPojo o WHERE o.time BETWEEN :start AND :end";
     private static final String COUNT_BASE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.time BETWEEN :start AND :end";
-    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE DATE(o.time) = DATE(:date) ORDER BY o.time DESC";
+    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE o.time >= :startOfDay AND o.time < :endOfDay ORDER BY o.time DESC";
 
     public OrderDao() {
         super(OrderPojo.class);
@@ -41,8 +41,12 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     }
 
     public List<OrderPojo> getByDate(ZonedDateTime date) {
+        ZonedDateTime startOfDay = date.toLocalDate().atStartOfDay(date.getZone());
+        ZonedDateTime endOfDay = startOfDay.plusDays(1);
+        
         return em.createQuery(SELECT_BY_DATE, OrderPojo.class)
-                .setParameter("date", date)
+                .setParameter("startOfDay", startOfDay)
+                .setParameter("endOfDay", endOfDay)
                 .getResultList();
     }
 
@@ -62,7 +66,8 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         }
         
         if (query != null && !query.trim().isEmpty()) {
-            jpql.append(" AND LOWER(o.id) LIKE :query");
+            // Search by order ID as string conversion
+            jpql.append(" AND CAST(o.id AS string) LIKE :query");
         }
         
         if (!isCount) {
@@ -74,8 +79,8 @@ public class OrderDao extends AbstractDao<OrderPojo> {
 
     private Map<String, Object> buildParams(ZonedDateTime start, ZonedDateTime end, String query) {
         Map<String, Object> params = new HashMap<>();
-        params.put("start", start.toLocalDate().atStartOfDay(start.getZone()));
-        params.put("end", end.toLocalDate().atTime(23, 59, 59).atZone(end.getZone()));
+        params.put("start", start);
+        params.put("end", end);
         
         if (query != null && !query.trim().isEmpty()) {
             params.put("query", "%" + query.toLowerCase() + "%");

@@ -1,6 +1,5 @@
 package com.increff.pos.controller;
 
-import com.increff.pos.config.PaginationConfig;
 import com.increff.pos.dto.InventoryDto;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
@@ -20,9 +19,6 @@ public class InventoryController {
 
     @Autowired
     private InventoryDto inventoryDto;
-    
-    @Autowired
-    private PaginationConfig paginationConfig;
 
     @ApiOperation("Get all inventory items")
     @GetMapping

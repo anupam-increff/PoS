@@ -11,6 +11,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.ArrayList;
+import com.increff.pos.util.TSVUtil;
+import com.increff.pos.util.ValidationUtil;
+import com.increff.pos.exception.ApiException;
 
 @Component
 public class ProductDto extends BaseDto {
@@ -45,6 +49,54 @@ public class ProductDto extends BaseDto {
     }
 
     public TSVUploadResponse uploadProductMasterByTsv(MultipartFile file) {
-        return productFlow.processProductTSV(file);
+        try {
+            // Step 1: Convert TSV to list of forms
+            List<ProductForm> formList = TSVUtil.readFromTsv(file, ProductForm.class);
+            
+            if (formList.isEmpty()) {
+                throw new ApiException("TSV file is empty or has no valid data");
+            }
+            
+            List<String> successList = new ArrayList<>();
+            List<String> failureList = new ArrayList<>();
+            
+            // Step 2: Process each form with validation and error handling
+            for (int i = 0; i < formList.size(); i++) {
+                ProductForm form = formList.get(i);
+                try {
+                    ValidationUtil.validate(form);
+                    productFlow.addProduct(form);
+                    successList.add("Row " + (i + 1) + ": Product added successfully");
+                } catch (ApiException e) {
+                    failureList.add("Row " + (i + 1) + ": " + e.getMessage());
+                }
+            }
+            
+            // Step 3: Return response based on results
+            if (!failureList.isEmpty()) {
+                // Create error TSV for download
+                String[] errorHeaders = {"Row", "Error", "Barcode", "Name", "ClientName", "MRP"};
+                List<String> errorData = new ArrayList<>();
+                for (String error : failureList) {
+                    errorData.add(error);
+                }
+                byte[] errorTsv = TSVUtil.createTsvFromList(errorData, errorHeaders);
+                
+                return TSVUploadResponse.error(
+                    "TSV processing completed with errors. " + successList.size() + " products added successfully.",
+                    formList.size(),
+                    failureList.size(),
+                    failureList
+                );
+            } else {
+                return TSVUploadResponse.success(
+                    "All " + successList.size() + " products added successfully",
+                    successList.size()
+                );
+            }
+            
+        } catch (Exception e) {
+            throw new ApiException("Failed to process TSV file: " + e.getMessage(), e);
+        }
     }
 }

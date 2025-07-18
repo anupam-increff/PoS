@@ -1,6 +1,5 @@
 package com.increff.pos.controller;
 
-import com.increff.pos.config.PaginationConfig;
 import com.increff.pos.dto.OrderDto;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.OrderItemData;
@@ -20,9 +19,7 @@ public class OrderController {
 
     @Autowired
     private OrderDto orderDto;
-    
-    @Autowired
-    private PaginationConfig paginationConfig;
+
 
     @ApiOperation("Get all orders")
     @GetMapping
