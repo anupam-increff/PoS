@@ -1,9 +1,7 @@
 package com.increff.pos.dao;
 
-import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.ClientPojo;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,11 +24,11 @@ public class ClientDao extends AbstractDao<ClientPojo> {
         return result.isEmpty() ? null : result.get(0);
     }
 
-    public List<ClientPojo> getAllPaged(int page, int pageSize) {
+    public List<ClientPojo> getAllClients(int page, int pageSize) {
         return runPagedQuery(SELECT_ALL_ORDERED, page, pageSize, null);
     }
 
-    public List<ClientPojo> searchByQuery(String query, int page, int pageSize) {
+    public List<ClientPojo> searchClientByName(String query, int page, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put("pattern", "%" + query.toLowerCase() + "%");
         return runPagedQuery(SEARCH_BY_QUERY, page, pageSize, params);

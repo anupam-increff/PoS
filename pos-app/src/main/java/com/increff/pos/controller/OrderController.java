@@ -50,7 +50,7 @@ public class OrderController {
         return orderDto.searchOrdersByForm(form);
     }
 
-    @ApiOperation("Search orders with filters (GET variant)")
+    @ApiOperation("Search orders with filters")
     @GetMapping("/search")
     public PaginatedResponse<OrderData> searchOrdersGet(
             @RequestParam(required = false) String query,

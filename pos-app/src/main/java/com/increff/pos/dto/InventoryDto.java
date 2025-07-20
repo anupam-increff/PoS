@@ -47,6 +47,9 @@ public class InventoryDto extends BaseDto {
             if (formList.isEmpty()) {
                 throw new ApiException("TSV file is empty or has no valid data");
             }
+            if(formList.size()>5000){
+                throw new ApiException("Maximum 5000 rows allowed per upload but found : "+formList.size());
+            }
 
             List<String> successList = new ArrayList<>();
             List<String> failureList = new ArrayList<>();

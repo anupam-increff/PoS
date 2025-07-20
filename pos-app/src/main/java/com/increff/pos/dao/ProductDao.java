@@ -1,9 +1,7 @@
 package com.increff.pos.dao;
 
-import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.ProductPojo;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
@@ -29,11 +27,11 @@ public class ProductDao extends AbstractDao<ProductPojo> {
         return list.isEmpty() ? null : list.get(0);
     }
 
-    public List<ProductPojo> getAllPaged(int page, int pageSize) {
+    public List<ProductPojo> getAllProducts(int page, int pageSize) {
         return getPaginatedResults(SELECT_ALL, page, pageSize, null);
     }
 
-    public List<ProductPojo> getByClientIdPaged(Integer clientId, int page, int pageSize) {
+    public List<ProductPojo> getProductsByClientId(Integer clientId, int page, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put("clientId", clientId);
         return getPaginatedResults(SELECT_BY_CLIENT_ID, page, pageSize, params);

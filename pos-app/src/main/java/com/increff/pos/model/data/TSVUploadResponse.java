@@ -14,10 +14,7 @@ public class TSVUploadResponse {
     private int successRows;
     private int errorRows;
     private List<String> errors;
-    private String downloadUrl; // URL to download the result file
-
-    public TSVUploadResponse() {
-    }
+    private String downloadUrl;
 
     public TSVUploadResponse(boolean success, String message, int totalRows, int successRows, int errorRows) {
         this.success = success;

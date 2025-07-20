@@ -82,7 +82,7 @@ public class ClientCreationIntegrationTests {
         }
 
         // Assert - Verify only one client exists in database
-        List<ClientPojo> allClients = clientDao.getAllPaged(0, 100);
+        List<ClientPojo> allClients = clientDao.getAllClients(0, 100);
         long duplicateCount = allClients.stream().filter(c -> c.getName().equals(uniqueClientName)).count();
         assertEquals(1, duplicateCount);
     }
@@ -170,7 +170,7 @@ public class ClientCreationIntegrationTests {
         long dbCount = clientDao.countAll();
         assertTrue(dbCount >= 2);
         
-        List<ClientPojo> dbClients = clientDao.getAllPaged(0, 10);
+        List<ClientPojo> dbClients = clientDao.getAllClients(0, 10);
         assertTrue(dbClients.size() >= 2);
     }
 
@@ -232,7 +232,7 @@ public class ClientCreationIntegrationTests {
         long dbCount = clientDao.countByQuery("SearchTest");
         assertTrue(dbCount >= 2);
         
-        List<ClientPojo> dbClients = clientDao.searchByQuery("SearchTest", 0, 10);
+        List<ClientPojo> dbClients = clientDao.searchClientByName("SearchTest", 0, 10);
         assertTrue(dbClients.size() >= 2);
     }
 

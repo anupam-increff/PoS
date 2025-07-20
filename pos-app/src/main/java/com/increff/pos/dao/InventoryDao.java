@@ -1,9 +1,7 @@
 package com.increff.pos.dao;
 
-import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.InventoryPojo;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +24,7 @@ public class InventoryDao extends AbstractDao<InventoryPojo> {
         return list.isEmpty() ? null : list.get(0);
     }
 
-    public List<InventoryPojo> getAllPaginated(int page, int pageSize) {
+    public List<InventoryPojo> getAllInventory(int page, int pageSize) {
         return getPaginatedResults(SELECT_ALL, page, pageSize, null);
     }
 

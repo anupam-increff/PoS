@@ -25,36 +25,35 @@ public class ProductFlow {
     @Autowired
     private ClientService clientService;
 
-    public void addProduct(ProductForm form) {
-        ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
-        ClientPojo client = clientService.getCheckClientByName(form.getClientName());
+    public void addProduct(ProductPojo productPojo , String clientName) {
+        ClientPojo client = clientService.getCheckClientByName(clientName);
         productPojo.setClientId(client.getId());
         productService.addProduct(productPojo);
     }
 
     public List<ProductData> getAllProducts(int page, int pageSize) {
         List<ProductPojo> products = productService.getAll(page, pageSize);
-        return products.stream().map(this::convertToProductData).collect(Collectors.toList());
+        return products.stream().map(this::pojoToData).collect(Collectors.toList());
     }
 
     public long countAllProducts() {
         return productService.countAll();
     }
 
-    public List<ProductData> getProductsByClient(String clientName, int page, int pageSize) {
+    public List<ProductData> getProductsByAClient(String clientName, int page, int pageSize) {
         ClientPojo client = clientService.getCheckClientByName(clientName);
         List<ProductPojo> products = productService.getProductsByClientId(client.getId(), page, pageSize);
-        return products.stream().map(this::convertToProductData).collect(Collectors.toList());
+        return products.stream().map(this::pojoToData).collect(Collectors.toList());
     }
 
-    public long countProductsByClient(String clientName) {
+    public long countProductsByAClient(String clientName) {
         ClientPojo client = clientService.getCheckClientByName(clientName);
         return productService.countProductsByClientId(client.getId());
     }
 
     public List<ProductData> searchProductsByBarcode(String barcode, int page, int pageSize) {
         List<ProductPojo> products = productService.searchByBarcode(barcode, page, pageSize);
-        return products.stream().map(this::convertToProductData).collect(Collectors.toList());
+        return products.stream().map(this::pojoToData).collect(Collectors.toList());
     }
 
     public long countSearchByBarcode(String barcode) {
@@ -63,7 +62,7 @@ public class ProductFlow {
 
     public ProductData getProductByBarcode(String barcode) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
-        return convertToProductData(product);
+        return pojoToData(product);
     }
 
     public void updateProduct(Integer id, ProductForm form) {
@@ -73,12 +72,10 @@ public class ProductFlow {
         productService.update(id, productPojo);
     }
 
-    private ProductData convertToProductData(ProductPojo product) {
+    private ProductData pojoToData(ProductPojo product) {
         ClientPojo client = clientService.getCheckClientById(product.getClientId());
-
         ProductData data = ConvertUtil.convert(product, ProductData.class);
         data.setClientName(client.getName());
-
         return data;
     }
 }

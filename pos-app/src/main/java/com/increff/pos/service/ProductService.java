@@ -6,7 +6,6 @@ import com.increff.pos.pojo.ProductPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +42,7 @@ public class ProductService {
     }
 
     public List<ProductPojo> getAll(int page, int pageSize) {
-        return dao.getAllPaged(page, pageSize);
+        return dao.getAllProducts(page, pageSize);
     }
 
     public long countAll() {
@@ -51,7 +50,7 @@ public class ProductService {
     }
 
     public List<ProductPojo> getProductsByClientId(Integer clientId, int page, int pageSize) {
-        return dao.getByClientIdPaged(clientId, page, pageSize);
+        return dao.getProductsByClientId(clientId, page, pageSize);
     }
 
     public long countProductsByClientId(Integer clientId) {

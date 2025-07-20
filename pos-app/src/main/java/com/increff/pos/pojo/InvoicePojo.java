@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "invoices")
+@Table(name = "invoices", uniqueConstraints = @UniqueConstraint(columnNames = "orderId"))
 @Getter
 @Setter
 public class InvoicePojo extends BaseEntity {
@@ -22,12 +22,6 @@ public class InvoicePojo extends BaseEntity {
 
     @Column(name = "file_path", nullable = false, length = 500)
     private String filePath;
-
-    @Column(name = "generated_at", nullable = false)
-    private ZonedDateTime generatedAt;
-
-    @Column(name = "total_amount", nullable = false)
-    private Double totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

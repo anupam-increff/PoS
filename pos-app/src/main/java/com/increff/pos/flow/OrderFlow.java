@@ -6,7 +6,6 @@ import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.model.form.OrderItemForm;
-import com.increff.pos.model.form.OrderSearchForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +38,7 @@ public class OrderFlow {
 
     public Integer placeOrder(OrderForm orderForm) {
         List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
-        double total = calculateTotal(orderItemPojos);
+        Double total = calculateTotal(orderItemPojos);
         OrderPojo order = createOrder(total);
         Integer orderId = orderService.createOrder(order);
         saveOrderItems(orderItemPojos, orderId);
@@ -51,7 +49,7 @@ public class OrderFlow {
         List<OrderPojo> pojos = orderService.search(startDate, endDate, invoiceGenerated, query, page, size);
         long totalItems = orderService.countMatching(startDate, endDate, invoiceGenerated, query);
         int totalPages = (int) Math.ceil((double) totalItems / size);
-        List<OrderData> dataList = pojos.stream().map(this::convert).collect(Collectors.toList());
+        List<OrderData> dataList = pojos.stream().map(this::pojoToData).collect(Collectors.toList());
         return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
     }
 
@@ -59,7 +57,7 @@ public class OrderFlow {
         List<OrderPojo> all = orderService.getAllPaginated(page, size);
         long total = orderService.countAll();
         int totalPages = (int) Math.ceil((double) total / size);
-        List<OrderData> data = all.stream().map(this::convert).collect(Collectors.toList());
+        List<OrderData> data = all.stream().map(this::pojoToData).collect(Collectors.toList());
         return new PaginatedResponse<>(data, page, totalPages, total, size);
     }
 
@@ -107,14 +105,13 @@ public class OrderFlow {
         return pojo;
     }
 
-    private double calculateTotal(List<OrderItemPojo> orderItemPojos) {
+    private Double calculateTotal(List<OrderItemPojo> orderItemPojos) {
         return orderItemPojos.stream()
                 .mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
     }
 
     private OrderPojo createOrder(Double total) {
         OrderPojo order = new OrderPojo();
-        order.setPlacedAt(ZonedDateTime.now());
         order.setInvoiceGenerated(false);
         order.setTotal(total);
         return order;
@@ -135,7 +132,9 @@ public class OrderFlow {
         return data;
     }
 
-    private OrderData convert(OrderPojo pojo) {
-        return ConvertUtil.convert(pojo, OrderData.class);
+    private OrderData pojoToData(OrderPojo pojo) {
+        OrderData orderData=ConvertUtil.convert(pojo, OrderData.class);
+        orderData.setPlacedAt(pojo.getCreatedAt());
+        return orderData;
     }
 }

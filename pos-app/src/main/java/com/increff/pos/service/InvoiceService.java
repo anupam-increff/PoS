@@ -65,8 +65,6 @@ public class InvoiceService {
         InvoicePojo invoice = new InvoicePojo();
         invoice.setOrderId(orderId);
         invoice.setFilePath(invoicePath);
-        invoice.setGeneratedAt(java.time.ZonedDateTime.now());
-        invoice.setTotalAmount(calculatedTotal);
         invoice.setStatus(InvoiceStatus.GENERATED);
         invoiceDao.insert(invoice);
 

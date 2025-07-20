@@ -2,10 +2,7 @@ package com.increff.pos.service;
 
 import com.increff.pos.dao.DaySalesDao;
 import com.increff.pos.pojo.DaySalesPojo;
-import com.increff.pos.pojo.OrderItemPojo;
-import com.increff.pos.pojo.OrderPojo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.increff.pos.exception.ApiException;
@@ -25,12 +22,12 @@ public class DaySalesService {
 
     @Transactional(rollbackFor = ApiException.class)
     public DaySalesPojo getByDate(ZonedDateTime date) {
-        return daySalesDao.getByDate(date);
+        return daySalesDao.getReportForDate(date);
     }
 
     @Transactional(rollbackFor = ApiException.class)
     public List<DaySalesPojo> getBetween(ZonedDateTime start, ZonedDateTime end) {
-        return daySalesDao.getBetween(start, end);
+        return daySalesDao.getReportBetweenDates(start, end);
     }
 }
 

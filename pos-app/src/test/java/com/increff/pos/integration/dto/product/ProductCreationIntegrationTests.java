@@ -177,7 +177,7 @@ public class ProductCreationIntegrationTests {
         long dbCount = productDao.countAll();
         assertTrue(dbCount >= 2);
         
-        List<ProductPojo> dbProducts = productDao.getAllPaged(0, 10);
+        List<ProductPojo> dbProducts = productDao.getAllProducts(0, 10);
         assertTrue(dbProducts.size() >= 2);
     }
 
@@ -219,7 +219,7 @@ public class ProductCreationIntegrationTests {
         long dbCount = productDao.countByClientId(client1.getId());
         assertEquals(2, dbCount);
         
-        List<ProductPojo> dbProducts = productDao.getByClientIdPaged(client1.getId(), 0, 10);
+        List<ProductPojo> dbProducts = productDao.getProductsByClientId(client1.getId(), 0, 10);
         assertEquals(2, dbProducts.size());
     }
 

@@ -1,9 +1,7 @@
 package com.increff.pos.dao;
 
-import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.OrderPojo;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
 import java.time.ZonedDateTime;
@@ -23,13 +21,13 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         super(OrderPojo.class);
     }
 
-    public List<OrderPojo> search(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query, int page, int size) {
+    public List<OrderPojo> searchOrder(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query, int page, int size) {
         String jpql = buildQuery(false, start, end, invoiceGenerated, query);
         Map<String, Object> params = buildParams(start, end, query);
         return getPaginatedResults(jpql, page, size, params);
     }
 
-    public long countMatching(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query) {
+    public long countMatchingOrders(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query) {
         String jpql = buildQuery(true, start, end, invoiceGenerated, query);
         Map<String, Object> params = buildParams(start, end, query);
         TypedQuery<Long> countQuery = em.createQuery(jpql, Long.class);
@@ -39,7 +37,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         return countQuery.getSingleResult();
     }
 
-    public List<OrderPojo> getByDate(ZonedDateTime date) {
+    public List<OrderPojo> getOrdersForDate(ZonedDateTime date) {
         ZonedDateTime startOfDay = date.toLocalDate().atStartOfDay(date.getZone());
         ZonedDateTime endOfDay = startOfDay.plusDays(1);
         
@@ -49,7 +47,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
                 .getResultList();
     }
 
-    public List<OrderPojo> getAllPaginated(int page, int size) {
+    public List<OrderPojo> getAllOrders(int page, int size) {
         return getPaginatedResults(SELECT_ALL, page, size, null);
     }
 

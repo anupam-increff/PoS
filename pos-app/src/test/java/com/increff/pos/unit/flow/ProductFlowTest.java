@@ -19,13 +19,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import com.increff.pos.model.data.TSVUploadResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductFlowTest {
@@ -107,7 +105,7 @@ public class ProductFlowTest {
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         when(productService.getProductsByClientId(client1.getId(), 0, 10)).thenReturn(Arrays.asList(product1, product2));
         when(clientService.getCheckClientById(client1.getId())).thenReturn(client1);
-        List<ProductData> result = productFlow.getProductsByClient(client1.getName(), 0, 10);
+        List<ProductData> result = productFlow.getProductsByAClient(client1.getName(), 0, 10);
         assertNotNull(result);
         assertEquals(2, result.size());
         for (ProductData product : result) {
@@ -181,7 +179,7 @@ public class ProductFlowTest {
     public void testCountProductsByClient() {
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         when(productService.countProductsByClientId(client1.getId())).thenReturn(2L);
-        long count = productFlow.countProductsByClient(client1.getName());
+        long count = productFlow.countProductsByAClient(client1.getName());
         assertEquals(2L, count);
     }
 

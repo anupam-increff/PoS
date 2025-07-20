@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -25,7 +25,7 @@ public class ClientService {
     }
 
     public List<ClientPojo> getAllClients(int page, int pageSize) {
-        return clientDao.getAllPaged(page, pageSize);
+        return clientDao.getAllClients(page, pageSize);
     }
 
     public long countAll() {
@@ -33,7 +33,7 @@ public class ClientService {
     }
 
     public List<ClientPojo> searchClients(String query, int page, int pageSize) {
-        return clientDao.searchByQuery(query, page, pageSize);
+        return clientDao.searchClientByName(query, page, pageSize);
     }
 
     public long countByQuery(String query) {

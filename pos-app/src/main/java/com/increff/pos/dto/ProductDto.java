@@ -5,6 +5,8 @@ import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.ProductForm;
+import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +30,8 @@ public class ProductDto extends BaseDto {
     private TSVDownloadService tsvDownloadService;
 
     public void addProduct(@Valid ProductForm productForm) {
-        productFlow.addProduct(productForm);
+        ProductPojo productPojo= ConvertUtil.convert(productForm,ProductPojo.class);
+        productFlow.addProduct(productPojo,productForm.getClientName());
     }
 
     public PaginatedResponse<ProductData> getAll(int page, int pageSize) {
@@ -38,8 +41,8 @@ public class ProductDto extends BaseDto {
     }
 
     public PaginatedResponse<ProductData> getByClient(String clientName, int page, int pageSize) {
-        List<ProductData> products = productFlow.getProductsByClient(clientName, page, pageSize);
-        long total = productFlow.countProductsByClient(clientName);
+        List<ProductData> products = productFlow.getProductsByAClient(clientName, page, pageSize);
+        long total = productFlow.countProductsByAClient(clientName);
         return createPaginatedResponse(products, page, pageSize, total);
     }
 
@@ -71,7 +74,7 @@ public class ProductDto extends BaseDto {
                 ProductForm form = formList.get(i);
                 try {
                     ValidationUtil.validate(form);
-                    productFlow.addProduct(form);
+                    productFlow.addProduct(ConvertUtil.convert(form,ProductPojo.class),form.getClientName());
                     successList.add("Row " + (i + 1));
                 } catch (ApiException e) {
                     // Combine original row values + error message

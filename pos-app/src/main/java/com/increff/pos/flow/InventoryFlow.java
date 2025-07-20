@@ -38,18 +38,18 @@ public class InventoryFlow {
     public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
         List<InventoryPojo> pojos = inventoryService.getAll(page, pageSize);
         long total = inventoryService.countAll();
-        List<InventoryData> data = pojos.stream().map(this::toData).collect(Collectors.toList());
+        List<InventoryData> data = pojos.stream().map(this::pojoToData).collect(Collectors.toList());
         return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
     }
 
     public PaginatedResponse<InventoryData> searchByBarcode(String barcode, int page, int pageSize) {
         List<InventoryPojo> pojos = inventoryService.searchByBarcode(barcode, page, pageSize);
         long total = inventoryService.countByBarcodeSearch(barcode);
-        List<InventoryData> data = pojos.stream().map(this::toData).collect(Collectors.toList());
+        List<InventoryData> data = pojos.stream().map(this::pojoToData).collect(Collectors.toList());
         return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
     }
 
-    private InventoryData toData(InventoryPojo pojo) {
+    private InventoryData pojoToData(InventoryPojo pojo) {
         ProductPojo product = productService.getCheckProductById(pojo.getProductId());
         InventoryData data = ConvertUtil.convert(pojo, InventoryData.class);
         data.setBarcode(product.getBarcode());

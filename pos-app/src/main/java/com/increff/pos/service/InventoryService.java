@@ -36,7 +36,7 @@ public class InventoryService {
     }
 
     public List<InventoryPojo> getAll(int page, int pageSize) {
-        return inventoryDao.getAllPaginated(page, pageSize);
+        return inventoryDao.getAllInventory(page, pageSize);
     }
 
     public long countAll() {

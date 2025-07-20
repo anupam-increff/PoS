@@ -16,9 +16,6 @@ public class OrderPojo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "placed_at", nullable = false)
-    private ZonedDateTime placedAt;
-
     @Column(name = "invoice_generated", nullable = false)
     private Boolean invoiceGenerated = false;
     
