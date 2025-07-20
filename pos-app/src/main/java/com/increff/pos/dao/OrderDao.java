@@ -12,10 +12,10 @@ import java.util.Map;
 @Repository
 public class OrderDao extends AbstractDao<OrderPojo> {
 
-    private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.placedAt DESC";
-    private static final String SEARCH_BASE = "SELECT o FROM OrderPojo o WHERE o.placedAt BETWEEN :start AND :end";
-    private static final String COUNT_BASE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.placedAt BETWEEN :start AND :end";
-    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE o.placedAt >= :startOfDay AND o.placedAt < :endOfDay ORDER BY o.placedAt DESC";
+    private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.createdAt DESC";
+    private static final String SEARCH_BASE = "SELECT o FROM OrderPojo o WHERE o.createdAt BETWEEN :start AND :end";
+    private static final String COUNT_BASE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.createdAt BETWEEN :start AND :end";
+    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE o.createdAt >= :startOfDay AND o.createdAt < :endOfDay ORDER BY o.createdAt DESC";
 
     public OrderDao() {
         super(OrderPojo.class);
@@ -68,7 +68,7 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         }
         
         if (!isCount) {
-            jpql.append(" ORDER BY o.placedAt DESC");
+            jpql.append(" ORDER BY o.createdAt DESC");
         }
         
         return jpql.toString();

@@ -1,71 +1,23 @@
 package com.increff.pos.scheduler;
 
 import com.increff.pos.flow.DaySalesFlow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 @Component
 public class DaySalesScheduler {
 
-    private static final Logger logger = LoggerFactory.getLogger(DaySalesScheduler.class);
-    
     @Autowired
     private DaySalesFlow daySalesFlow;
 
-    // Run at 23:30 every day (safer than 23:59)
-    @Scheduled(cron = "0 30 23 * * *", zone = "Asia/Kolkata")
+    // Run daily at 23:59 UTC
+    @Scheduled(cron = "0 59 23 * * *", zone = "UTC")
     public void runDailySalesCalculation() {
-        try {
-            ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
-            ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("Asia/Kolkata"));
-            
-            logger.info("Starting daily sales calculation for date: {}", today);
-            daySalesFlow.calculateDailySales(today);
-            logger.info("Completed daily sales calculation for date: {}", today);
-        } catch (Exception e) {
-            logger.error("Error in daily sales calculation: ", e);
-        }
-    }
-    
-    // Manual method to generate reports for past dates
-    public void generatePastReports(int daysBack) {
-        try {
-            ZonedDateTime endDate = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
-            ZonedDateTime startDate = endDate.minusDays(daysBack);
-            
-            logger.info("Generating sales reports from {} to {}", startDate, endDate);
-            
-            for (ZonedDateTime date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-                if (daySalesFlow.getBetween(date, date).isEmpty()) {
-                    logger.info("Generating report for missing date: {}", date);
-                    daySalesFlow.calculateDailySales(date);
-                }
-            }
-            
-            logger.info("Completed generating past sales reports");
-        } catch (Exception e) {
-            logger.error("Error generating past reports: ", e);
-        }
-    }
-    
-    // Method to generate reports for a specific date range
-    public void generateReportsForDateRange(ZonedDateTime startDate, ZonedDateTime endDate) {
-        try {
-            logger.info("Generating sales reports for date range: {} to {}", startDate, endDate);
-            
-            for (ZonedDateTime date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-                daySalesFlow.calculateDailySales(date);
-            }
-            
-            logger.info("Completed generating reports for date range");
-        } catch (Exception e) {
-            logger.error("Error generating reports for date range: ", e);
-        }
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        daySalesFlow.calculateDailySales(now);
     }
 }

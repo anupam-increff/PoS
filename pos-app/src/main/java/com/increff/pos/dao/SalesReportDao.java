@@ -22,7 +22,7 @@ public class SalesReportDao {
         "JOIN OrderItemPojo oi ON o.id = oi.orderId " +
         "JOIN ProductPojo p ON oi.productId = p.id " +
         "JOIN ClientPojo c ON p.clientId = c.id " +
-        "WHERE o.placedAt BETWEEN :start AND :end ";
+        "WHERE o.createdAt BETWEEN :start AND :end ";
 
     private static final String CLIENT_FILTER = "AND LOWER(c.name) LIKE :clientName ";
     private static final String GROUP_ORDER = "GROUP BY c.name ORDER BY SUM(oi.quantity * oi.sellingPrice) DESC";
@@ -33,7 +33,7 @@ public class SalesReportDao {
         "JOIN OrderItemPojo oi ON o.id = oi.orderId " +
         "JOIN ProductPojo p ON oi.productId = p.id " +
         "JOIN ClientPojo c ON p.clientId = c.id " +
-        "WHERE o.placedAt BETWEEN :start AND :end ";
+        "WHERE o.createdAt BETWEEN :start AND :end ";
 
     public List<SalesReportData> getSalesReport(ZonedDateTime start, ZonedDateTime end, String clientName, int page, int size) {
         StringBuilder queryBuilder = new StringBuilder(BASE_SALES_QUERY);
