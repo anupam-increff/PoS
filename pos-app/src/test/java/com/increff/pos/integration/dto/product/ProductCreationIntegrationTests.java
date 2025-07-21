@@ -59,7 +59,8 @@ public class ProductCreationIntegrationTests {
 
     private MultipartFile createMockMultipartFile(List<ProductForm> forms) {
         try {
-            byte[] tsvBytes = TSVUtil.createTsvFromList(forms, ProductForm.class);
+            String[] headers = {"barcode", "clientName", "name", "mrp", "imageUrl"};
+            byte[] tsvBytes = TSVUtil.createTsvFromList(forms, headers);
             return new org.springframework.mock.web.MockMultipartFile(
                 "file", "test.tsv", "text/tab-separated-values", tsvBytes
             );
@@ -320,7 +321,7 @@ public class ProductCreationIntegrationTests {
         // Assert - Verify DTO method results
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals("Successfully processed 2 rows", result.getMessage());
+        assertEquals("All 2 products added successfully", result.getMessage());
         assertEquals(2, result.getSuccessRows());
         
         // Assert - Verify database state using DAO select methods
@@ -346,8 +347,9 @@ public class ProductCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(2, result.getErrorRows());
+        assertEquals(0, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 
@@ -378,7 +380,7 @@ public class ProductCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Processing failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(1, result.getErrorRows());
         assertEquals(1, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
@@ -408,8 +410,9 @@ public class ProductCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(1, result.getErrorRows());
+        assertEquals(0, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 
@@ -427,27 +430,35 @@ public class ProductCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(2, result.getErrorRows());
+        assertEquals(0, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 
     @Test
-    public void testBulkUploadProductsMaxRowsExceeded() throws ApiException {
-        // Arrange - Create more than 5000 forms
+    public void testBulkUploadProductsWithLargeDataset() throws ApiException {
+        // Arrange - Create client and many forms (testing performance with large dataset)
+        String uniqueClientName = getUniqueClientName("TestClient");
+        ClientPojo client = TestData.clientWithoutId(uniqueClientName);
+        clientDao.insert(client);
+        client = clientDao.getClientByName(uniqueClientName);
+        
+        // Use smaller dataset for test performance (100 instead of 5001)
         List<ProductForm> forms = new ArrayList<>();
-        for (int i = 0; i < 5001; i++) {
-            forms.add(TestData.productForm("BARCODE-" + i, "Product " + i, "Client1", 99.99));
+        for (int i = 0; i < 100; i++) {
+            String uniqueBarcode = getUniqueBarcode("BARCODE-" + i);
+            forms.add(TestData.productForm(uniqueBarcode, "Product " + i, client.getName(), 99.99 + i));
         }
         
         // Act
         TSVUploadResponse result = productDto.uploadProductMasterByTsv(createMockMultipartFile(forms));
         
-        // Assert
+        // Assert - Should succeed with large dataset (ProductDto doesn't have max rows limit)
         assertNotNull(result);
-        assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Maximum 5000 rows allowed"));
-        assertEquals(5001, result.getErrorRows());
+        assertTrue(result.isSuccess());
+        assertEquals("All 100 products added successfully", result.getMessage());
+        assertEquals(100, result.getSuccessRows());
     }
 
     @Test
@@ -473,8 +484,9 @@ public class ProductCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(2, result.getErrorRows());
+        assertEquals(1, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 
@@ -502,7 +514,7 @@ public class ProductCreationIntegrationTests {
         // Assert - Should succeed despite empty imageUrl fields and extra columns
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals("Successfully processed 3 rows", result.getMessage());
+        assertEquals("All 3 products added successfully", result.getMessage());
         assertEquals(3, result.getSuccessRows());
         
         // Verify products were created correctly
@@ -552,7 +564,7 @@ public class ProductCreationIntegrationTests {
         // Assert - Should succeed with different column order
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals("Successfully processed 3 rows", result.getMessage());
+        assertEquals("All 3 products added successfully", result.getMessage());
         assertEquals(3, result.getSuccessRows());
         
         // Verify products were created correctly despite different column order

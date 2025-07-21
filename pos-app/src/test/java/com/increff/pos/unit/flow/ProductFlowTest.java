@@ -60,18 +60,24 @@ public class ProductFlowTest {
     @Test
     public void testAddProduct() throws ApiException {
         ProductForm form = TestData.productForm("BARCODE-1", "Test Product", client1.getName(), 99.99);
+        ProductPojo productPojo = TestData.productWithoutId(form.getBarcode(), form.getName(), 0); // clientId will be set by flow
+        productPojo.setMrp(form.getMrp());
+        productPojo.setImageUrl(form.getImageUrl());
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         doNothing().when(productService).addProduct(any(ProductPojo.class));
-        productFlow.addProduct(form);
+        productFlow.addProduct(productPojo, client1.getName());
         verify(productService, times(1)).addProduct(any(ProductPojo.class));
     }
 
     @Test
     public void testAddProductWithNonExistentClient() {
         ProductForm form = TestData.productForm("BARCODE-1", "Test Product", "NonExistentClient", 99.99);
+        ProductPojo productPojo = TestData.productWithoutId(form.getBarcode(), form.getName(), 0);
+        productPojo.setMrp(form.getMrp());
+        productPojo.setImageUrl(form.getImageUrl());
         when(clientService.getCheckClientByName("NonExistentClient")).thenThrow(new ApiException("Client not found"));
         try {
-            productFlow.addProduct(form);
+            productFlow.addProduct(productPojo, "NonExistentClient");
             fail("Should throw ApiException for non-existent client");
         } catch (ApiException e) {
             assertTrue(e.getMessage().toLowerCase().contains("client"));
@@ -81,10 +87,13 @@ public class ProductFlowTest {
     @Test
     public void testAddProductWithDuplicateBarcode() throws ApiException {
         ProductForm form = TestData.productForm("BARCODE-1", "Product 1", client1.getName(), 99.99);
+        ProductPojo productPojo = TestData.productWithoutId(form.getBarcode(), form.getName(), 0);
+        productPojo.setMrp(form.getMrp());
+        productPojo.setImageUrl(form.getImageUrl());
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         doThrow(new ApiException("Product with same barcode : BARCODE-1 already exists !")).when(productService).addProduct(any(ProductPojo.class));
         try {
-            productFlow.addProduct(form);
+            productFlow.addProduct(productPojo, client1.getName());
             fail("Should throw ApiException for duplicate barcode");
         } catch (ApiException e) {
             assertTrue(e.getMessage().toLowerCase().contains("barcode"));

@@ -95,14 +95,15 @@ public final class TestData {
     public static OrderPojo order(int id) {
         OrderPojo order = new OrderPojo();
         order.setId(id);
-        order.setTime(ZonedDateTime.now(ZoneOffset.UTC));
-        order.setInvoicePath("/invoices/order-" + id + ".pdf");
+        order.setInvoiceGenerated(false);
+        order.setTotal(0.0);
         return order;
     }
     
     public static OrderPojo orderWithoutId() {
         OrderPojo order = new OrderPojo();
-        order.setTime(ZonedDateTime.now(ZoneOffset.UTC));
+        order.setInvoiceGenerated(false);
+        order.setTotal(0.0);
         return order;
     }
     

@@ -64,7 +64,8 @@ public class InventoryCreationIntegrationTests {
 
     private MultipartFile createMockMultipartFile(List<InventoryForm> forms) {
         try {
-            byte[] tsvBytes = TSVUtil.createTsvFromList(forms, InventoryForm.class);
+            String[] headers = {"barcode", "quantity"};
+            byte[] tsvBytes = TSVUtil.createTsvFromList(forms, headers);
             return new org.springframework.mock.web.MockMultipartFile(
                 "file", "test.tsv", "text/tab-separated-values", tsvBytes
             );
@@ -289,7 +290,7 @@ public class InventoryCreationIntegrationTests {
         // Assert - Verify DTO method results
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals("Successfully processed 2 rows", result.getMessage());
+        assertEquals("All 2 inventory items updated successfully", result.getMessage());
         assertEquals(2, result.getSuccessRows());
         
         // Assert - Verify database state using DAO select methods
@@ -318,8 +319,9 @@ public class InventoryCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(3, result.getErrorRows());
+        assertEquals(0, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 
@@ -346,7 +348,7 @@ public class InventoryCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Processing failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(1, result.getErrorRows());
         assertEquals(1, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
@@ -380,8 +382,9 @@ public class InventoryCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(1, result.getErrorRows());
+        assertEquals(0, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 
@@ -393,14 +396,14 @@ public class InventoryCreationIntegrationTests {
             forms.add(TestData.inventoryForm("BARCODE-" + i, 100));
         }
         
-        // Act
-        TSVUploadResponse result = inventoryDto.uploadInventoryByTsv(createMockMultipartFile(forms));
-        
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Maximum 5000 rows allowed"));
-        assertEquals(5001, result.getErrorRows());
+        // Act & Assert - Should throw ApiException
+        try {
+            inventoryDto.uploadInventoryByTsv(createMockMultipartFile(forms));
+            fail("Should throw ApiException for exceeding max rows");
+        } catch (ApiException e) {
+            assertTrue(e.getMessage().contains("Maximum 5000 rows allowed"));
+            assertTrue(e.getMessage().contains("5001"));
+        }
     }
 
     @Test
@@ -429,7 +432,7 @@ public class InventoryCreationIntegrationTests {
         // Assert - Should succeed and add quantities
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals("Successfully processed 1 rows", result.getMessage());
+        assertEquals("All 1 inventory items updated successfully", result.getMessage());
         assertEquals(1, result.getSuccessRows());
         
         // Verify that quantities were added together (50 + 100 = 150)
@@ -466,8 +469,9 @@ public class InventoryCreationIntegrationTests {
         // Assert
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMessage().contains("Validation failed"));
+        assertTrue(result.getMessage().contains("TSV processing completed with errors"));
         assertEquals(2, result.getErrorRows());
+        assertEquals(1, result.getSuccessRows());
         assertNotNull(result.getDownloadUrl());
     }
 } 

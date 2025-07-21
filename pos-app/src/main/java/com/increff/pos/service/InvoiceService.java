@@ -47,7 +47,7 @@ public class InvoiceService {
     public void generateInvoice(Integer orderId) {
         OrderPojo order = orderService.getCheckByOrderId(orderId);
 
-        if (Boolean.TRUE.equals(order.getInvoiceGenerated())) {
+        if ((order.getInvoiceGenerated())) {
             throw new ApiException("Invoice already exists for order ID: " + orderId);
         }
 
@@ -104,7 +104,7 @@ public class InvoiceService {
     private OrderData buildOrderData(OrderPojo order, double total) {
         OrderData orderData = new OrderData();
         orderData.setId(order.getId());
-        orderData.setTime(order.getPlacedAt());
+        orderData.setTime(order.getCreatedAt());
         orderData.setTotal(total);
         return orderData;
     }
