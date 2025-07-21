@@ -1,4 +1,4 @@
-package com.increff.pos.setup;
+package com.increff.pos.config;
 
 import com.increff.pos.model.form.*;
 import com.increff.pos.pojo.*;
@@ -8,13 +8,9 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Centralized factories for lightweight test objects.
- * Add methods here instead of duplicating builders across individual test classes.
- */
 public final class TestData {
     
-    private TestData() {} // utility class – no instances
+    private TestData() {}
     
     /* ---------- Client ---------- */
     public static ClientPojo client(int id) {

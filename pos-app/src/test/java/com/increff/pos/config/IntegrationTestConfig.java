@@ -1,4 +1,4 @@
-package com.increff.pos.setup;
+package com.increff.pos.config;
 
 import com.increff.pos.config.SnakeCaseNamingStrategy;
 import org.springframework.context.annotation.Bean;

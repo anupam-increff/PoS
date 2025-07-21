@@ -8,7 +8,7 @@ import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.service.TSVDownloadService;
-import com.increff.pos.setup.TestData;
+import com.increff.pos.config.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

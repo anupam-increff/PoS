@@ -20,22 +20,18 @@ public class TSVDownloadController {
 
     @GetMapping("/download/{fileId}")
     public ResponseEntity<byte[]> downloadTsv(@PathVariable String fileId) {
-        try {
-            byte[] tsvBytes = tsvDownloadService.getTSVFile(fileId);
 
-            if (Objects.isNull(tsvBytes)) {
-                throw new ApiException("File not found or expired");
-            }
+        byte[] tsvBytes = tsvDownloadService.getTSVFile(fileId);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.valueOf("text/tab-separated-values"));
-            headers.setContentDispositionFormData("attachment", "upload_result.tsv");
-            headers.setContentLength(tsvBytes.length);
-
-            return new ResponseEntity<>(tsvBytes, headers, HttpStatus.OK);
-
-        } catch (Exception e) {
-            throw new ApiException("Error downloading TSV file: " + e.getMessage());
+        if (Objects.isNull(tsvBytes)) {
+            throw new ApiException("File not found or expired");
         }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("text/tab-separated-values"));
+        headers.setContentDispositionFormData("attachment", "upload_result.tsv");
+        headers.setContentLength(tsvBytes.length);
+
+        return new ResponseEntity<>(tsvBytes, headers, HttpStatus.OK);
     }
 } 

@@ -2,12 +2,12 @@ package com.increff.pos.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
-import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -16,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import javax.validation.Validator;
 import java.util.Properties;
 
 @Configuration
@@ -27,15 +28,17 @@ import java.util.Properties;
 public class SpringConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
-    private Environment env;
+    private AppProperties appProperties;
 
     @Bean
     public DataSource dataSource() {
         org.apache.commons.dbcp2.BasicDataSource ds = new org.apache.commons.dbcp2.BasicDataSource();
-        ds.setDriverClassName(env.getProperty("jdbc.driver"));
-        ds.setUrl(env.getProperty("jdbc.url"));
-        ds.setUsername(env.getProperty("jdbc.username"));
-        ds.setPassword(env.getProperty("jdbc.password"));
+        ds.setDriverClassName(appProperties.getJdbcDriver());
+        ds.setUrl(appProperties.getJdbcUrl());
+        ds.setUsername(appProperties.getJdbcUserName());
+        ds.setPassword(appProperties.getJdbcPassword());
+        ds.setMinIdle(appProperties.getMinConnection());
+        ds.setMaxTotal(appProperties.getMaxConnection());
         return ds;
     }
 
@@ -47,9 +50,10 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         Properties props = new Properties();
-        props.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
-        props.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
-        props.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
+        props.put("hibernate.dialect", appProperties.getHibernateDialect());
+        props.put("hibernate.show_sql", appProperties.getHibernateShowSql());
+        props.put("hibernate.hbm2ddl.auto", appProperties.getHibernateHbm2ddlAuto());
+        props.put("hibernate.jdbc.batch_size", appProperties.getHibernateBatchSize());
         props.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy("pos"));
 
         emf.setJpaProperties(props);
@@ -64,21 +68,15 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     @Bean
     public MultipartResolver multipartResolver() {
         CommonsMultipartResolver resolver = new CommonsMultipartResolver();
-        String maxFileSize = env.getProperty("multipart.max-file-size", "5MB");
-        
-        resolver.setMaxUploadSize(parseSize(maxFileSize));
-        resolver.setMaxUploadSizePerFile(parseSize(maxFileSize));
+        resolver.setMaxUploadSize(appProperties.getMultipartMaxFileSize() * 1024 * 1024L);
+        resolver.setMaxUploadSizePerFile(appProperties.getMultipartMaxRequestSize() * 1024 * 1024L);
         resolver.setDefaultEncoding("utf-8");
         return resolver;
     }
 
-    private long parseSize(String size) {
-        if (size.toUpperCase().endsWith("MB")) {
-            return Long.parseLong(size.substring(0, size.length() - 2)) * 1024 * 1024;
-        } else if (size.toUpperCase().endsWith("KB")) {
-            return Long.parseLong(size.substring(0, size.length() - 2)) * 1024;
-        }
-        return Long.parseLong(size);
+    @Bean
+    public Validator validator() {
+        return new LocalValidatorFactoryBean();
     }
 
     @Override

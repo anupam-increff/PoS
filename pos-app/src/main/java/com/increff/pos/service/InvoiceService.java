@@ -121,7 +121,7 @@ public class InvoiceService {
 
     private void saveInvoiceToFile(String invoicePath, byte[] pdfBytes) {
         try {
-            Files.createDirectories(Paths.get("invoices"));
+            Files.createDirectories(Paths.get("./invoices"));
             Files.write(Paths.get(invoicePath), pdfBytes);
         } catch (IOException e) {
             throw new ApiException("Failed to save invoice file: " + e.getMessage());

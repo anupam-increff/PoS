@@ -21,34 +21,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().configurationSource(corsConfigurationSource())
-                .and()
-                .csrf().disable()
+                .and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/app/**", "/static/**", "/api/auth/**").permitAll()
-                .antMatchers("/api/about/**").permitAll()
-                .antMatchers("/swagger-ui/**", "/v2/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
-                .antMatchers("/api/invoice/**", "/api/reports/**", "/api/report/**").hasRole("SUPERVISOR")
-                .antMatchers("/api/product/upload-tsv", "/api/inventory/upload-tsv").hasRole("SUPERVISOR")
-                .antMatchers("/api/product/**", "/api/inventory/**", "/api/client/**", "/api/order/**").hasAnyRole("OPERATOR", "SUPERVISOR")
-                .anyRequest().authenticated()
+                    .antMatchers("/", "/app/**", "/static/**", "/api/auth/**", "/api/about/**").permitAll()
+                    .antMatchers("/swagger-ui/**", "/v2/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+                    .antMatchers("/api/invoice/**", "/api/reports/**", "/api/report/**").hasRole("SUPERVISOR")
+                    .antMatchers("/api/product/upload-tsv", "/api/inventory/upload-tsv").hasRole("SUPERVISOR")
+                    .antMatchers("/api/product/**", "/api/inventory/**", "/api/client/**", "/api/order/**").hasAnyRole("OPERATOR", "SUPERVISOR")
+                    .anyRequest().authenticated()
                 .and()
-                .formLogin().disable()
-                .httpBasic().disable()
-                .logout()
-                .logoutUrl("/api/auth/logout")
-                .logoutSuccessHandler((req, res, auth) -> writeJson(res, 200, "{\"message\":\"Logged out successfully\"}"))
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
+                    .formLogin().disable()
+                    .httpBasic().disable()
+                    .logout()
+                        .logoutUrl("/api/auth/logout")
+                        .logoutSuccessHandler((req, res, auth) -> writeJson(res, 200, "{\"message\":\"Logged out successfully\"}"))
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 .and()
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint())
-                .accessDeniedHandler(accessDeniedHandler())
+                    .exceptionHandling()
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
                 .and()
-                .sessionManagement()
-                .sessionFixation().migrateSession()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false);
+                    .sessionManagement()
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
     }
 
     @Bean
@@ -66,13 +61,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return source;
     }
 
-    private void writeJson(HttpServletResponse response, int status, String message) throws IOException {
-        response.setStatus(status);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(message);
-    }
-
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, accessDeniedException) ->
@@ -85,5 +73,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return (request, response, authException) ->
                 writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,
                         "{\"message\":\"Session expired or invalid. Please login again.\"}");
+    }
+
+    private void writeJson(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(message);
     }
 }

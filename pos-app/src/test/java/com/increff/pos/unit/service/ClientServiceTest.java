@@ -1,4 +1,4 @@
-package com.increff.pos.unit.flow;
+package com.increff.pos.unit.service;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.service.ClientService;
@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClientFlowTest {
+public class ClientServiceTest {
 
     @Mock
     private ClientService clientService;

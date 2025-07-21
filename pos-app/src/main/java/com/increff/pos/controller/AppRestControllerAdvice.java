@@ -2,7 +2,6 @@ package com.increff.pos.controller;
 
 import com.increff.pos.exception.ApiException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,14 +18,6 @@ public class AppRestControllerAdvice {
     public MessageData handle(ApiException e) {
         MessageData data = new MessageData();
         data.setMessage(e.getMessage());
-        return data;
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public MessageData handle(AccessDeniedException e) {
-        MessageData data = new MessageData();
-        data.setMessage("Access denied: You don't have permission to perform this action");
         return data;
     }
 
