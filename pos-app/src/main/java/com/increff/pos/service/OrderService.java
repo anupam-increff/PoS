@@ -38,12 +38,12 @@ public class OrderService {
     }
 
     public List<OrderPojo> getAllPaginated(int page, int size) {
-        return orderDao.getAllOrders(page, size);
+        return orderDao.getAllOrdersByDate(page, size);
     }
+    
     public List<OrderPojo> getOrdersByDate(ZonedDateTime date) {
-        return orderDao.getOrdersForDate(date);
+        return orderDao.getOrdersForSpecificDate(date);
     }
-
 
     public long countAll() {
         return orderDao.countAll();
@@ -60,7 +60,7 @@ public class OrderService {
     }
 
     public List<OrderPojo> search(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
-        return orderDao.searchOrder(startDate, endDate, invoiceGenerated, query, page, size);
+        return orderDao.searchOrders(startDate, endDate, invoiceGenerated, query, page, size);
     }
 
     public long countMatching(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query) {

@@ -6,8 +6,9 @@ import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.TSVUploadProcessor;
+import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.TSVUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,11 +23,27 @@ public class ProductDto extends BaseDto {
     private ProductFlow productFlow;
 
     @Autowired
-    private TSVUploadProcessor tsvUploadProcessor;
+    private TSVDownloadService tsvDownloadService;
 
     public void addProduct(@Valid ProductForm productForm) {
         ProductPojo productPojo = ConvertUtil.convert(productForm, ProductPojo.class);
         productFlow.addProduct(productPojo, productForm.getClientName());
+    }
+
+    public TSVUploadResponse uploadProductMasterByTsv(MultipartFile file) {
+        String[] errorHeaders = {"Barcode", "ClientName", "Name", "MRP", "Error"};
+        String errorFileName = "product_upload_errors.tsv";
+        final int maxRows = 5000;
+        String successMessage = "products added successfully";
+
+        return TSVUploadUtil.processTSVUpload(
+            file, ProductForm.class, errorHeaders, errorFileName, maxRows,
+            form -> {
+                ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
+                productFlow.addProduct(productPojo, form.getClientName());
+            },
+            successMessage, tsvDownloadService
+        );
     }
 
     public PaginatedResponse<ProductData> getAll(int page, int pageSize) {
@@ -49,19 +66,6 @@ public class ProductDto extends BaseDto {
 
     public ProductData getByBarcode(String barcode) {
         return productFlow.getProductByBarcode(barcode);
-    }
-
-    public TSVUploadResponse uploadProductMasterByTsv(MultipartFile file) {
-        String[] errorHeaders = {"Barcode", "ClientName", "Name", "MRP", "Error"};
-        String errorFileName = "product_upload_errors.tsv";
-        final int maxRows = 5000;
-        String successMessage = "products added successfully";
-
-        return tsvUploadProcessor.processTSVUpload(file, ProductForm.class, errorHeaders, errorFileName, maxRows,
-                form -> {
-                    ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
-                    productFlow.addProduct(productPojo, form.getClientName());
-        }, successMessage);
     }
 
     public void update(Integer id, @Valid ProductForm productForm) {

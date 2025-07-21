@@ -3,7 +3,6 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.OrderPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.TypedQuery;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -12,77 +11,77 @@ import java.util.Map;
 @Repository
 public class OrderDao extends AbstractDao<OrderPojo> {
 
-    private static final String SELECT_ALL = "SELECT o FROM OrderPojo o ORDER BY o.createdAt DESC";
-    private static final String SEARCH_BASE = "SELECT o FROM OrderPojo o WHERE o.createdAt BETWEEN :start AND :end";
-    private static final String COUNT_BASE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.createdAt BETWEEN :start AND :end";
-    private static final String SELECT_BY_DATE = "SELECT o FROM OrderPojo o WHERE o.createdAt >= :startOfDay AND o.createdAt < :endOfDay ORDER BY o.createdAt DESC";
+    private static final String SELECT_ALL_ORDERS_BY_DATE = "SELECT o FROM OrderPojo o ORDER BY o.createdAt DESC";
+    private static final String SELECT_ORDERS_IN_DATE_RANGE = "SELECT o FROM OrderPojo o WHERE o.createdAt BETWEEN :startDate AND :endDate";
+    private static final String COUNT_ORDERS_IN_DATE_RANGE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.createdAt BETWEEN :startDate AND :endDate";
+    private static final String SELECT_ORDERS_FOR_SPECIFIC_DATE = "SELECT o FROM OrderPojo o WHERE o.createdAt >= :startOfDay AND o.createdAt < :endOfDay ORDER BY o.createdAt DESC";
+    private static final String INVOICE_GENERATED_FILTER = " AND o.invoiceGenerated = true";
+    private static final String INVOICE_NOT_GENERATED_FILTER = " AND o.invoiceGenerated = false";
+    private static final String ORDER_ID_SEARCH_FILTER = " AND CAST(o.id AS string) LIKE :searchQuery";
+    private static final String ORDER_BY_CREATION_DATE_DESC = " ORDER BY o.createdAt DESC";
 
     public OrderDao() {
         super(OrderPojo.class);
     }
 
-    public List<OrderPojo> searchOrder(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query, int page, int size) {
-        String jpql = buildQuery(false, start, end, invoiceGenerated, query);
-        Map<String, Object> params = buildParams(start, end, query);
-        return getPaginatedResults(jpql, page, size, params);
+    public List<OrderPojo> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean isInvoiceGenerated, String searchQuery, int pageNumber, int pageSize) {
+        String searchQueryJpql = buildSearchQuery(isInvoiceGenerated, searchQuery);
+        Map<String, Object> queryParameters = buildQueryParameters(startDate, endDate, searchQuery);
+        return getPaginatedResults(searchQueryJpql, pageNumber, pageSize, queryParameters);
     }
 
-    public long countMatchingOrders(ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query) {
-        String jpql = buildQuery(true, start, end, invoiceGenerated, query);
-        Map<String, Object> params = buildParams(start, end, query);
-        TypedQuery<Long> countQuery = em.createQuery(jpql, Long.class);
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            countQuery.setParameter(entry.getKey(), entry.getValue());
-        }
-        return countQuery.getSingleResult();
+    public long countMatchingOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean isInvoiceGenerated, String searchQuery) {
+        String countQueryJpql = buildCountQuery(isInvoiceGenerated, searchQuery);
+        Map<String, Object> queryParameters = buildQueryParameters(startDate, endDate, searchQuery);
+        return getCount(countQueryJpql, queryParameters);
     }
 
-    public List<OrderPojo> getOrdersForDate(ZonedDateTime date) {
-        ZonedDateTime startOfDay = date.toLocalDate().atStartOfDay(date.getZone());
-        ZonedDateTime endOfDay = startOfDay.plusDays(1);
+    public List<OrderPojo> getOrdersForSpecificDate(ZonedDateTime targetDate) {
+        ZonedDateTime dayStartTime = targetDate.toLocalDate().atStartOfDay(targetDate.getZone());
+        ZonedDateTime dayEndTime = dayStartTime.plusDays(1);
         
-        return em.createQuery(SELECT_BY_DATE, OrderPojo.class)
-                .setParameter("startOfDay", startOfDay)
-                .setParameter("endOfDay", endOfDay)
+        return em.createQuery(SELECT_ORDERS_FOR_SPECIFIC_DATE, OrderPojo.class)
+                .setParameter("startOfDay", dayStartTime)
+                .setParameter("endOfDay", dayEndTime)
                 .getResultList();
     }
 
-    public List<OrderPojo> getAllOrders(int page, int size) {
-        return getPaginatedResults(SELECT_ALL, page, size, null);
+    public List<OrderPojo> getAllOrdersByDate(int pageNumber, int pageSize) {
+        return getPaginatedResults(SELECT_ALL_ORDERS_BY_DATE, pageNumber, pageSize, null);
     }
 
-    private String buildQuery(boolean isCount, ZonedDateTime start, ZonedDateTime end, Boolean invoiceGenerated, String query) {
-        StringBuilder jpql = new StringBuilder(isCount ? COUNT_BASE : SEARCH_BASE);
-        
-        if (invoiceGenerated != null) {
-            if (invoiceGenerated) {
-                jpql.append(" AND o.invoiceGenerated = true");
-            } else {
-                jpql.append(" AND o.invoiceGenerated = false");
-            }
-        }
-        
-        if (query != null && !query.trim().isEmpty()) {
-            // Search by order ID as string conversion
-            jpql.append(" AND CAST(o.id AS string) LIKE :query");
-        }
-        
-        if (!isCount) {
-            jpql.append(" ORDER BY o.createdAt DESC");
-        }
-        
-        return jpql.toString();
+    private String buildSearchQuery(Boolean isInvoiceGenerated, String searchQuery) {
+        StringBuilder queryBuilder = new StringBuilder(SELECT_ORDERS_IN_DATE_RANGE);
+        addSearchFilters(queryBuilder, isInvoiceGenerated, searchQuery);
+        queryBuilder.append(ORDER_BY_CREATION_DATE_DESC);
+        return queryBuilder.toString();
     }
 
-    private Map<String, Object> buildParams(ZonedDateTime start, ZonedDateTime end, String query) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("start", start);
-        params.put("end", end);
-        
-        if (query != null && !query.trim().isEmpty()) {
-            params.put("query", "%" + query.toLowerCase() + "%");
+    private String buildCountQuery(Boolean isInvoiceGenerated, String searchQuery) {
+        StringBuilder queryBuilder = new StringBuilder(COUNT_ORDERS_IN_DATE_RANGE);
+        addSearchFilters(queryBuilder, isInvoiceGenerated, searchQuery);
+        return queryBuilder.toString();
+    }
+
+    private void addSearchFilters(StringBuilder queryBuilder, Boolean isInvoiceGenerated, String searchQuery) {
+        if (isInvoiceGenerated != null) {
+            queryBuilder.append(isInvoiceGenerated ? INVOICE_GENERATED_FILTER : INVOICE_NOT_GENERATED_FILTER);
         }
         
-        return params;
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            queryBuilder.append(ORDER_ID_SEARCH_FILTER);
+        }
+    }
+
+    private Map<String, Object> buildQueryParameters(ZonedDateTime startDate, ZonedDateTime endDate, String searchQuery) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("startDate", startDate);
+        parameters.put("endDate", endDate);
+        
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            parameters.put("searchQuery", toLikePattern(searchQuery.toLowerCase()));
+        }
+        
+        return parameters;
     }
 }

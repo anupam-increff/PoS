@@ -18,7 +18,7 @@ public class TSVRowMapper {
             for (Map.Entry<String, String> entry : recordMap.entrySet()) {
                 String header = entry.getKey();
                 String value = entry.getValue();
-                
+
                 if (value != null) {
                     value = value.trim();
                     // Convert empty strings to null
@@ -26,7 +26,7 @@ public class TSVRowMapper {
                         value = null;
                     }
                 }
-                
+
                 if (header != null) {
                     headerValueMap.put(header.toLowerCase().trim(), value);
                 }
@@ -39,17 +39,17 @@ public class TSVRowMapper {
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             String fieldName = field.getName().toLowerCase();
-            
+
             // Try to find the value for this field in the header map
             String value = headerValueMap.get(fieldName);
-            
+
             // Also try common variations of field names
             if (value == null) {
                 // Try with underscores (e.g., client_name for clientName)
                 String underscoreName = camelToUnderscore(field.getName()).toLowerCase();
                 value = headerValueMap.get(underscoreName);
             }
-            
+
             // If header map approach failed, try direct field access
             if (value == null) {
                 try {
@@ -66,7 +66,7 @@ public class TSVRowMapper {
                     // Field doesn't exist in TSV, skip it
                 }
             }
-            
+
             // Skip null or empty values
             if (value == null) {
                 continue;
@@ -85,23 +85,15 @@ public class TSVRowMapper {
                     field.set(instance, value);
                 }
             } catch (NumberFormatException e) {
-                throw new RuntimeException("Row " + (record.getRecordNumber()) + ": Invalid " + 
-                    type.getSimpleName().toLowerCase() + " value for field '" + field.getName() + 
-                    "': '" + value + "'. Expected a valid " + type.getSimpleName().toLowerCase() + 
-                    ". Please check that your TSV file is properly formatted with tab characters separating columns.");
+                throw new RuntimeException("Row " + (record.getRecordNumber()) + ": Invalid " + type.getSimpleName().toLowerCase() + " value for field '" + field.getName() + "': '" + value + "'. Expected a valid " + type.getSimpleName().toLowerCase() + ". Please check that your TSV file is properly formatted with tab characters separating columns.");
             } catch (Exception e) {
-                throw new RuntimeException("Row " + (record.getRecordNumber()) + ": Error setting value for field '" + 
-                    field.getName() + "': " + e.getMessage());
+                throw new RuntimeException("Row " + (record.getRecordNumber()) + ": Error setting value for field '" + field.getName() + "': " + e.getMessage());
             }
         }
 
         return instance;
     }
-    
-    /**
-     * Convert camelCase to underscore_case
-     * e.g., clientName -> client_name
-     */
+
     private static String camelToUnderscore(String camelCase) {
         return camelCase.replaceAll("([a-z])([A-Z])", "$1_$2");
     }

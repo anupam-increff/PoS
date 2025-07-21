@@ -33,7 +33,7 @@ public class TestConfig {
         ds.setDriverClassName(env.getProperty("jdbc.driver"));
         ds.setUrl(env.getProperty("jdbc.url"));
         ds.setUsername(env.getProperty("jdbc.user"));
-        ds.setPassword(env.getProperty("jdbc.pass"));
+        ds.setPassword(env.getProperty("jdbc.password"));
         return ds;
     }
 

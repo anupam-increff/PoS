@@ -34,8 +34,8 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         org.apache.commons.dbcp2.BasicDataSource ds = new org.apache.commons.dbcp2.BasicDataSource();
         ds.setDriverClassName(env.getProperty("jdbc.driver"));
         ds.setUrl(env.getProperty("jdbc.url"));
-        ds.setUsername(env.getProperty("jdbc.user"));
-        ds.setPassword(env.getProperty("jdbc.pass"));
+        ds.setUsername(env.getProperty("jdbc.username"));
+        ds.setPassword(env.getProperty("jdbc.password"));
         return ds;
     }
 
@@ -47,9 +47,9 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         Properties props = new Properties();
-        props.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
-        props.put("hibernate.show_sql", "true");
-        props.put("hibernate.hbm2ddl.auto", "update");
+        props.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
+        props.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
+        props.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
         props.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy("pos"));
 
         emf.setJpaProperties(props);
@@ -64,9 +64,21 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
     @Bean
     public MultipartResolver multipartResolver() {
         CommonsMultipartResolver resolver = new CommonsMultipartResolver();
-        resolver.setMaxUploadSize(5 * 1024 * 1024); // 5 MB
+        String maxFileSize = env.getProperty("multipart.max-file-size", "5MB");
+        
+        resolver.setMaxUploadSize(parseSize(maxFileSize));
+        resolver.setMaxUploadSizePerFile(parseSize(maxFileSize));
         resolver.setDefaultEncoding("utf-8");
         return resolver;
+    }
+
+    private long parseSize(String size) {
+        if (size.toUpperCase().endsWith("MB")) {
+            return Long.parseLong(size.substring(0, size.length() - 2)) * 1024 * 1024;
+        } else if (size.toUpperCase().endsWith("KB")) {
+            return Long.parseLong(size.substring(0, size.length() - 2)) * 1024;
+        }
+        return Long.parseLong(size);
     }
 
     @Override

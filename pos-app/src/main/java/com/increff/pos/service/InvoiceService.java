@@ -7,10 +7,13 @@ import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.enums.InvoiceStatus;
 import com.increff.pos.pojo.*;
 import com.increff.pos.dao.InvoiceDao;
+import com.increff.pos.util.ConvertUtil;
+import org.apache.fop.apps.FOPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class InvoiceService {
 
     @Autowired
@@ -43,7 +47,6 @@ public class InvoiceService {
         }
     }
 
-    @Transactional(rollbackFor = ApiException.class)
     public void generateInvoice(Integer orderId) {
         OrderPojo order = orderService.getCheckByOrderId(orderId);
 
@@ -74,31 +77,25 @@ public class InvoiceService {
 
     private List<OrderItemData> buildOrderItemDataList(List<OrderItemPojo> orderItems) {
         List<OrderItemData> itemDataList = new ArrayList<>();
-        
+
         for (OrderItemPojo item : orderItems) {
             ProductPojo product = productService.getCheckProductById(item.getProductId());
             OrderItemData data = createOrderItemData(item, product);
             itemDataList.add(data);
         }
-        
+
         return itemDataList;
     }
 
-    private OrderItemData createOrderItemData(OrderItemPojo item, ProductPojo product) {
-        OrderItemData data = new OrderItemData();
-        data.setId(item.getId());
-        data.setOrderId(item.getOrderId());
+    private OrderItemData createOrderItemData(OrderItemPojo orderItemPojo, ProductPojo product) {
+        OrderItemData data = ConvertUtil.convert(orderItemPojo, OrderItemData.class);
         data.setBarcode(product.getBarcode());
         data.setProductName(product.getName());
-        data.setQuantity(item.getQuantity());
-        data.setSellingPrice(item.getSellingPrice());
         return data;
     }
 
     private double calculateOrderTotal(List<OrderItemPojo> orderItems) {
-        return orderItems.stream()
-                .mapToDouble(item -> item.getQuantity() * item.getSellingPrice())
-                .sum();
+        return orderItems.stream().mapToDouble(item -> item.getQuantity() * item.getSellingPrice()).sum();
     }
 
     private OrderData buildOrderData(OrderPojo order, double total) {
@@ -110,17 +107,15 @@ public class InvoiceService {
     }
 
     private String generateInvoicePath(Integer orderId) {
-        return "./invoices/order-" + orderId + ".pdf";
+        return "../invoices/order-" + orderId + ".pdf";
     }
 
     private byte[] generatePdfDocument(OrderData orderData, List<OrderItemData> itemDataList) {
         try {
             String base64Pdf = InvoiceGenerator.generate(orderData, itemDataList);
             return Base64.getDecoder().decode(base64Pdf);
-        } catch (IllegalArgumentException e) {
-            throw new ApiException("Invalid base64 format in PDF generation: " + e.getMessage());
-        } catch (Exception e) {
-            throw new ApiException("PDF generation failed: " + e.getMessage());
+        } catch (IllegalArgumentException | TransformerException | FOPException e) {
+            throw new ApiException("Failed during PDF generation: " + e.getMessage());
         }
     }
 

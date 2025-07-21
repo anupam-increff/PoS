@@ -76,32 +76,23 @@
       <version>2.9.0</version>
     </dependency>
 
-    <!-- 📦 Servlet + JSTL -->
+    <!-- 📦 Servlet -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>3.1.0</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jstl</artifactId>
-      <version>1.2</version>
-    </dependency>
 
-    <!-- 📅 JSON Support - Updated to match Spring version -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
+
+    <!-- 📅 JSON Support  -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
       <version>${jackson.version}</version>
     </dependency>
 
-    <!-- ✅ JSR 303 Validation - Updated versions -->
+    <!-- ✅ JSR 303 Validation -->
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>

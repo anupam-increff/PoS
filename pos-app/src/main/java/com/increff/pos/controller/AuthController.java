@@ -3,7 +3,7 @@ package com.increff.pos.controller;
 import com.increff.pos.dto.AuthDto;
 import com.increff.pos.model.form.LoginForm;
 import com.increff.pos.model.form.SignupForm;
-import com.increff.pos.model.data.LoginData;
+import com.increff.pos.model.data.UserData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +22,15 @@ public class AuthController {
 
    @ApiOperation("User signup")
    @PostMapping("/signup")
-   public ResponseEntity<LoginData> signup(@RequestBody SignupForm form, HttpSession session) {
-       LoginData data = authDto.signup(form, session);
+   public ResponseEntity<UserData> signup(@RequestBody SignupForm form, HttpSession session) {
+       UserData data = authDto.signup(form, session);
        return ResponseEntity.ok(data);
    }
 
    @ApiOperation("User login")
    @PostMapping("/login")
-   public ResponseEntity<LoginData> login(@RequestBody LoginForm form, HttpSession session) {
-       LoginData data = authDto.login(form, session);
+   public ResponseEntity<UserData> login(@RequestBody LoginForm form, HttpSession session) {
+       UserData data = authDto.login(form, session);
        return ResponseEntity.ok(data);
    }
 

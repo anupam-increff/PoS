@@ -12,10 +12,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/**
- * Utility class for TSV file operations.
- * Contains only static methods, no Spring dependency injection needed.
- */
 public class TSVUtil {
 
     /**

@@ -1,11 +1,10 @@
 package com.increff.pos.service;
 
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.LoginData;
+import com.increff.pos.model.data.UserData;
 import com.increff.pos.model.form.LoginForm;
 import com.increff.pos.model.form.SignupForm;
 import com.increff.pos.pojo.UserPojo;
-import com.increff.pos.util.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +23,7 @@ public class AuthService {
     @Autowired
     private UserService userService;
 
-    public LoginData signup(@Valid SignupForm form, HttpSession session) {
+    public UserData signup(@Valid SignupForm form, HttpSession session) {
         if (!form.getPassword().equals(form.getConfirmPassword())) {
             throw new ApiException("Password and confirm password do not match");
         }
@@ -36,7 +35,7 @@ public class AuthService {
         return createUserSession(user, session);
     }
 
-    public LoginData login(@Valid LoginForm form, HttpSession session) {
+    public UserData login(@Valid LoginForm form, HttpSession session) {
 
         // Authenticate using UserService
         UserPojo user = userService.login(form.getEmail(), form.getPassword());
@@ -45,7 +44,7 @@ public class AuthService {
         return createUserSession(user, session);
     }
 
-    private LoginData createUserSession(UserPojo user, HttpSession session) {
+    private UserData createUserSession(UserPojo user, HttpSession session) {
         String role = user.getRole().toString().toLowerCase();
         String roleWithPrefix = "ROLE_" + role.toUpperCase();
 
@@ -62,7 +61,7 @@ public class AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        LoginData loginData = new LoginData();
+        UserData loginData = new UserData();
         loginData.setEmail(user.getEmail());
         loginData.setRole(role);
         return loginData;
