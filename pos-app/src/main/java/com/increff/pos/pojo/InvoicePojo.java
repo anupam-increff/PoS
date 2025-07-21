@@ -20,11 +20,11 @@ public class InvoicePojo extends BaseEntity {
     @Column(nullable = false)
     private Integer orderId;
 
-    @Column(name = "file_path", nullable = false, length = 500)
+    @Column(nullable = false, length = 500)
     private String filePath;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     private InvoiceStatus status = InvoiceStatus.NOT_GENERATED;
 
 } 

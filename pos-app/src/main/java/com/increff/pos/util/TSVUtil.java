@@ -5,7 +5,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -13,7 +12,10 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-@Component
+/**
+ * Utility class for TSV file operations.
+ * Contains only static methods, no Spring dependency injection needed.
+ */
 public class TSVUtil {
 
     /**

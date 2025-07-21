@@ -3,7 +3,6 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.ProductPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +22,9 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     }
 
     public ProductPojo getByBarcode(String barcode) {
-        List<ProductPojo> list = em.createQuery(SELECT_BY_BARCODE, ProductPojo.class).setParameter("barcode", barcode).getResultList();
-        return list.isEmpty() ? null : list.get(0);
+        Map<String, Object> params = new HashMap<>();
+        params.put("barcode", barcode);
+        return getSingleResult(SELECT_BY_BARCODE, params);
     }
 
     public List<ProductPojo> getAllProducts(int page, int pageSize) {
@@ -38,21 +38,20 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     }
 
     public long countByClientId(Integer clientId) {
-        TypedQuery<Long> query = em.createQuery(COUNT_BY_CLIENT_ID, Long.class);
-        query.setParameter("clientId", clientId);
-        return query.getSingleResult();
+        Map<String, Object> params = new HashMap<>();
+        params.put("clientId", clientId);
+        return getCount(COUNT_BY_CLIENT_ID, params);
     }
 
     public List<ProductPojo> searchByBarcode(String searchTerm, int page, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("pattern", "%" + escapeLikePattern(searchTerm.toLowerCase()) + "%");
+        params.put("pattern", toLikePattern(searchTerm));
         return getPaginatedResults(SEARCH_BY_BARCODE_OR_NAME, page, pageSize, params);
     }
 
     public long countByBarcodeSearch(String searchTerm) {
-        return em.createQuery(COUNT_SEARCH_BY_BARCODE_OR_NAME, Long.class).
-                setParameter("pattern", "%" + escapeLikePattern(searchTerm.toLowerCase()) + "%").
-                getSingleResult();
+        Map<String, Object> params = new HashMap<>();
+        params.put("pattern", toLikePattern(searchTerm));
+        return getCount(COUNT_SEARCH_BY_BARCODE_OR_NAME, params);
     }
-
 }

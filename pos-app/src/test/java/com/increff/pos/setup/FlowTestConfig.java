@@ -36,7 +36,7 @@ public class FlowTestConfig {
 
     @Bean
     public DataSource dataSource() {
-        org.apache.commons.dbcp.BasicDataSource ds = new org.apache.commons.dbcp.BasicDataSource();
+        org.apache.commons.dbcp2.BasicDataSource ds = new org.apache.commons.dbcp2.BasicDataSource();
         ds.setDriverClassName(env.getProperty("jdbc.driverClassName"));
         ds.setUrl(env.getProperty("jdbc.url"));
         ds.setUsername(env.getProperty("jdbc.username"));

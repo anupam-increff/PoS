@@ -29,7 +29,7 @@ public class TestConfig {
 
     @Bean
     public DataSource dataSource() {
-        org.apache.commons.dbcp.BasicDataSource ds = new org.apache.commons.dbcp.BasicDataSource();
+        org.apache.commons.dbcp2.BasicDataSource ds = new org.apache.commons.dbcp2.BasicDataSource();
         ds.setDriverClassName(env.getProperty("jdbc.driver"));
         ds.setUrl(env.getProperty("jdbc.url"));
         ds.setUsername(env.getProperty("jdbc.user"));

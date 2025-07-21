@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "pos_day_sales")
+@Table(name = "day_sales")
 @Getter
 @Setter
 public class DaySalesPojo extends BaseEntity {
@@ -16,15 +16,15 @@ public class DaySalesPojo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "report_date", nullable = false)
+    @Column(nullable = false)
     private ZonedDateTime reportDate;
 
-    @Column(name = "invoiced_orders_count")
+    @Column
     private Integer invoicedOrdersCount;
 
-    @Column(name = "invoiced_items_count")
+    @Column
     private Integer invoicedItemsCount;
 
-    @Column(name = "total_revenue")
+    @Column
     private Double totalRevenue;
 }

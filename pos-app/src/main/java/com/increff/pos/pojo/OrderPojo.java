@@ -16,9 +16,9 @@ public class OrderPojo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "invoice_generated", nullable = false)
+    @Column(nullable = false)
     private Boolean invoiceGenerated = false;
     
-    @Column(name = "total", nullable = false)
+    @Column(nullable = false)
     private Double total;
 }

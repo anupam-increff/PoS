@@ -15,11 +15,16 @@
   <properties>
     <java.version>1.8</java.version>
     <spring.version>4.3.6.RELEASE</spring.version>
+    <spring.security.version>4.2.13.RELEASE</spring.security.version>
+    <testcontainers.version>1.17.6</testcontainers.version>
 
     <jetty.version>9.4.21.v20190926</jetty.version>
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <mysql.version>8.0.33</mysql.version>
     <hibernate.version>5.3.20.Final</hibernate.version>
+    <jackson.version>2.9.10</jackson.version>
+    <validation.version>1.1.0.Final</validation.version>
+    <hibernate.validator.version>5.4.3.Final</hibernate.validator.version>
   </properties>
 
   <dependencies>
@@ -66,9 +71,9 @@
       <version>${mysql.version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-dbcp</groupId>
-      <artifactId>commons-dbcp</artifactId>
-      <version>1.4</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>2.9.0</version>
     </dependency>
 
     <!-- 📦 Servlet + JSTL -->
@@ -84,28 +89,28 @@
       <version>1.2</version>
     </dependency>
 
-    <!-- 📅 JSON Support -->
+    <!-- 📅 JSON Support - Updated to match Spring version -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.17.1</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.17.1</version>
+      <version>${jackson.version}</version>
     </dependency>
 
-    <!-- ✅ JSR 303 Validation -->
+    <!-- ✅ JSR 303 Validation - Updated versions -->
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
-      <version>1.1.0.Final</version>
+      <version>${validation.version}</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>5.2.4.Final</version>
+      <version>${hibernate.validator.version}</version>
     </dependency>
 
     <!-- 📘 Swagger Docs -->
@@ -120,16 +125,16 @@
       <version>2.9.2</version>
     </dependency>
 
-    <!-- 🔐 Spring Security -->
+    <!-- 🔐 Spring Security - Consistent versions -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
-      <version>4.2.13.RELEASE</version>
+      <version>${spring.security.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
-      <version>4.2.13.RELEASE</version>
+      <version>${spring.security.version}</version>
     </dependency>
 
     <!-- 📁 CSV / File Upload -->
@@ -171,35 +176,31 @@
       <version>1.0</version>
     </dependency>
 
-    <!-- 🧪 Unit Testing (JUnit 4 + Mockito Inline + Byte Buddy) -->
+    <!-- 🧪 Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>4.11.0</version>
+      <artifactId>mockito-core</artifactId>
+      <version>3.12.4</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- 🐳 TestContainers for Integration Testing -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-      <version>1.14.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy-agent</artifactId>
-      <version>1.14.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.4.200</version>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mysql</artifactId>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
 

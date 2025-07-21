@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "inventory", uniqueConstraints = @UniqueConstraint(columnNames = "product_id"))
+@Table(name = "inventory", uniqueConstraints = @UniqueConstraint(columnNames = "productId"))
 @Getter 
 @Setter
 public class InventoryPojo extends BaseEntity {
@@ -14,7 +14,7 @@ public class InventoryPojo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "product_id", nullable = false)
+    @Column(nullable = false)
     private Integer productId;
 
     @Column(nullable = false)

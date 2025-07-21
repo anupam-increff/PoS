@@ -20,25 +20,24 @@ public class ClientDao extends AbstractDao<ClientPojo> {
     }
 
     public ClientPojo getClientByName(String clientName) {
-        List<ClientPojo> result = em.createQuery(SELECT_BY_NAME, ClientPojo.class).setParameter("name", clientName.toLowerCase()).getResultList();
-        return result.isEmpty() ? null : result.get(0);
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", clientName.toLowerCase());
+        return getSingleResult(SELECT_BY_NAME, params);
     }
 
     public List<ClientPojo> getAllClients(int page, int pageSize) {
-        return runPagedQuery(SELECT_ALL_ORDERED, page, pageSize, null);
+        return getPaginatedResults(SELECT_ALL_ORDERED, page, pageSize, null);
     }
 
     public List<ClientPojo> searchClientByName(String query, int page, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("pattern", "%" + query.toLowerCase() + "%");
-        return runPagedQuery(SEARCH_BY_QUERY, page, pageSize, params);
+        params.put("pattern", toLikePattern(query));
+        return getPaginatedResults(SEARCH_BY_QUERY, page, pageSize, params);
     }
 
     public long countByQuery(String query) {
-        return em.createQuery(COUNT_BY_QUERY, Long.class).setParameter("pattern", "%" + query.toLowerCase() + "%").getSingleResult();
-    }
-
-    private List<ClientPojo> runPagedQuery(String jpql, int page, int pageSize, Map<String, Object> params) {
-        return getPaginatedResults(jpql, page, pageSize, params);
+        Map<String, Object> params = new HashMap<>();
+        params.put("pattern", toLikePattern(query));
+        return getCount(COUNT_BY_QUERY, params);
     }
 }

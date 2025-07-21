@@ -13,16 +13,16 @@ import java.time.ZonedDateTime;
 @Setter
 public abstract class BaseEntity {
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private ZonedDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     @UpdateTimestamp
     private ZonedDateTime updatedAt;
 
     @Version
-    @Column(name = "version", nullable = false)
+    @Column(nullable = false)
     private Long version = 0L;
 
     @PrePersist

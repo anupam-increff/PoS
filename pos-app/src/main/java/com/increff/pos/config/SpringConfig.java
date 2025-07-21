@@ -31,7 +31,7 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     public DataSource dataSource() {
-        org.apache.commons.dbcp.BasicDataSource ds = new org.apache.commons.dbcp.BasicDataSource();
+        org.apache.commons.dbcp2.BasicDataSource ds = new org.apache.commons.dbcp2.BasicDataSource();
         ds.setDriverClassName(env.getProperty("jdbc.driver"));
         ds.setUrl(env.getProperty("jdbc.url"));
         ds.setUsername(env.getProperty("jdbc.user"));
@@ -50,7 +50,7 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         props.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         props.put("hibernate.show_sql", "true");
         props.put("hibernate.hbm2ddl.auto", "update");
-//        props.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
+        props.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy("pos"));
 
         emf.setJpaProperties(props);
         return emf;

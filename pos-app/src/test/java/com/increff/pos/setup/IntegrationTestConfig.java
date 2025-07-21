@@ -1,11 +1,9 @@
 package com.increff.pos.setup;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.increff.pos.config.SnakeCaseNamingStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -20,8 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import javax.validation.Validator;
+import org.testcontainers.containers.MySQLContainer;
+import org.apache.commons.dbcp2.BasicDataSource;
 
+import javax.validation.Validator;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -37,16 +37,33 @@ import java.util.Properties;
 })
 public class IntegrationTestConfig {
 
+    private static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.33")
+            .withDatabaseName("pos_test_db")
+            .withUsername("test_user")
+            .withPassword("test_password")
+            .withReuse(true);
+
+    static {
+        mysql.start();
+    }
+
     @Bean
     public DataSource dataSource() {
-        // Use H2 in-memory database for tests with UUID to ensure isolation
-        org.apache.commons.dbcp.BasicDataSource ds = new org.apache.commons.dbcp.BasicDataSource();
-        ds.setDriverClassName("org.h2.Driver");
-        // Use a unique database name for each test run to prevent data leakage
-        String dbName = "testdb_" + System.currentTimeMillis();
-        ds.setUrl("jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL;DATABASE_TO_UPPER=FALSE");
-        ds.setUsername("sa");
-        ds.setPassword("");
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        ds.setUrl(mysql.getJdbcUrl());
+        ds.setUsername(mysql.getUsername());
+        ds.setPassword(mysql.getPassword());
+        
+        // Connection pool settings for tests
+        ds.setInitialSize(2);
+        ds.setMaxTotal(10);
+        ds.setMaxIdle(5);
+        ds.setMinIdle(1);
+        ds.setTestOnBorrow(true);
+        ds.setTestWhileIdle(true);
+        ds.setValidationQuery("SELECT 1");
+        
         return ds;
     }
 
@@ -58,7 +75,7 @@ public class IntegrationTestConfig {
         emf.setPackagesToScan("com.increff.pos.pojo");
         
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         properties.setProperty("hibernate.show_sql", "false");
         properties.setProperty("hibernate.format_sql", "false");
@@ -67,8 +84,9 @@ public class IntegrationTestConfig {
         properties.setProperty("hibernate.order_inserts", "true");
         properties.setProperty("hibernate.order_updates", "true");
         properties.setProperty("hibernate.jdbc.batch_versioned_data", "true");
-        // Use default connection provider for H2 in-memory database
-        properties.setProperty("hibernate.connection.provider_disables_autocommit", "false");
+        
+        // Use our SnakeCaseNamingStrategy for tests too
+        properties.put("hibernate.physical_naming_strategy", new SnakeCaseNamingStrategy("pos"));
         
         emf.setJpaProperties(properties);
         
@@ -106,7 +124,6 @@ public class IntegrationTestConfig {
         provider.setPasswordEncoder(passwordEncoder);
         return new ProviderManager(java.util.Arrays.asList(provider));
     }
-
 
     @Bean
     public Validator validator() {

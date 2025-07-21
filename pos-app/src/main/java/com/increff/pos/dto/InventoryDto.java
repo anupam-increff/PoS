@@ -1,22 +1,16 @@
 package com.increff.pos.dto;
 
-import com.increff.pos.exception.ApiException;
 import com.increff.pos.flow.InventoryFlow;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.InventoryForm;
-import com.increff.pos.util.TSVUtil;
-import com.increff.pos.service.TSVDownloadService;
-import com.increff.pos.util.ValidationUtil;
+import com.increff.pos.service.TSVUploadProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
 
 @Component
 public class InventoryDto extends BaseDto {
@@ -25,7 +19,7 @@ public class InventoryDto extends BaseDto {
     private InventoryFlow inventoryFlow;
 
     @Autowired
-    private TSVDownloadService tsvDownloadService;
+    private TSVUploadProcessor tsvUploadProcessor;
 
     public void addInventory(@Valid InventoryForm inventoryForm) {
         inventoryFlow.addInventory(inventoryForm.getBarcode(), inventoryForm.getQuantity());
@@ -40,48 +34,13 @@ public class InventoryDto extends BaseDto {
     }
 
     public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
-        try {
-            List<InventoryForm> formList = TSVUtil.readFromTsv(file, InventoryForm.class);
-            List<String[]> rawRows = TSVUtil.readRawRows(file);
+        String[] errorHeaders = {"Barcode", "Quantity", "Error"};
+        String errorFileName = "inventory_upload_errors.tsv";
+        final int maxRows = 5000;
+        String successMessage = "inventory items updated successfully";
 
-            if (formList.isEmpty()) {
-                throw new ApiException("TSV file is empty or has no valid data");
-            }
-            if(formList.size()>5000){
-                throw new ApiException("Maximum 5000 rows allowed per upload but found : "+formList.size());
-            }
-
-            List<String> successList = new ArrayList<>();
-            List<String> failureList = new ArrayList<>();
-
-            for (int i = 0; i < formList.size(); i++) {
-                InventoryForm form = formList.get(i);
-                try {
-                    ValidationUtil.validate(form);
-                    inventoryFlow.addInventory(form.getBarcode(), form.getQuantity());
-                    successList.add("Row " + (i + 1));
-                } catch (ApiException e) {
-                    String[] row = Arrays.copyOf(rawRows.get(i), rawRows.get(i).length + 1);
-                    row[row.length - 1] = e.getMessage();
-                    failureList.add(String.join("\t", row));
-                }
-            }
-
-            if (!failureList.isEmpty()) {
-                String[] errorHeaders = {"Barcode","Quantity","Error"};
-                List<String[]> errorRows = failureList.stream().map(s->s.split("\t",-1)).collect(java.util.stream.Collectors.toList());
-                byte[] errorTsv = TSVUtil.createTsvFromRows(errorRows, errorHeaders);
-                String fileId = tsvDownloadService.storeTSVFile(errorTsv, "inventory_upload_errors.tsv");
-                TSVUploadResponse resp = TSVUploadResponse.error("TSV processing completed with errors. " + successList.size() + " inventory items updated successfully.", formList.size(), failureList.size(), failureList);
-                resp.setDownloadUrl("/tsv/download/" + fileId);
-                return resp;
-            } else {
-                return TSVUploadResponse.success("All " + successList.size() + " inventory items updated successfully", successList.size());
-            }
-
-        } catch (Exception e) {
-            throw new ApiException("Failed to process TSV file: " + e.getMessage(), e);
-        }
+        return tsvUploadProcessor.processTSVUpload(file, InventoryForm.class, errorHeaders, errorFileName, maxRows,
+                form -> inventoryFlow.addInventory(form.getBarcode(), form.getQuantity()), successMessage);
     }
 
     public void updateInventoryByBarcode(String barcode, @Valid InventoryForm form) {
