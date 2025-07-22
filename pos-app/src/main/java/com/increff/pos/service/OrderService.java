@@ -55,15 +55,14 @@ public class OrderService {
 
     public void update(Integer id, OrderPojo newPojo) {
         OrderPojo existing = getCheckByOrderId(id);
-        existing.setInvoiceGenerated(newPojo.getInvoiceGenerated());
         existing.setTotal(newPojo.getTotal());
     }
 
-    public List<OrderPojo> search(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
-        return orderDao.searchOrders(startDate, endDate, invoiceGenerated, query, page, size);
+    public List<OrderPojo> search(ZonedDateTime startDate, ZonedDateTime endDate, String query, int page, int size) {
+        return orderDao.searchOrders(startDate, endDate, query, page, size);
     }
 
-    public long countMatching(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query) {
-        return orderDao.countMatchingOrders(startDate, endDate, invoiceGenerated, query);
+    public long countMatching(ZonedDateTime startDate, ZonedDateTime endDate, String query) {
+        return orderDao.countMatchingOrders(startDate, endDate, query);
     }
 }

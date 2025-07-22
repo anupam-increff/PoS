@@ -20,7 +20,9 @@ public class InventoryDao extends AbstractDao<InventoryPojo> {
     }
 
     public InventoryPojo getByProductId(Integer productId) {
-        List<InventoryPojo> list = em.createQuery(SELECT_BY_PRODUCT_ID, InventoryPojo.class).setParameter("pid", productId).getResultList();
+        List<InventoryPojo> list = em.createQuery(SELECT_BY_PRODUCT_ID, InventoryPojo.class).
+                setParameter("pid", productId).
+                getResultList();
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -35,7 +37,9 @@ public class InventoryDao extends AbstractDao<InventoryPojo> {
     }
 
     public long countByBarcodeSearch(String searchTerm) {
-        return em.createQuery(COUNT_BY_BARCODE_OR_NAME, Long.class).setParameter("searchTerm", "%" + escapeLikePattern(searchTerm.toLowerCase()) + "%").getSingleResult();
+        return em.createQuery(COUNT_BY_BARCODE_OR_NAME, Long.class).
+                setParameter("searchTerm", "%" + escapeLikePattern(searchTerm.toLowerCase()) + "%").
+                getSingleResult();
     }
 
 }

@@ -19,11 +19,13 @@ public class InventoryService {
     private InventoryDao inventoryDao;
 
     public void updateInventory(Integer productId, Integer quantity) {
+        validateQuantity(quantity);
         InventoryPojo inventory = getCheckByProductId(productId);
         inventory.setQuantity(quantity);
     }
 
     public void addInventory(Integer productId, Integer quantity) {
+        validateQuantity(quantity);
         InventoryPojo inventory = inventoryDao.getByProductId(productId);
         if (Objects.isNull(inventory)) {
             InventoryPojo newInventory = new InventoryPojo();
@@ -57,4 +59,12 @@ public class InventoryService {
         return inventoryPojo;
     }
 
+    private void validateQuantity(Integer quantity) {
+        if (Objects.isNull(quantity)) {
+            throw new ApiException("Quantity cannot be null");
+        }
+        if (quantity < 0) {
+            throw new ApiException("Quantity cannot be negative");
+        }
+    }
 }

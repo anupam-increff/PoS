@@ -17,8 +17,5 @@ public class OrderPojo extends BaseEntity {
     private Integer id;
 
     @Column(nullable = false)
-    private Boolean invoiceGenerated = false;
-    
-    @Column(nullable = false)
     private Double total;
 }

@@ -17,7 +17,14 @@ public class ClientService {
 
     @Autowired
     private ClientDao clientDao;
+    
     public void addClient(ClientPojo clientPojo) {
+        if (Objects.isNull(clientPojo.getName())) {
+            throw new ApiException("Client name cannot be null");
+        }
+        if (clientPojo.getName().trim().isEmpty()) {
+            throw new ApiException("Client name cannot be empty");
+        }
         if (!Objects.isNull(clientDao.getClientByName(clientPojo.getName()))) {
             throw new ApiException("Client with name already exists");
         }
@@ -55,8 +62,15 @@ public class ClientService {
         }
         return client;
     }
+    
     public void update(int id, ClientPojo clientPojo) {
         ClientPojo existingClient = getCheckClientById(id);
+        if (Objects.isNull(clientPojo.getName())) {
+            throw new ApiException("Client name cannot be null");
+        }
+        if (clientPojo.getName().trim().isEmpty()) {
+            throw new ApiException("Client name cannot be empty");
+        }
         // Check if another client with the same name already exists (excluding current client)
         ClientPojo clientWithSameName = clientDao.getClientByName(clientPojo.getName());
         if (clientWithSameName != null && !clientWithSameName.getId().equals(id)) {

@@ -8,7 +8,10 @@ import java.util.List;
 
 @Repository
 public class DaySalesDao extends AbstractDao<DaySalesPojo> {
-
+    
+    private static final String SELECT_BY_DATE_RANGE = "SELECT d FROM DaySalesPojo d WHERE d.reportDate >= :startOfDay AND d.reportDate <=:endOfDay";
+    private static final String SELECT_BETWEEN_DATES = "SELECT d FROM DaySalesPojo d WHERE d.reportDate BETWEEN :start AND :end ORDER BY d.reportDate DESC";
+    
     public DaySalesDao() {
         super(DaySalesPojo.class);
     }
@@ -17,7 +20,7 @@ public class DaySalesDao extends AbstractDao<DaySalesPojo> {
         ZonedDateTime startOfDay = date.toLocalDate().atStartOfDay(date.getZone());
         ZonedDateTime endOfDay = startOfDay.plusDays(1);
         
-        List<DaySalesPojo> result = em.createQuery("SELECT d FROM DaySalesPojo d WHERE d.reportDate >= :startOfDay AND d.reportDate <=:endOfDay", DaySalesPojo.class)
+        List<DaySalesPojo> result = em.createQuery(SELECT_BY_DATE_RANGE, DaySalesPojo.class)
                 .setParameter("startOfDay", startOfDay)
                 .setParameter("endOfDay", endOfDay)
                 .getResultList();
@@ -25,7 +28,7 @@ public class DaySalesDao extends AbstractDao<DaySalesPojo> {
     }
 
     public List<DaySalesPojo> getReportBetweenDates(ZonedDateTime start, ZonedDateTime end) {
-        return em.createQuery("SELECT d FROM DaySalesPojo d WHERE d.reportDate BETWEEN :start AND :end ORDER BY d.reportDate DESC", DaySalesPojo.class)
+        return em.createQuery(SELECT_BETWEEN_DATES, DaySalesPojo.class)
                 .setParameter("start", start)
                 .setParameter("end", end)
                 .getResultList();

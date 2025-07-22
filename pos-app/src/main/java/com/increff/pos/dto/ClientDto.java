@@ -29,9 +29,9 @@ public class ClientDto extends BaseDto {
     }
 
     public PaginatedResponse<ClientData> getAll(int page, int pageSize) {
-        List<ClientPojo> pojos = clientService.getAllClients(page, pageSize);
+        List<ClientPojo> clientPojos = clientService.getAllClients(page, pageSize);
         long totalItems = clientService.countAll();
-        return createPaginatedResponse(pojos.stream()
+        return createPaginatedResponse(clientPojos.stream()
                 .map(p -> ConvertUtil.convert(p, ClientData.class))
                 .collect(Collectors.toList()), page, pageSize, totalItems);
     }

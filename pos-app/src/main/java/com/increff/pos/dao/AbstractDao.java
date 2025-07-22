@@ -36,7 +36,7 @@ public abstract class AbstractDao<T> {
                 .getSingleResult();
     }
 
-    protected T getSingleResult(String jpql, Map<String, Object> params) {
+    protected T getSingleResultOrNull(String jpql, Map<String, Object> params) {
         try {
             TypedQuery<T> query = em.createQuery(jpql, entityClass);
             setParameters(query, params);

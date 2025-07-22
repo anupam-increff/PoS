@@ -91,14 +91,12 @@ public final class TestData {
     public static OrderPojo order(int id) {
         OrderPojo order = new OrderPojo();
         order.setId(id);
-        order.setInvoiceGenerated(false);
         order.setTotal(0.0);
         return order;
     }
     
     public static OrderPojo orderWithoutId() {
         OrderPojo order = new OrderPojo();
-        order.setInvoiceGenerated(false);
         order.setTotal(0.0);
         return order;
     }
@@ -109,11 +107,10 @@ public final class TestData {
         return form;
     }
     
-    public static OrderSearchForm orderSearchForm(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated) {
+    public static OrderSearchForm orderSearchForm(ZonedDateTime startDate, ZonedDateTime endDate) {
         OrderSearchForm form = new OrderSearchForm();
         form.setStartDate(startDate);
         form.setEndDate(endDate);
-        form.setInvoiceGenerated(invoiceGenerated);
         form.setPage(0);
         form.setSize(10);
         return form;

@@ -14,7 +14,6 @@ public class OrderSearchForm {
     private ZonedDateTime startDate;
     @NotNull(message = "End date is required")
     private ZonedDateTime endDate;
-    private Boolean invoiceGenerated;
     private int page;
     private int size;
 }

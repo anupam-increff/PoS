@@ -15,8 +15,6 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     private static final String SELECT_ORDERS_IN_DATE_RANGE = "SELECT o FROM OrderPojo o WHERE o.createdAt BETWEEN :startDate AND :endDate";
     private static final String COUNT_ORDERS_IN_DATE_RANGE = "SELECT COUNT(o) FROM OrderPojo o WHERE o.createdAt BETWEEN :startDate AND :endDate";
     private static final String SELECT_ORDERS_FOR_SPECIFIC_DATE = "SELECT o FROM OrderPojo o WHERE o.createdAt >= :startOfDay AND o.createdAt < :endOfDay ORDER BY o.createdAt DESC";
-    private static final String INVOICE_GENERATED_FILTER = " AND o.invoiceGenerated = true";
-    private static final String INVOICE_NOT_GENERATED_FILTER = " AND o.invoiceGenerated = false";
     private static final String ORDER_ID_SEARCH_FILTER = " AND CAST(o.id AS string) LIKE :searchQuery";
     private static final String ORDER_BY_CREATION_DATE_DESC = " ORDER BY o.createdAt DESC";
 
@@ -24,14 +22,14 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         super(OrderPojo.class);
     }
 
-    public List<OrderPojo> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean isInvoiceGenerated, String searchQuery, int pageNumber, int pageSize) {
-        String searchQueryJpql = buildSearchQuery(isInvoiceGenerated, searchQuery);
+    public List<OrderPojo> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, String searchQuery, int pageNumber, int pageSize) {
+        String searchQueryJpql = buildSearchQuery(searchQuery);
         Map<String, Object> queryParameters = buildQueryParameters(startDate, endDate, searchQuery);
         return getPaginatedResults(searchQueryJpql, pageNumber, pageSize, queryParameters);
     }
 
-    public long countMatchingOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean isInvoiceGenerated, String searchQuery) {
-        String countQueryJpql = buildCountQuery(isInvoiceGenerated, searchQuery);
+    public long countMatchingOrders(ZonedDateTime startDate, ZonedDateTime endDate, String searchQuery) {
+        String countQueryJpql = buildCountQuery(searchQuery);
         Map<String, Object> queryParameters = buildQueryParameters(startDate, endDate, searchQuery);
         return getCount(countQueryJpql, queryParameters);
     }
@@ -50,27 +48,21 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         return getPaginatedResults(SELECT_ALL_ORDERS_BY_DATE, pageNumber, pageSize, null);
     }
 
-    private String buildSearchQuery(Boolean isInvoiceGenerated, String searchQuery) {
+    private String buildSearchQuery(String searchQuery) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ORDERS_IN_DATE_RANGE);
-        addSearchFilters(queryBuilder, isInvoiceGenerated, searchQuery);
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            queryBuilder.append(ORDER_ID_SEARCH_FILTER);
+        }
         queryBuilder.append(ORDER_BY_CREATION_DATE_DESC);
         return queryBuilder.toString();
     }
 
-    private String buildCountQuery(Boolean isInvoiceGenerated, String searchQuery) {
+    private String buildCountQuery(String searchQuery) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ORDERS_IN_DATE_RANGE);
-        addSearchFilters(queryBuilder, isInvoiceGenerated, searchQuery);
-        return queryBuilder.toString();
-    }
-
-    private void addSearchFilters(StringBuilder queryBuilder, Boolean isInvoiceGenerated, String searchQuery) {
-        if (isInvoiceGenerated != null) {
-            queryBuilder.append(isInvoiceGenerated ? INVOICE_GENERATED_FILTER : INVOICE_NOT_GENERATED_FILTER);
-        }
-        
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             queryBuilder.append(ORDER_ID_SEARCH_FILTER);
         }
+        return queryBuilder.toString();
     }
 
     private Map<String, Object> buildQueryParameters(ZonedDateTime startDate, ZonedDateTime endDate, String searchQuery) {

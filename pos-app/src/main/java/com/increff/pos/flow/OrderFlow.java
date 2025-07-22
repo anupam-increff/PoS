@@ -14,6 +14,7 @@ import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.OrderItemService;
 import com.increff.pos.service.OrderService;
 import com.increff.pos.service.ProductService;
+import com.increff.pos.service.InvoiceService;
 import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,8 @@ public class OrderFlow {
     private OrderService orderService;
     @Autowired
     private OrderItemService orderItemService;
+    @Autowired
+    private InvoiceService invoiceService;
 
     public Integer placeOrder(OrderForm orderForm) {
         List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
@@ -46,8 +49,8 @@ public class OrderFlow {
     }
 
     public PaginatedResponse<OrderData> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
-        List<OrderPojo> pojos = orderService.search(startDate, endDate, invoiceGenerated, query, page, size);
-        long totalItems = orderService.countMatching(startDate, endDate, invoiceGenerated, query);
+        List<OrderPojo> pojos = orderService.search(startDate, endDate, query, page, size);
+        long totalItems = orderService.countMatching(startDate, endDate, query);
         int totalPages = (int) Math.ceil((double) totalItems / size);
         List<OrderData> dataList = pojos.stream().map(this::pojoToData).collect(Collectors.toList());
         return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
@@ -96,7 +99,6 @@ public class OrderFlow {
         }
     }
 
-
     private OrderItemPojo buildOrderItem(Integer productId, OrderItemForm form) {
         OrderItemPojo pojo = new OrderItemPojo();
         pojo.setProductId(productId);
@@ -112,7 +114,6 @@ public class OrderFlow {
 
     private OrderPojo createOrder(Double total) {
         OrderPojo order = new OrderPojo();
-        order.setInvoiceGenerated(false);
         order.setTotal(total);
         return order;
     }
@@ -133,8 +134,10 @@ public class OrderFlow {
     }
 
     private OrderData pojoToData(OrderPojo pojo) {
-        OrderData orderData=ConvertUtil.convert(pojo, OrderData.class);
+        OrderData orderData = ConvertUtil.convert(pojo, OrderData.class);
         orderData.setPlacedAt(pojo.getCreatedAt());
+        // Get invoice status from InvoiceService
+        orderData.setInvoiceGenerated(invoiceService.getInvoiceStatus(pojo.getId()));
         return orderData;
     }
 }

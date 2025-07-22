@@ -22,7 +22,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
     public ClientPojo getClientByName(String clientName) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", clientName.toLowerCase());
-        return getSingleResult(SELECT_BY_NAME, params);
+        return getSingleResultOrNull(SELECT_BY_NAME, params);
     }
 
     public List<ClientPojo> getAllClients(int page, int pageSize) {

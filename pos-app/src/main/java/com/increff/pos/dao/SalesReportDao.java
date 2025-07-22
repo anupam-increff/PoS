@@ -37,18 +37,14 @@ public class SalesReportDao {
 
     public List<SalesReportData> getSalesReport(ZonedDateTime start, ZonedDateTime end, String clientName, int page, int size) {
         StringBuilder queryBuilder = new StringBuilder(BASE_SALES_QUERY);
-        
-        if (clientName != null && !clientName.trim().isEmpty()) {
-            queryBuilder.append(CLIENT_FILTER);
-        }
-        
+
         queryBuilder.append(GROUP_ORDER);
 
         TypedQuery<SalesReportData> query = em.createQuery(queryBuilder.toString(), SalesReportData.class);
         query.setParameter("start", start);
         query.setParameter("end", end);
-
         if (clientName != null && !clientName.trim().isEmpty()) {
+            queryBuilder.append(CLIENT_FILTER);
             query.setParameter("clientName", "%" + clientName.trim().toLowerCase() + "%");
         }
 
@@ -60,19 +56,15 @@ public class SalesReportDao {
 
     public Long countTotalClients(ZonedDateTime start, ZonedDateTime end, String clientName) {
         StringBuilder countBuilder = new StringBuilder(BASE_COUNT_QUERY);
-        
-        if (clientName != null && !clientName.trim().isEmpty()) {
-            countBuilder.append(CLIENT_FILTER);
-        }
 
         TypedQuery<Long> query = em.createQuery(countBuilder.toString(), Long.class);
         query.setParameter("start", start);
         query.setParameter("end", end);
 
         if (clientName != null && !clientName.trim().isEmpty()) {
+            countBuilder.append(CLIENT_FILTER);
             query.setParameter("clientName", "%" + clientName.trim().toLowerCase() + "%");
         }
-
         return query.getSingleResult();
     }
 }

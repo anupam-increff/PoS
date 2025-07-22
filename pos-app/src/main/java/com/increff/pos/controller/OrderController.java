@@ -56,12 +56,11 @@ public class OrderController {
             @RequestParam(required = false) String query,
             @RequestParam String startDate,
             @RequestParam String endDate,
-            @RequestParam(required = false) Boolean invoiceGenerated,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         ZonedDateTime start = ZonedDateTime.parse(startDate.trim());
         ZonedDateTime end = ZonedDateTime.parse(endDate.trim());
-        return orderDto.searchOrders(start, end, invoiceGenerated, query, page, size);
+        return orderDto.searchOrders(start, end, query, page, size);
     }
 }

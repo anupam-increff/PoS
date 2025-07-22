@@ -24,7 +24,7 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     public ProductPojo getByBarcode(String barcode) {
         Map<String, Object> params = new HashMap<>();
         params.put("barcode", barcode);
-        return getSingleResult(SELECT_BY_BARCODE, params);
+        return getSingleResultOrNull(SELECT_BY_BARCODE, params);
     }
 
     public List<ProductPojo> getAllProducts(int page, int pageSize) {
