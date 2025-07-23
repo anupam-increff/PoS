@@ -4,7 +4,6 @@ import com.increff.invoice.InvoiceGenerator;
 import com.increff.invoice.model.OrderData;
 import com.increff.invoice.model.OrderItemData;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.enums.InvoiceStatus;
 import com.increff.pos.pojo.InvoicePojo;
 import com.increff.pos.dao.InvoiceDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,21 +42,17 @@ public class InvoiceService {
     }
 
     public void createInvoice(Integer orderId, String invoicePath, OrderData orderData, List<OrderItemData> itemDataList) {
-        // Check if invoice already exists
         InvoicePojo existingInvoice = invoiceDao.getByOrderId(orderId);
         if (existingInvoice != null) {
             throw new ApiException("Invoice already exists for order ID: " + orderId);
         }
 
-        // Generate PDF document
         byte[] pdfBytes = generatePdfDocument(orderData, itemDataList);
         saveInvoiceToFile(invoicePath, pdfBytes);
 
-        // Persist invoice record
         InvoicePojo invoice = new InvoicePojo();
         invoice.setOrderId(orderId);
         invoice.setFilePath(invoicePath);
-        invoice.setStatus(InvoiceStatus.GENERATED);
         invoiceDao.insert(invoice);
     }
 

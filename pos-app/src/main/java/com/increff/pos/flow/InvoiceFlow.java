@@ -26,9 +26,6 @@ public class InvoiceFlow {
     private OrderService orderService;
     
     @Autowired
-    private OrderItemService orderItemService;
-    
-    @Autowired
     private ProductService productService;
 
     public byte[] getInvoice(Integer orderId) {
@@ -41,7 +38,7 @@ public class InvoiceFlow {
         }
 
         OrderPojo order = orderService.getCheckByOrderId(orderId);
-        List<OrderItemPojo> orderItems = orderItemService.getByOrderId(orderId);
+        List<OrderItemPojo> orderItems = orderService.getOrderItemsByOrderId(orderId);
 
         List<OrderItemData> itemDataList = buildOrderItemDataList(orderItems);
         double calculatedTotal = calculateOrderTotal(orderItems);

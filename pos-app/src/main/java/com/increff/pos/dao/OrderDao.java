@@ -37,11 +37,8 @@ public class OrderDao extends AbstractDao<OrderPojo> {
     public List<OrderPojo> getOrdersForSpecificDate(ZonedDateTime targetDate) {
         ZonedDateTime dayStartTime = targetDate.toLocalDate().atStartOfDay(targetDate.getZone());
         ZonedDateTime dayEndTime = dayStartTime.plusDays(1);
-        
-        return em.createQuery(SELECT_ORDERS_FOR_SPECIFIC_DATE, OrderPojo.class)
-                .setParameter("startOfDay", dayStartTime)
-                .setParameter("endOfDay", dayEndTime)
-                .getResultList();
+
+        return em.createQuery(SELECT_ORDERS_FOR_SPECIFIC_DATE, OrderPojo.class).setParameter("startOfDay", dayStartTime).setParameter("endOfDay", dayEndTime).getResultList();
     }
 
     public List<OrderPojo> getAllOrdersByDate(int pageNumber, int pageSize) {
@@ -69,11 +66,11 @@ public class OrderDao extends AbstractDao<OrderPojo> {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("startDate", startDate);
         parameters.put("endDate", endDate);
-        
+
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             parameters.put("searchQuery", toLikePattern(searchQuery.toLowerCase()));
         }
-        
+
         return parameters;
     }
 }

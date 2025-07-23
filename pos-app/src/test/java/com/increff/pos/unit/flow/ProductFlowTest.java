@@ -103,8 +103,7 @@ public class ProductFlowTest {
     @Test
     public void testGetAllProducts() {
         when(productService.getAll(0, 10)).thenReturn(Arrays.asList(product1, product2));
-        when(clientService.getCheckClientById(client1.getId())).thenReturn(client1);
-        List<ProductData> result = productFlow.getAllProducts(0, 10);
+        List<ProductPojo> result = productFlow.getAllProducts(0, 10);
         assertNotNull(result);
         assertEquals(2, result.size());
     }
@@ -113,23 +112,21 @@ public class ProductFlowTest {
     public void testGetProductsByClient() {
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         when(productService.getProductsByClientId(client1.getId(), 0, 10)).thenReturn(Arrays.asList(product1, product2));
-        when(clientService.getCheckClientById(client1.getId())).thenReturn(client1);
-        List<ProductData> result = productFlow.getProductsByAClient(client1.getName(), 0, 10);
+        List<ProductPojo> result = productFlow.getProductsByAClient(client1.getName(), 0, 10);
         assertNotNull(result);
         assertEquals(2, result.size());
-        for (ProductData product : result) {
-            assertEquals(client1.getName(), product.getClientName());
+        for (ProductPojo product : result) {
+            assertEquals(client1.getId(), product.getClientId());
         }
     }
 
     @Test
     public void testSearchProductsByBarcode() {
         when(productService.searchByBarcode("BARCODE", 0, 10)).thenReturn(Arrays.asList(product1, product2));
-        when(clientService.getCheckClientById(client1.getId())).thenReturn(client1);
-        List<ProductData> result = productFlow.searchProductsByBarcode("BARCODE", 0, 10);
+        List<ProductPojo> result = productFlow.searchProductsByBarcode("BARCODE", 0, 10);
         assertNotNull(result);
         assertEquals(2, result.size());
-        for (ProductData product : result) {
+        for (ProductPojo product : result) {
             assertTrue(product.getBarcode().toLowerCase().contains("barcode"));
         }
     }
@@ -137,8 +134,7 @@ public class ProductFlowTest {
     @Test
     public void testGetProductByBarcode() {
         when(productService.getCheckProductByBarcode("BARCODE-1")).thenReturn(product1);
-        when(clientService.getCheckClientById(client1.getId())).thenReturn(client1);
-        ProductData result = productFlow.getProductByBarcode("BARCODE-1");
+        ProductPojo result = productFlow.getProductByBarcode("BARCODE-1");
         assertNotNull(result);
         assertEquals("Product-1", result.getName());
         assertEquals("BARCODE-1", result.getBarcode());

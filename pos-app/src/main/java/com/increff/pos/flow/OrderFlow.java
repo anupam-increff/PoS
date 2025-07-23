@@ -11,7 +11,6 @@ import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
-import com.increff.pos.service.OrderItemService;
 import com.increff.pos.service.OrderService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.service.InvoiceService;
@@ -35,16 +34,14 @@ public class OrderFlow {
     @Autowired
     private OrderService orderService;
     @Autowired
-    private OrderItemService orderItemService;
-    @Autowired
     private InvoiceService invoiceService;
-    //todo : move saveOrderItems method to OrderService
+
     public Integer placeOrder(OrderForm orderForm) {
         List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
         Double total = calculateTotal(orderItemPojos);
         OrderPojo order = createOrder(total);
         Integer orderId = orderService.createOrder(order);
-        saveOrderItems(orderItemPojos, orderId);
+        orderService.saveOrderItems(orderItemPojos, orderId);
         return orderId;
     }
 
@@ -64,10 +61,8 @@ public class OrderFlow {
         return new PaginatedResponse<>(data, page, totalPages, total, size);
     }
 
-    public List<OrderItemData> getOrderItemsByOrderId(Integer orderId) {
-        return orderItemService.getByOrderId(orderId).stream()
-                .map(this::convertToOrderItemData)
-                .collect(Collectors.toList());
+    public List<OrderItemPojo> getOrderItemsByOrderId(Integer orderId) {
+        return orderService.getOrderItemsByOrderId(orderId);
     }
 
     private List<OrderItemPojo> createOrderItems(OrderForm orderForm) {
@@ -118,26 +113,9 @@ public class OrderFlow {
         return order;
     }
 
-    private void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
-        for (OrderItemPojo item : orderItemPojos) {
-            item.setOrderId(orderId);
-            orderItemService.add(item);
-        }
-    }
-    //todo : we can move this conversion to DTO
-
-    private OrderItemData convertToOrderItemData(OrderItemPojo item) {
-        ProductPojo product = productService.getCheckProductById(item.getProductId());
-        OrderItemData data = ConvertUtil.convert(item, OrderItemData.class);
-        data.setBarcode(product.getBarcode());
-        data.setProductName(product.getName());
-        return data;
-    }
-
     private OrderData pojoToData(OrderPojo pojo) {
         OrderData orderData = ConvertUtil.convert(pojo, OrderData.class);
         orderData.setPlacedAt(pojo.getCreatedAt());
-        // Get invoice status from InvoiceService
         orderData.setInvoiceGenerated(invoiceService.getInvoiceStatus(pojo.getId()));
         return orderData;
     }

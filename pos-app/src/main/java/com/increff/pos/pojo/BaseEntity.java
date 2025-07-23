@@ -8,10 +8,23 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
+/**
+ * Base entity with optimistic locking using @Version annotation.
+ * 
+ * Optimistic Locking: Uses version field to detect concurrent modifications.
+ * - When entity is updated, version is incremented automatically
+ * - If two transactions try to update same entity, the second will fail with OptimisticLockException
+ * - Better performance as no locks are held during transaction
+ * - Suitable for read-heavy applications with infrequent conflicts
+ * 
+ * Pessimistic Locking: Can be enabled using @Lock annotation or EntityManager.lock()
+ * - Acquires database locks preventing concurrent access
+ * - Higher data consistency but potential performance impact
+ * - Use LockModeType.PESSIMISTIC_WRITE or PESSIMISTIC_READ
+ */
 @MappedSuperclass
 @Getter
 @Setter
-//todo : read about optimistic , pesimistic locking exception in hibernation
 public abstract class BaseEntity {
 
     @Column(nullable = false, updatable = false)

@@ -13,8 +13,8 @@ public class ProductDao extends AbstractDao<ProductPojo> {
     private static final String SELECT_ALL = "SELECT p FROM ProductPojo p ORDER BY p.name ASC";
     private static final String COUNT_BY_CLIENT_ID = "SELECT COUNT(p) FROM ProductPojo p WHERE p.clientId = :clientId";
     private static final String SELECT_BY_BARCODE = "SELECT p FROM ProductPojo p WHERE p.barcode = :barcode";
-    private static final String SEARCH_BY_BARCODE_OR_NAME = "SELECT p FROM ProductPojo p WHERE LOWER(p.barcode) LIKE :pattern OR LOWER(p.name) LIKE :pattern ORDER BY p.barcode ASC";
-    private static final String COUNT_SEARCH_BY_BARCODE_OR_NAME = "SELECT COUNT(p) FROM ProductPojo p WHERE LOWER(p.barcode) LIKE :pattern OR LOWER(p.name) LIKE :pattern";
+    private static final String SEARCH_BY_BARCODE_OR_NAME = "SELECT p FROM ProductPojo p WHERE p.barcode LIKE :pattern OR p.name LIKE :pattern ORDER BY p.barcode ASC";
+    private static final String COUNT_SEARCH_BY_BARCODE_OR_NAME = "SELECT COUNT(p) FROM ProductPojo p WHERE p.barcode LIKE :pattern OR p.name LIKE :pattern";
     private static final String SELECT_BY_CLIENT_ID = "SELECT p FROM ProductPojo p WHERE p.clientId = :clientId ORDER BY p.name ASC";
 
     public ProductDao() {

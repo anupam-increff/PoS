@@ -21,12 +21,27 @@ public class OrderService {
     private OrderDao orderDao;
 
     @Autowired
-    private OrderItemDao itemDao;
+    private OrderItemDao orderItemDao;
 
     @Transactional(rollbackFor = ApiException.class)
     public Integer createOrder(OrderPojo orderPojo) {
         orderDao.insert(orderPojo);
         return orderPojo.getId();
+    }
+
+    public void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
+        for (OrderItemPojo item : orderItemPojos) {
+            item.setOrderId(orderId);
+            orderItemDao.insert(item);
+        }
+    }
+
+    public void addOrderItem(OrderItemPojo orderItemPojo) {
+        orderItemDao.insert(orderItemPojo);
+    }
+
+    public List<OrderItemPojo> getOrderItemsByOrderId(Integer orderId) {
+        return orderItemDao.getByOrderId(orderId);
     }
 
     public OrderPojo getCheckByOrderId(Integer id) {
@@ -47,10 +62,6 @@ public class OrderService {
 
     public long countAll() {
         return orderDao.countAll();
-    }
-
-    public List<OrderItemPojo> getOrderItems(Integer orderId) {
-        return itemDao.getByOrderId(orderId);
     }
 
     public void update(Integer id, OrderPojo newPojo) {

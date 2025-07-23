@@ -4,7 +4,7 @@ import com.increff.pos.pojo.DaySalesPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.DaySalesService;
-import com.increff.pos.service.OrderItemService;
+
 import com.increff.pos.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +20,6 @@ public class DaySalesFlow {
 
     @Autowired
     private OrderService orderService;
-
-    @Autowired
-    private OrderItemService orderItemService;
 
     @Autowired
     private DaySalesService daySalesService;
@@ -55,7 +52,7 @@ public class DaySalesFlow {
         double totalRevenue = 0.0;
 
         for (OrderPojo order : orders) {
-            List<OrderItemPojo> items = orderItemService.getByOrderId(order.getId());
+            List<OrderItemPojo> items = orderService.getOrderItemsByOrderId(order.getId());
             for (OrderItemPojo item : items) {
                 totalItems += item.getQuantity();
             }

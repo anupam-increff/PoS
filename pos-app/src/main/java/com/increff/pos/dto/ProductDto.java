@@ -5,7 +5,9 @@ import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.ProductForm;
+import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.service.ClientService;
 import com.increff.pos.service.TSVDownloadService;
 import com.increff.pos.util.ConvertUtil;
 import com.increff.pos.util.TSVUploadUtil;
@@ -15,12 +17,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductDto extends BaseDto {
 
     @Autowired
     private ProductFlow productFlow;
+
+    @Autowired
+    private ClientService clientService;
 
     @Autowired
     private TSVDownloadService tsvDownloadService;
@@ -47,28 +53,39 @@ public class ProductDto extends BaseDto {
     }
 
     public PaginatedResponse<ProductData> getAll(int page, int pageSize) {
-        List<ProductData> products = productFlow.getAllProducts(page, pageSize);
+        List<ProductPojo> products = productFlow.getAllProducts(page, pageSize);
+        List<ProductData> productData = products.stream().map(this::pojoToData).collect(Collectors.toList());
         long total = productFlow.countAllProducts();
-        return createPaginatedResponse(products, page, pageSize, total);
+        return createPaginatedResponse(productData, page, pageSize, total);
     }
 
     public PaginatedResponse<ProductData> getByClient(String clientName, int page, int pageSize) {
-        List<ProductData> products = productFlow.getProductsByAClient(clientName, page, pageSize);
+        List<ProductPojo> products = productFlow.getProductsByAClient(clientName, page, pageSize);
+        List<ProductData> productData = products.stream().map(this::pojoToData).collect(Collectors.toList());
         long total = productFlow.countProductsByAClient(clientName);
-        return createPaginatedResponse(products, page, pageSize, total);
+        return createPaginatedResponse(productData, page, pageSize, total);
     }
 
     public PaginatedResponse<ProductData> searchByBarcode(String barcode, int page, int pageSize) {
-        List<ProductData> products = productFlow.searchProductsByBarcode(barcode, page, pageSize);
+        List<ProductPojo> products = productFlow.searchProductsByBarcode(barcode, page, pageSize);
+        List<ProductData> productData = products.stream().map(this::pojoToData).collect(Collectors.toList());
         long total = productFlow.countSearchByBarcode(barcode);
-        return createPaginatedResponse(products, page, pageSize, total);
+        return createPaginatedResponse(productData, page, pageSize, total);
     }
 
     public ProductData getByBarcode(String barcode) {
-        return productFlow.getProductByBarcode(barcode);
+        ProductPojo product = productFlow.getProductByBarcode(barcode);
+        return pojoToData(product);
     }
 
     public void update(Integer id, @Valid ProductForm productForm) {
         productFlow.updateProduct(id, productForm);
+    }
+
+    private ProductData pojoToData(ProductPojo product) {
+        ClientPojo client = clientService.getCheckClientById(product.getClientId());
+        ProductData data = ConvertUtil.convert(product, ProductData.class);
+        data.setClientName(client.getName());
+        return data;
     }
 }

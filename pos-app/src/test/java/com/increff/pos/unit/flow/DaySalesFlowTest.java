@@ -5,7 +5,6 @@ import com.increff.pos.flow.DaySalesFlow;
 import com.increff.pos.pojo.DaySalesPojo;
 import com.increff.pos.service.DaySalesService;
 import com.increff.pos.service.OrderService;
-import com.increff.pos.service.OrderItemService;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import org.junit.Before;
@@ -33,9 +32,6 @@ public class DaySalesFlowTest {
 
     @Mock
     private OrderService orderService;
-
-    @Mock
-    private OrderItemService orderItemService;
 
     @InjectMocks
     private DaySalesFlow daySalesFlow;
@@ -76,8 +72,8 @@ public class DaySalesFlowTest {
         
         when(daySalesService.getByDate(testDate)).thenReturn(null);
         when(orderService.getOrdersByDate(testDate)).thenReturn(orders);
-        when(orderItemService.getByOrderId(1)).thenReturn(orderItems.subList(0, 1));
-        when(orderItemService.getByOrderId(2)).thenReturn(orderItems.subList(1, 2));
+        when(orderService.getOrderItemsByOrderId(1)).thenReturn(orderItems.subList(0, 1));
+        when(orderService.getOrderItemsByOrderId(2)).thenReturn(orderItems.subList(1, 2));
         
         // Act
         daySalesFlow.calculateDailySales(testDate);
@@ -85,8 +81,8 @@ public class DaySalesFlowTest {
         // Assert
         verify(daySalesService, times(1)).getByDate(testDate);
         verify(orderService, times(1)).getOrdersByDate(testDate);
-        verify(orderItemService, times(1)).getByOrderId(1);
-        verify(orderItemService, times(1)).getByOrderId(2);
+        verify(orderService, times(1)).getOrderItemsByOrderId(1);
+        verify(orderService, times(1)).getOrderItemsByOrderId(2);
         verify(daySalesService, times(1)).insert(any(DaySalesPojo.class));
     }
 
@@ -210,8 +206,8 @@ public class DaySalesFlowTest {
         
         when(daySalesService.getByDate(testDate)).thenReturn(null);
         when(orderService.getOrdersByDate(testDate)).thenReturn(orders);
-        when(orderItemService.getByOrderId(1)).thenReturn(orderItems1);
-        when(orderItemService.getByOrderId(2)).thenReturn(orderItems2);
+        when(orderService.getOrderItemsByOrderId(1)).thenReturn(orderItems1);
+        when(orderService.getOrderItemsByOrderId(2)).thenReturn(orderItems2);
         
         // Act
         daySalesFlow.calculateDailySales(testDate);
@@ -219,8 +215,8 @@ public class DaySalesFlowTest {
         // Assert
         verify(daySalesService, times(1)).getByDate(testDate);
         verify(orderService, times(1)).getOrdersByDate(testDate);
-        verify(orderItemService, times(1)).getByOrderId(1);
-        verify(orderItemService, times(1)).getByOrderId(2);
+        verify(orderService, times(1)).getOrderItemsByOrderId(1);
+        verify(orderService, times(1)).getOrderItemsByOrderId(2);
         verify(daySalesService, times(1)).insert(any(DaySalesPojo.class));
     }
 
@@ -274,9 +270,9 @@ public class DaySalesFlowTest {
         
         when(daySalesService.getByDate(testDate)).thenReturn(null);
         when(orderService.getOrdersByDate(testDate)).thenReturn(orders);
-        when(orderItemService.getByOrderId(1)).thenReturn(orderItems1);
-        when(orderItemService.getByOrderId(2)).thenReturn(orderItems2);
-        when(orderItemService.getByOrderId(3)).thenReturn(orderItems3);
+        when(orderService.getOrderItemsByOrderId(1)).thenReturn(orderItems1);
+        when(orderService.getOrderItemsByOrderId(2)).thenReturn(orderItems2);
+        when(orderService.getOrderItemsByOrderId(3)).thenReturn(orderItems3);
         
         // Act
         daySalesFlow.calculateDailySales(testDate);
@@ -284,7 +280,7 @@ public class DaySalesFlowTest {
         // Assert
         verify(daySalesService, times(1)).getByDate(testDate);
         verify(orderService, times(1)).getOrdersByDate(testDate);
-        verify(orderItemService, times(3)).getByOrderId(anyInt());
+        verify(orderService, times(3)).getOrderItemsByOrderId(anyInt());
         verify(daySalesService, times(1)).insert(any(DaySalesPojo.class));
     }
 
@@ -338,7 +334,7 @@ public class DaySalesFlowTest {
         when(daySalesService.getByDate(testDate)).thenReturn(null);
         when(orderService.getOrdersByDate(testDate)).thenReturn(orders);
         
-        // Mock orderItemService for each order
+        // Mock orderService for each order
         for (int i = 1; i <= 100; i++) {
             List<OrderItemPojo> orderItems = new ArrayList<>();
             OrderItemPojo item = new OrderItemPojo();
@@ -346,7 +342,7 @@ public class DaySalesFlowTest {
             item.setQuantity(i);
             item.setSellingPrice(100.0);
             orderItems.add(item);
-            when(orderItemService.getByOrderId(i)).thenReturn(orderItems);
+            when(orderService.getOrderItemsByOrderId(i)).thenReturn(orderItems);
         }
         
         // Act
@@ -355,7 +351,7 @@ public class DaySalesFlowTest {
         // Assert
         verify(daySalesService, times(1)).getByDate(testDate);
         verify(orderService, times(1)).getOrdersByDate(testDate);
-        verify(orderItemService, times(100)).getByOrderId(anyInt());
+        verify(orderService, times(100)).getOrderItemsByOrderId(anyInt());
         verify(daySalesService, times(1)).insert(any(DaySalesPojo.class));
     }
 } 

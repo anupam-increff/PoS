@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-//todo : since mysql is case insensitive we can remove LOWER things while comparisons where clause in every dao
 public class ClientDao extends AbstractDao<ClientPojo> {
 
-    private static final String SELECT_BY_NAME = "SELECT c FROM ClientPojo c WHERE LOWER(c.name) = :name";
-    private static final String SEARCH_BY_QUERY = "SELECT c FROM ClientPojo c WHERE LOWER(c.name) LIKE :pattern ORDER BY c.name ASC";
-    private static final String COUNT_BY_QUERY = "SELECT COUNT(c) FROM ClientPojo c WHERE LOWER(c.name) LIKE :pattern";
+    private static final String SELECT_BY_NAME = "SELECT c FROM ClientPojo c WHERE c.name = :name";
+    private static final String SEARCH_BY_QUERY = "SELECT c FROM ClientPojo c WHERE c.name LIKE :pattern ORDER BY c.name ASC";
+    private static final String COUNT_BY_QUERY = "SELECT COUNT(c) FROM ClientPojo c WHERE c.name LIKE :pattern";
     private static final String SELECT_ALL_ORDERED = "SELECT c FROM ClientPojo c ORDER BY c.name ASC";
 
     public ClientDao() {
@@ -22,7 +21,7 @@ public class ClientDao extends AbstractDao<ClientPojo> {
 
     public ClientPojo getClientByName(String clientName) {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", clientName.toLowerCase());
+        params.put("name", clientName);
         return getSingleResultOrNull(SELECT_BY_NAME, params);
     }
 

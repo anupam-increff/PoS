@@ -1,7 +1,6 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Transactional(rollbackFor = ApiException.class)
@@ -31,19 +29,17 @@ public class ProductFlow {
         productService.addProduct(productPojo);
     }
 
-    public List<ProductData> getAllProducts(int page, int pageSize) {
-        List<ProductPojo> products = productService.getAll(page, pageSize);
-        return products.stream().map(this::pojoToData).collect(Collectors.toList());
+    public List<ProductPojo> getAllProducts(int page, int pageSize) {
+        return productService.getAll(page, pageSize);
     }
 
     public long countAllProducts() {
         return productService.countAll();
     }
 
-    public List<ProductData> getProductsByAClient(String clientName, int page, int pageSize) {
+    public List<ProductPojo> getProductsByAClient(String clientName, int page, int pageSize) {
         ClientPojo client = clientService.getCheckClientByName(clientName);
-        List<ProductPojo> products = productService.getProductsByClientId(client.getId(), page, pageSize);
-        return products.stream().map(this::pojoToData).collect(Collectors.toList());
+        return productService.getProductsByClientId(client.getId(), page, pageSize);
     }
 
     public long countProductsByAClient(String clientName) {
@@ -51,18 +47,16 @@ public class ProductFlow {
         return productService.countProductsByClientId(client.getId());
     }
 
-    public List<ProductData> searchProductsByBarcode(String barcode, int page, int pageSize) {
-        List<ProductPojo> products = productService.searchByBarcode(barcode, page, pageSize);
-        return products.stream().map(this::pojoToData).collect(Collectors.toList());
+    public List<ProductPojo> searchProductsByBarcode(String barcode, int page, int pageSize) {
+        return productService.searchByBarcode(barcode, page, pageSize);
     }
 
     public long countSearchByBarcode(String barcode) {
         return productService.countSearchByBarcode(barcode);
     }
 
-    public ProductData getProductByBarcode(String barcode) {
-        ProductPojo product = productService.getCheckProductByBarcode(barcode);
-        return pojoToData(product);
+    public ProductPojo getProductByBarcode(String barcode) {
+        return productService.getCheckProductByBarcode(barcode);
     }
 
     public void updateProduct(Integer id, ProductForm form) {
@@ -70,12 +64,5 @@ public class ProductFlow {
         ClientPojo client = clientService.getCheckClientByName(form.getClientName());
         productPojo.setClientId(client.getId());
         productService.update(id, productPojo);
-    }
-
-    private ProductData pojoToData(ProductPojo product) {
-        ClientPojo client = clientService.getCheckClientById(product.getClientId());
-        ProductData data = ConvertUtil.convert(product, ProductData.class);
-        data.setClientName(client.getName());
-        return data;
     }
 }

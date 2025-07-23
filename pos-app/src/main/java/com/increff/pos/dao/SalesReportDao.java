@@ -22,7 +22,7 @@ public class SalesReportDao {
                     "JOIN ClientPojo c ON p.clientId = c.id ";
 
     private static final String DATE_RANGE_FILTER = "WHERE o.createdAt BETWEEN :start AND :end ";
-    private static final String CLIENT_NAME_FILTER = "AND LOWER(c.name) LIKE :clientName ";
+    private static final String CLIENT_NAME_FILTER = "AND c.name LIKE :clientName ";
 
     private static final String CLIENT_SALES_DATA_SELECT =
             "SELECT new com.increff.pos.model.data.SalesReportData(" +
@@ -83,7 +83,7 @@ public class SalesReportDao {
         query.setParameter("end", end);
 
         if (hasClientFilter(clientName)) {
-            query.setParameter("clientName", "%" + clientName.trim().toLowerCase() + "%");
+            query.setParameter("clientName", "%" + clientName.trim() + "%");
         }
     }
 
