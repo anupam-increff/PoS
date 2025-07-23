@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 @MappedSuperclass
 @Getter
 @Setter
+//todo : read about optimistic , pesimistic locking exception in hibernation
 public abstract class BaseEntity {
 
     @Column(nullable = false, updatable = false)

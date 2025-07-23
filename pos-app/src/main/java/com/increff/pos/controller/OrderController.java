@@ -40,13 +40,13 @@ public class OrderController {
 
     @ApiOperation("Place a new order")
     @PostMapping
-    public Integer placeOrder(@RequestBody @Valid OrderForm form) {
+    public Integer placeOrder(@RequestBody OrderForm form) {
         return orderDto.placeOrder(form);
     }
 
     @ApiOperation("Search orders with filters")
     @PostMapping("/search")
-    public PaginatedResponse<OrderData> searchOrders(@RequestBody @Valid OrderSearchForm form) {
+    public PaginatedResponse<OrderData> searchOrders(@RequestBody  OrderSearchForm form) {
         return orderDto.searchOrdersByForm(form);
     }
 

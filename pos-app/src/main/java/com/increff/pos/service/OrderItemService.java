@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+//todo : move into order service
 @Service
 @Transactional(rollbackFor = ApiException.class)
 public class OrderItemService {

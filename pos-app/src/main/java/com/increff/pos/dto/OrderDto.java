@@ -9,6 +9,7 @@ import com.increff.pos.model.form.OrderSearchForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class OrderDto {
     @Autowired
     private OrderFlow orderFlow;
 
-    public Integer placeOrder(OrderForm form) {
+    public Integer placeOrder(@Valid OrderForm form) {
         return orderFlow.placeOrder(form);
     }
 

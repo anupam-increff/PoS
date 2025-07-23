@@ -38,7 +38,7 @@ public class OrderFlow {
     private OrderItemService orderItemService;
     @Autowired
     private InvoiceService invoiceService;
-
+    //todo : move saveOrderItems method to OrderService
     public Integer placeOrder(OrderForm orderForm) {
         List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
         Double total = calculateTotal(orderItemPojos);
@@ -124,6 +124,7 @@ public class OrderFlow {
             orderItemService.add(item);
         }
     }
+    //todo : we can move this conversion to DTO
 
     private OrderItemData convertToOrderItemData(OrderItemPojo item) {
         ProductPojo product = productService.getCheckProductById(item.getProductId());

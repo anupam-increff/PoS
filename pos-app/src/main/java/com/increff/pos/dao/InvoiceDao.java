@@ -2,7 +2,9 @@ package com.increff.pos.dao;
 
 import com.increff.pos.pojo.InvoicePojo;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Repository
 public class InvoiceDao extends AbstractDao<InvoicePojo> {
@@ -14,10 +16,8 @@ public class InvoiceDao extends AbstractDao<InvoicePojo> {
     }
 
     public InvoicePojo getByOrderId(Integer orderId) {
-        return em.createQuery(SELECT_BY_ORDER, InvoicePojo.class)
-                .setParameter("orderId", orderId)
-                .getResultStream()
-                .findFirst()
-                .orElse(null);
+        Map<String, Object> params = new HashMap<>();
+        params.put("orderId", orderId);
+        return getSingleResultOrNull(SELECT_BY_ORDER, params);
     }
-} 
+}

@@ -36,22 +36,18 @@ public class InvoiceFlow {
     }
 
     public void generateInvoice(Integer orderId) {
-        // Check if invoice already exists
         if (invoiceService.getInvoiceStatus(orderId)) {
             throw new ApiException("Invoice already exists for order ID: " + orderId);
         }
 
-        // Get order details
         OrderPojo order = orderService.getCheckByOrderId(orderId);
         List<OrderItemPojo> orderItems = orderItemService.getByOrderId(orderId);
 
-        // Build order data and item data for invoice generation
         List<OrderItemData> itemDataList = buildOrderItemDataList(orderItems);
         double calculatedTotal = calculateOrderTotal(orderItems);
         OrderData orderData = buildOrderData(order, calculatedTotal);
         String invoicePath = generateInvoicePath(orderId);
 
-        // Create invoice using service
         invoiceService.createInvoice(orderId, invoicePath, orderData, itemDataList);
     }
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
+//todo : since mysql is case insensitive we can remove LOWER things while comparisons where clause in every dao
 public class ClientDao extends AbstractDao<ClientPojo> {
 
     private static final String SELECT_BY_NAME = "SELECT c FROM ClientPojo c WHERE LOWER(c.name) = :name";
