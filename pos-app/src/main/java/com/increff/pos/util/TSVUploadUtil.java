@@ -3,6 +3,7 @@ package com.increff.pos.util;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.service.TSVDownloadService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.ConstraintViolation;
@@ -14,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-
 public class TSVUploadUtil {
 
     public static <T> TSVUploadResponse processTSVUpload(

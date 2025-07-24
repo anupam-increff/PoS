@@ -34,7 +34,7 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
-        if (!Objects.isNull(clientName) && !clientName.isEmpty()) {
+        if (Objects.nonNull(clientName) && !clientName.trim().isEmpty()) {
             return productDto.getByClient(clientName, page, pageSize);
         }
         return productDto.getAll(page, pageSize);

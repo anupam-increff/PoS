@@ -24,7 +24,7 @@ public class UserService {
 
     @Transactional
     public UserPojo signup(String email, String password) {
-        if (!Objects.isNull(userDao.findByEmail(email))) {
+        if (Objects.nonNull(userDao.findByEmail(email))) {
             throw new ApiException("User with email " + email + " already exists");
         }
 

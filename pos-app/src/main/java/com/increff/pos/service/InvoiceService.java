@@ -29,10 +29,15 @@ public class InvoiceService {
         return invoice != null;
     }
 
-    public byte[] downloadInvoice(Integer orderId) {
+    public Integer getInvoiceIdByOrderId(Integer orderId) {
         InvoicePojo invoice = invoiceDao.getByOrderId(orderId);
+        return invoice != null ? invoice.getId() : null;
+    }
+
+    public byte[] downloadInvoiceById(Integer invoiceId) {
+        InvoicePojo invoice = invoiceDao.getById(invoiceId);
         if (invoice == null) {
-            throw new ApiException("Invoice not generated for order id: " + orderId);
+            throw new ApiException("Invoice not found for invoice id: " + invoiceId);
         }
         try {
             return Files.readAllBytes(Paths.get(invoice.getFilePath()));

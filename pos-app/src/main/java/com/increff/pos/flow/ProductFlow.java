@@ -59,9 +59,8 @@ public class ProductFlow {
         return productService.getCheckProductByBarcode(barcode);
     }
 
-    public void updateProduct(Integer id, ProductForm form) {
-        ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
-        ClientPojo client = clientService.getCheckClientByName(form.getClientName());
+    public void updateProduct(Integer id, ProductPojo productPojo, String clientName) {
+        ClientPojo client = clientService.getCheckClientByName(clientName);
         productPojo.setClientId(client.getId());
         productService.update(id, productPojo);
     }

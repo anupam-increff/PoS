@@ -27,7 +27,7 @@ public class ConvertUtil {
                             sf.getType().equals(tf.getType())) {
 
                         tf.setAccessible(true);
-                        if (tf.getType() == String.class && !Objects.isNull(value)) {
+                        if (tf.getType() == String.class && Objects.nonNull(value)) {
                             // trim string values
                             tf.set(target, value.toString().trim());
                         } else {

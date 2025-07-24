@@ -6,7 +6,9 @@ import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.*;
+import com.increff.pos.service.InvoiceService;
+import com.increff.pos.service.OrderService;
+import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,11 +30,11 @@ public class InvoiceFlow {
     @Autowired
     private ProductService productService;
 
-    public byte[] getInvoice(Integer orderId) {
-        return invoiceService.downloadInvoice(orderId);
+    public byte[] getInvoiceById(Integer invoiceId) {
+        return invoiceService.downloadInvoiceById(invoiceId);
     }
 
-    public void generateInvoice(Integer orderId) {
+    public Integer generateInvoice(Integer orderId) {
         if (invoiceService.getInvoiceStatus(orderId)) {
             throw new ApiException("Invoice already exists for order ID: " + orderId);
         }
@@ -40,46 +42,33 @@ public class InvoiceFlow {
         OrderPojo order = orderService.getCheckByOrderId(orderId);
         List<OrderItemPojo> orderItems = orderService.getOrderItemsByOrderId(orderId);
 
-        List<OrderItemData> itemDataList = buildOrderItemDataList(orderItems);
-        double calculatedTotal = calculateOrderTotal(orderItems);
-        OrderData orderData = buildOrderData(order, calculatedTotal);
-        String invoicePath = generateInvoicePath(orderId);
+        List<OrderItemData> itemDataList = buildInvoiceItemDataList(orderItems);
+        OrderData orderData = buildInvoiceOrderData(order);
+        String invoicePath = generateInvoiceFilePath(orderId);
 
         invoiceService.createInvoice(orderId, invoicePath, orderData, itemDataList);
+        return invoiceService.getInvoiceIdByOrderId(orderId);
     }
 
-    private List<OrderItemData> buildOrderItemDataList(List<OrderItemPojo> orderItems) {
+    private List<OrderItemData> buildInvoiceItemDataList(List<OrderItemPojo> orderItems) {
         List<OrderItemData> itemDataList = new ArrayList<>();
-
         for (OrderItemPojo item : orderItems) {
             ProductPojo product = productService.getCheckProductById(item.getProductId());
-            OrderItemData data = createOrderItemData(item, product);
+            OrderItemData data = ConvertUtil.convert(item, OrderItemData.class);
+            data.setBarcode(product.getBarcode());
+            data.setProductName(product.getName());
             itemDataList.add(data);
         }
-
         return itemDataList;
     }
 
-    private OrderItemData createOrderItemData(OrderItemPojo orderItemPojo, ProductPojo product) {
-        OrderItemData data = ConvertUtil.convert(orderItemPojo, OrderItemData.class);
-        data.setBarcode(product.getBarcode());
-        data.setProductName(product.getName());
-        return data;
-    }
-
-    private double calculateOrderTotal(List<OrderItemPojo> orderItems) {
-        return orderItems.stream().mapToDouble(item -> item.getQuantity() * item.getSellingPrice()).sum();
-    }
-
-    private OrderData buildOrderData(OrderPojo order, double total) {
-        OrderData orderData = new OrderData();
-        orderData.setId(order.getId());
+    private OrderData buildInvoiceOrderData(OrderPojo order) {
+        OrderData orderData = ConvertUtil.convert(order,OrderData.class);
         orderData.setTime(order.getCreatedAt());
-        orderData.setTotal(total);
         return orderData;
     }
 
-    private String generateInvoicePath(Integer orderId) {
+    private String generateInvoiceFilePath(Integer orderId) {
         return "../invoices/order-" + orderId + ".pdf";
     }
 }

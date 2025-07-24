@@ -2,10 +2,7 @@ package com.increff.pos.flow;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.OrderData;
-import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.data.PaginatedResponse;
-import com.increff.pos.model.form.OrderForm;
-import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
@@ -28,24 +25,23 @@ import java.util.stream.Collectors;
 public class OrderFlow {
 
     @Autowired
+    private OrderService orderService;
+    @Autowired
     private ProductService productService;
     @Autowired
     private InventoryService inventoryService;
     @Autowired
-    private OrderService orderService;
-    @Autowired
     private InvoiceService invoiceService;
 
-    public Integer placeOrder(OrderForm orderForm) {
-        List<OrderItemPojo> orderItemPojos = createOrderItems(orderForm);
-        Double total = calculateTotal(orderItemPojos);
-        OrderPojo order = createOrder(total);
-        Integer orderId = orderService.createOrder(order);
-        orderService.saveOrderItems(orderItemPojos, orderId);
-        return orderId;
+    public OrderData placeOrder(List<OrderItemPojo> orderItemPojos) {
+        validateOrderItemsAndReduceInventory(orderItemPojos);
+        Double total = calculateOrderTotalCost(orderItemPojos);
+        Integer orderId = orderService.createOrderWithItems(orderItemPojos, total);
+        OrderPojo orderPojo = orderService.getCheckByOrderId(orderId);
+        return pojoToData(orderPojo);
     }
 
-    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, Boolean invoiceGenerated, String query, int page, int size) {
+    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, String query, int page, int size) {
         List<OrderPojo> pojos = orderService.search(startDate, endDate, query, page, size);
         long totalItems = orderService.countMatching(startDate, endDate, query);
         int totalPages = (int) Math.ceil((double) totalItems / size);
@@ -65,58 +61,38 @@ public class OrderFlow {
         return orderService.getOrderItemsByOrderId(orderId);
     }
 
-    private List<OrderItemPojo> createOrderItems(OrderForm orderForm) {
-        return orderForm.getItems().stream()
-                .map(this::createOrderItem)
-                .collect(Collectors.toList());
+    private void validateOrderItemsAndReduceInventory(List<OrderItemPojo> orderItemPojos) {
+        for (OrderItemPojo item : orderItemPojos) {
+            ProductPojo product = productService.getCheckProductById(item.getProductId());
+            validateSellingPriceAgainstMrp(item.getSellingPrice(), product);
+            InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
+            validateSufficientInventory(inventory, item.getQuantity(), product.getName());
+            inventory.setQuantity(inventory.getQuantity() - item.getQuantity());
+        }
     }
 
-    private OrderItemPojo createOrderItem(OrderItemForm form) {
-        ProductPojo product = productService.getCheckProductByBarcode(form.getBarcode());
-        validateSellingPrice(form.getSellingPrice(), product);
-        InventoryPojo inventory = inventoryService.getCheckByProductId(product.getId());
-
-        validateInventory(inventory, form.getQuantity(), product.getName());
-        inventory.setQuantity(inventory.getQuantity() - form.getQuantity());
-
-        return buildOrderItem(product.getId(), form);
-    }
-
-    private void validateInventory(InventoryPojo inventory, Integer quantity, String productName) {
+    private void validateSufficientInventory(InventoryPojo inventory, Integer quantity, String productName) {
         if (inventory.getQuantity() < quantity) {
             throw new ApiException("Insufficient inventory for: " + productName);
         }
     }
 
-    private void validateSellingPrice(Double sellingPrice, ProductPojo product) {
+    private void validateSellingPriceAgainstMrp(Double sellingPrice, ProductPojo product) {
         if (sellingPrice > product.getMrp()) {
             throw new ApiException("Selling price for product " + product.getName() + " cannot be greater than its mrp " + product.getMrp());
         }
     }
 
-    private OrderItemPojo buildOrderItem(Integer productId, OrderItemForm form) {
-        OrderItemPojo pojo = new OrderItemPojo();
-        pojo.setProductId(productId);
-        pojo.setQuantity(form.getQuantity());
-        pojo.setSellingPrice(form.getSellingPrice());
-        return pojo;
-    }
-
-    private Double calculateTotal(List<OrderItemPojo> orderItemPojos) {
+    private Double calculateOrderTotalCost(List<OrderItemPojo> orderItemPojos) {
         return orderItemPojos.stream()
                 .mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
-    }
-
-    private OrderPojo createOrder(Double total) {
-        OrderPojo order = new OrderPojo();
-        order.setTotal(total);
-        return order;
     }
 
     private OrderData pojoToData(OrderPojo pojo) {
         OrderData orderData = ConvertUtil.convert(pojo, OrderData.class);
         orderData.setPlacedAt(pojo.getCreatedAt());
         orderData.setInvoiceGenerated(invoiceService.getInvoiceStatus(pojo.getId()));
+        orderData.setInvoiceId(invoiceService.getInvoiceIdByOrderId(pojo.getId()));
         return orderData;
     }
 }

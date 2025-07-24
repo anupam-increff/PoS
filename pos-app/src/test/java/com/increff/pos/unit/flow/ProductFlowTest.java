@@ -154,19 +154,25 @@ public class ProductFlowTest {
     @Test
     public void testUpdateProduct() throws ApiException {
         ProductForm form = TestData.productForm("BARCODE-1", "Updated Product", client1.getName(), 199.99);
+        ProductPojo productPojo = TestData.productWithoutId(form.getBarcode(), form.getName(), 0);
+        productPojo.setMrp(form.getMrp());
+        productPojo.setImageUrl(form.getImageUrl());
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         doNothing().when(productService).update(anyInt(), any(ProductPojo.class));
-        productFlow.updateProduct(1, form);
+        productFlow.updateProduct(1, productPojo, client1.getName());
         verify(productService, times(1)).update(anyInt(), any(ProductPojo.class));
     }
 
     @Test
     public void testUpdateProductNotFound() throws ApiException {
         ProductForm form = TestData.productForm("BARCODE-1", "Updated Product", client1.getName(), 199.99);
+        ProductPojo productPojo = TestData.productWithoutId(form.getBarcode(), form.getName(), 0);
+        productPojo.setMrp(form.getMrp());
+        productPojo.setImageUrl(form.getImageUrl());
         when(clientService.getCheckClientByName(client1.getName())).thenReturn(client1);
         doThrow(new ApiException("No such product exists")).when(productService).update(anyInt(), any(ProductPojo.class));
         try {
-            productFlow.updateProduct(1, form);
+            productFlow.updateProduct(1, productPojo, client1.getName());
             fail("Should throw ApiException for non-existent product");
         } catch (ApiException e) {
             assertTrue(e.getMessage().toLowerCase().contains("product"));

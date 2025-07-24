@@ -2,7 +2,6 @@ package com.increff.pos.dto;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.flow.InvoiceFlow;
-import com.increff.pos.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,11 +12,12 @@ import org.springframework.stereotype.Component;
 public class InvoiceDto {
     @Autowired
     InvoiceFlow invoiceFlow;
-    public ResponseEntity<byte[]> downloadInvoice(Integer orderId){
+    
+    public ResponseEntity<byte[]> downloadInvoiceById(Integer invoiceId){
         try {
-            byte[] invoice = invoiceFlow.getInvoice(orderId);
+            byte[] invoice = invoiceFlow.getInvoiceById(invoiceId);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=order-" + orderId + ".pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice-" + invoiceId + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(invoice);
         }
@@ -25,7 +25,8 @@ public class InvoiceDto {
             throw new ApiException("Failed to download invoice: " + e.getMessage());
         }
     }
-    public void generateInvoice(Integer orderId) {
-        invoiceFlow.generateInvoice(orderId);
+    
+    public Integer generateInvoice(Integer orderId) {
+        return invoiceFlow.generateInvoice(orderId);
     }
 }

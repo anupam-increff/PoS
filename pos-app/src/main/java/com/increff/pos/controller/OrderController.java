@@ -40,7 +40,7 @@ public class OrderController {
 
     @ApiOperation("Place a new order")
     @PostMapping
-    public Integer placeOrder(@RequestBody OrderForm form) {
+    public OrderData placeOrder(@RequestBody OrderForm form) {
         return orderDto.placeOrder(form);
     }
 

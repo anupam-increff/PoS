@@ -5,18 +5,20 @@ import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.ProductPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class ProductService {
 
     @Autowired
     private ProductDao dao;
 
     public void addProduct(ProductPojo p) {
-        if (!Objects.isNull(getProductByBarcode(p.getBarcode()))) {
+        if (Objects.nonNull(getProductByBarcode(p.getBarcode()))) {
             throw new ApiException("Product with same barcode : " + p.getBarcode() + " already exists !");
         }
         dao.insert(p);
@@ -29,10 +31,11 @@ public class ProductService {
         }
         return productPojo;
     }
-    public ProductPojo getProductByBarcode(String barcode) {
 
+    public ProductPojo getProductByBarcode(String barcode) {
         return dao.getByBarcode(barcode);
     }
+
     public ProductPojo getCheckProductByBarcode(String barcode) {
         ProductPojo productPojo = dao.getByBarcode(barcode);
         if (Objects.isNull(productPojo)) {

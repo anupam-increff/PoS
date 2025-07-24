@@ -13,15 +13,15 @@ public class InvoiceController {
     @Autowired
     private InvoiceDto invoiceDto;
 
-    @ApiOperation("Download invoice for order")
-    @GetMapping("/{orderId}")
-    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Integer orderId) {
-        return invoiceDto.downloadInvoice(orderId);
+    @ApiOperation("Download invoice by invoice ID")
+    @GetMapping("/{invoiceId}")
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Integer invoiceId) {
+        return invoiceDto.downloadInvoiceById(invoiceId);
     }
 
-    @ApiOperation("Generate invoice for order")
-    @GetMapping("/generate/{orderId}")
-    public void generateInvoice(@PathVariable Integer orderId) {
-        invoiceDto.generateInvoice(orderId);
+    @ApiOperation("Generate invoice for order and return invoice ID")
+    @PostMapping("/generate/{orderId}")
+    public Integer generateInvoice(@PathVariable Integer orderId) {
+        return invoiceDto.generateInvoice(orderId);
     }
 }

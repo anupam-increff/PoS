@@ -20,6 +20,7 @@ public class ClientService {
 
     public void addClient(ClientPojo clientPojo) {
         validateClientName(clientPojo);
+        validateDuplicateClientWithSameName(clientPojo);
         clientDao.insert(clientPojo);
     }
 
@@ -57,6 +58,7 @@ public class ClientService {
 
     public void update(int id, ClientPojo clientPojo) {
         validateClientName(clientPojo);
+        validateDuplicateClientWithSameName(clientPojo);
         ClientPojo existingClient = getCheckClientById(id);
         // Check if another client with the same name already exists (excluding current client)
         ClientPojo clientWithSameName = clientDao.getClientByName(clientPojo.getName());
@@ -73,7 +75,10 @@ public class ClientService {
         if (clientPojo.getName().trim().isEmpty()) {
             throw new ApiException("Client name cannot be empty");
         }
-        if (!Objects.isNull(clientDao.getClientByName(clientPojo.getName()))) {
+
+    }
+    private void validateDuplicateClientWithSameName(ClientPojo clientPojo){
+        if (Objects.nonNull(clientDao.getClientByName(clientPojo.getName()))) {
             throw new ApiException("Client with name already exists");
         }
     }

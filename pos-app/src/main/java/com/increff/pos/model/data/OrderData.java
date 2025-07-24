@@ -17,6 +17,7 @@ public class OrderData {
     private Integer id;
     private ZonedDateTime placedAt;
     private Boolean invoiceGenerated;
+    private Integer invoiceId;
     private Double total;
 
 }

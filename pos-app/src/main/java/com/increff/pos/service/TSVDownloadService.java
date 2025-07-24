@@ -1,12 +1,15 @@
 package com.increff.pos.service;
 
+import com.increff.pos.exception.ApiException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Transactional(rollbackFor = ApiException.class)
 public class TSVDownloadService
 {
 

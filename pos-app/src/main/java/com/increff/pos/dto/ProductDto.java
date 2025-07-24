@@ -79,7 +79,8 @@ public class ProductDto extends BaseDto {
     }
 
     public void update(Integer id, @Valid ProductForm productForm) {
-        productFlow.updateProduct(id, productForm);
+        ProductPojo productPojo=ConvertUtil.convert(productForm,ProductPojo.class);
+        productFlow.updateProduct(id, productPojo,productForm.getClientName());
     }
 
     private ProductData pojoToData(ProductPojo product) {

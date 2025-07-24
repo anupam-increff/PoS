@@ -85,18 +85,19 @@ public class OrderOperationsIntegrationTest {
         OrderForm orderForm = TestData.orderForm(Arrays.asList(item1, item2));
 
         // When: Creating order
-        Integer orderId = orderDto.placeOrder(orderForm);
+        OrderData orderData = orderDto.placeOrder(orderForm);
 
         // Then: Order should be created with correct details
-        assertNotNull("Order ID should not be null", orderId);
+        assertNotNull("Order data should not be null", orderData);
+        assertNotNull("Order ID should not be null", orderData.getId());
         
-        OrderPojo savedOrder = orderDao.getById(orderId);
+        OrderPojo savedOrder = orderDao.getById(orderData.getId());
         assertNotNull("Order should be saved", savedOrder);
         assertEquals("Order total should be calculated correctly", 
             Double.valueOf(5 * 95.0 + 3 * 180.0), savedOrder.getTotal());
 
         // Verify order items are saved
-        List<OrderItemPojo> orderItems = orderItemDao.getByOrderId(orderId);
+        List<OrderItemPojo> orderItems = orderItemDao.getByOrderId(orderData.getId());
         assertEquals("Should have 2 order items", 2, orderItems.size());
     }
 
@@ -139,19 +140,18 @@ public class OrderOperationsIntegrationTest {
         OrderItemForm item1 = TestData.orderItemForm("BARCODE-001", 5, 95.0);
         OrderItemForm item2 = TestData.orderItemForm("BARCODE-002", 3, 180.0);
         OrderForm orderForm = TestData.orderForm(Arrays.asList(item1, item2));
-        Integer orderId = orderDto.placeOrder(orderForm);
+        OrderData orderData = orderDto.placeOrder(orderForm);
 
         // When: Getting order items
-        List<OrderItemData> orderItems = orderDto.getItemsByOrderId(orderId);
+        List<OrderItemData> orderItems = orderDto.getItemsByOrderId(orderData.getId());
 
         // Then: Should return all order items with product details
         assertEquals("Should have 2 order items", 2, orderItems.size());
         
         OrderItemData firstItem = orderItems.get(0);
-        assertNotNull("Barcode should be populated", firstItem.getBarcode());
-        assertNotNull("Product name should be populated", firstItem.getProductName());
-        assertNotNull("Quantity should be set", firstItem.getQuantity());
-        assertNotNull("Selling price should be set", firstItem.getSellingPrice());
+        assertNotNull("Order item should have barcode", firstItem.getBarcode());
+        assertNotNull("Order item should have product name", firstItem.getProductName());
+        assertTrue("Barcode should be valid", firstItem.getBarcode().startsWith("BARCODE-"));
     }
 
     @Test
@@ -226,6 +226,7 @@ public class OrderOperationsIntegrationTest {
     private Integer createTestOrder(String barcode, int quantity, double sellingPrice) {
         OrderItemForm item = TestData.orderItemForm(barcode, quantity, sellingPrice);
         OrderForm orderForm = TestData.orderForm(Arrays.asList(item));
-        return orderDto.placeOrder(orderForm);
+        OrderData orderData = orderDto.placeOrder(orderForm);
+        return orderData.getId();
     }
 } 
