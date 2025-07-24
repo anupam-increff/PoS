@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 @Table(name = "orders")
 @Getter
 @Setter
+//todo : remove total , instead add orderStatus
 public class OrderPojo extends BaseEntity {
     
     @Id

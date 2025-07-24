@@ -23,24 +23,17 @@ public class OrderService {
     @Autowired
     private OrderItemDao orderItemDao;
 
-    public Integer createOrderWithItems(List<OrderItemPojo> orderItemPojos, Double total) {
+    public Integer createOrderWithItems(List<OrderItemPojo> orderItemPojos) {
         OrderPojo order = new OrderPojo();
-        order.setTotal(total);
-        Integer orderId = placeOrder(order);
+        order.setTotal(calculateOrderTotalCost(orderItemPojos));
+        Integer orderId = createOrder(order);
         saveOrderItems(orderItemPojos, orderId);
         return orderId;
     }
 
-    public Integer placeOrder(OrderPojo orderPojo) {
+    private Integer createOrder(OrderPojo orderPojo) {
         orderDao.insert(orderPojo);
         return orderPojo.getId();
-    }
-
-    public void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
-        for (OrderItemPojo item : orderItemPojos) {
-            item.setOrderId(orderId);
-            orderItemDao.insert(item);
-        }
     }
 
     public List<OrderItemPojo> getOrderItemsByOrderId(Integer orderId) {
@@ -55,10 +48,10 @@ public class OrderService {
         return order;
     }
 
-    public List<OrderPojo> getAllPaginated(int page, int size) {
+    public List<OrderPojo> getAllOrders(int page, int size) {
         return orderDao.getAllOrdersByDate(page, size);
     }
-    
+
     public List<OrderPojo> getOrdersByDate(ZonedDateTime date) {
         return orderDao.getOrdersForSpecificDate(date);
     }
@@ -72,11 +65,21 @@ public class OrderService {
         existing.setTotal(newPojo.getTotal());
     }
 
-    public List<OrderPojo> search(ZonedDateTime startDate, ZonedDateTime endDate, String query, int page, int size) {
+    public List<OrderPojo> searchOrderByQuery(ZonedDateTime startDate, ZonedDateTime endDate, String query, int page, int size) {
         return orderDao.searchOrders(startDate, endDate, query, page, size);
     }
 
-    public long countMatching(ZonedDateTime startDate, ZonedDateTime endDate, String query) {
+    public long countMatchingOrdersByQuery(ZonedDateTime startDate, ZonedDateTime endDate, String query) {
         return orderDao.countMatchingOrders(startDate, endDate, query);
+    }
+
+    private void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
+        for (OrderItemPojo item : orderItemPojos) {
+            item.setOrderId(orderId);
+            orderItemDao.insert(item);
+        }
+    }
+    private Double calculateOrderTotalCost(List<OrderItemPojo> orderItemPojos) {
+        return orderItemPojos.stream().mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
     }
 }

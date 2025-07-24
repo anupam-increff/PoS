@@ -16,6 +16,7 @@ public class OrderData {
 
     private Integer id;
     private ZonedDateTime placedAt;
+    //todo : remove boolean field instead send status(created and invoiceGenerated )
     private Boolean invoiceGenerated;
     private Integer invoiceId;
     private Double total;

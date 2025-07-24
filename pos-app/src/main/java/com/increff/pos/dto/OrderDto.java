@@ -8,6 +8,7 @@ import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.model.form.OrderSearchForm;
 import com.increff.pos.pojo.OrderItemPojo;
+import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.service.InvoiceService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,11 +36,15 @@ public class OrderDto {
 
     public OrderData placeOrder(@Valid OrderForm form) {
         List<OrderItemPojo> orderItemPojos = convertFormToPojos(form);
-        return orderFlow.placeOrder(orderItemPojos);
+        return convertPojoToOrderData(orderFlow.placeOrder(orderItemPojos));
     }
 
     public PaginatedResponse<OrderData> getAll(int page, int size) {
-        return orderFlow.getAllPaginated(page, size);
+        List<OrderPojo> orderPojos=orderFlow.getAllOrders(page, size);
+        long total = orderFlow.countAllOrders();
+        int totalPages = (int) Math.ceil((double) total / size);
+        List<OrderData> data = orderPojos.stream().map(this::convertPojoToOrderData).collect(Collectors.toList());
+        return new PaginatedResponse<>(data, page, totalPages, total, size);
     }
 
     public List<OrderItemData> getItemsByOrderId(Integer id) {
@@ -46,12 +52,17 @@ public class OrderDto {
         return orderItems.stream().map(this::convertToOrderItemData).collect(Collectors.toList());
     }
 
-    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime start, ZonedDateTime end, String query, int page, int size){
-        return orderFlow.searchOrders(start, end, query, page, size);
+    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime start, ZonedDateTime end, String query, int page, int size) {
+        List<OrderPojo> pojos = orderFlow.searchOrders(start, end, query, page, size);
+        long totalItems = orderFlow.countMatchingOrders(start, end, query);
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        
+        List<OrderData> dataList = pojos.stream().map(this::convertPojoToOrderData).collect(Collectors.toList());
+        return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
     }
 
-    public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form){
-         return orderFlow.searchOrders(form.getStartDate(), form.getEndDate(), form.getQuery(), form.getPage(), form.getSize());
+    public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {
+        return searchOrders(form.getStartDate(), form.getEndDate(), form.getQuery(), form.getPage(), form.getSize());
     }
 
     private List<OrderItemPojo> convertFormToPojos(OrderForm form) {
@@ -75,5 +86,14 @@ public class OrderDto {
         orderItemData.setBarcode(product.getBarcode());
         orderItemData.setProductName(product.getName());
         return orderItemData;
+    }
+
+    private OrderData convertPojoToOrderData(OrderPojo pojo) {
+        OrderData orderData = ConvertUtil.convert(pojo, OrderData.class);
+        orderData.setPlacedAt(pojo.getCreatedAt());
+        Integer invoiceId = invoiceService.getInvoiceIdByOrderId(pojo.getId());
+        orderData.setInvoiceGenerated(Objects.nonNull(invoiceId));
+        orderData.setInvoiceId(invoiceId);
+        return orderData;
     }
 }
