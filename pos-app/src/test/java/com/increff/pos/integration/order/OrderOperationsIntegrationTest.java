@@ -8,6 +8,7 @@ import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.model.data.PaginatedResponse;
+import com.increff.pos.model.enums.OrderStatus;
 import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.*;
@@ -93,8 +94,7 @@ public class OrderOperationsIntegrationTest {
         
         OrderPojo savedOrder = orderDao.getById(orderData.getId());
         assertNotNull("Order should be saved", savedOrder);
-        assertEquals("Order total should be calculated correctly", 
-            Double.valueOf(5 * 95.0 + 3 * 180.0), savedOrder.getTotal());
+        assertEquals("Order status should be CREATED", OrderStatus.CREATED, savedOrder.getOrderStatus());
 
         // Verify order items are saved
         List<OrderItemPojo> orderItems = orderItemDao.getByOrderId(orderData.getId());
@@ -171,7 +171,7 @@ public class OrderOperationsIntegrationTest {
         // Verify order data is populated
         OrderData orderData = response.getContent().get(0);
         assertNotNull("Order ID should be set", orderData.getId());
-        assertNotNull("Total should be set", orderData.getTotal());
+        assertNotNull("Order status should be set", orderData.getOrderStatus());
         assertNotNull("Placed date should be set", orderData.getPlacedAt());
     }
 

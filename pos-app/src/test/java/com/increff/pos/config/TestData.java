@@ -91,13 +91,16 @@ public final class TestData {
     public static OrderPojo order(int id) {
         OrderPojo order = new OrderPojo();
         order.setId(id);
-        order.setTotal(0.0);
+        return order;
+    }
+    
+    public static OrderPojo orderPojo() {
+        OrderPojo order = new OrderPojo();
         return order;
     }
     
     public static OrderPojo orderWithoutId() {
         OrderPojo order = new OrderPojo();
-        order.setTotal(0.0);
         return order;
     }
     
@@ -124,6 +127,15 @@ public final class TestData {
         item.setProductId(productId);
         item.setQuantity(5);
         item.setSellingPrice(50.0);
+        return item;
+    }
+    
+    public static OrderItemPojo orderItemPojo(int id, int productId, int quantity, double sellingPrice) {
+        OrderItemPojo item = new OrderItemPojo();
+        item.setId(id);
+        item.setProductId(productId);
+        item.setQuantity(quantity);
+        item.setSellingPrice(sellingPrice);
         return item;
     }
     
@@ -161,6 +173,14 @@ public final class TestData {
         daySales.setInvoicedItemsCount(50);
         daySales.setTotalRevenue(1000.0);
         return daySales;
+    }
+    
+    /* ---------- Invoice ---------- */
+    public static InvoicePojo invoicePojo(int orderId, String filePath) {
+        InvoicePojo invoice = new InvoicePojo();
+        invoice.setOrderId(orderId);
+        invoice.setFilePath(filePath);
+        return invoice;
     }
     
     /* ---------- SalesReport ---------- */

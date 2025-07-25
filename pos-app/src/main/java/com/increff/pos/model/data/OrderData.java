@@ -1,6 +1,7 @@
 package com.increff.pos.model.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.increff.pos.model.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,7 @@ public class OrderData {
 
     private Integer id;
     private ZonedDateTime placedAt;
-    //todo : remove boolean field instead send status(created and invoiceGenerated )
-    private Boolean invoiceGenerated;
+    private OrderStatus orderStatus;
     private Integer invoiceId;
-    private Double total;
 
 }

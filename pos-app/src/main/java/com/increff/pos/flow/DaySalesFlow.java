@@ -27,7 +27,7 @@ public class DaySalesFlow {
     public void calculateDailySales(ZonedDateTime date) {
         if (daySalesService.getByDate(date) != null) return;
 
-        List<OrderPojo> orders = orderService.getOrdersByDate(date);
+        List<OrderPojo> orders = orderService.getOrdersForSpecificDate(date);
         SalesMetrics metrics = computeSalesMetrics(orders);
         
         DaySalesPojo dailySales = createDailySalesRecord(date, orders.size(), metrics);
@@ -55,8 +55,8 @@ public class DaySalesFlow {
             List<OrderItemPojo> items = orderService.getOrderItemsByOrderId(order.getId());
             for (OrderItemPojo item : items) {
                 totalItems += item.getQuantity();
+                totalRevenue += item.getSellingPrice() * item.getQuantity();
             }
-            totalRevenue += order.getTotal();
         }
 
         return new SalesMetrics(totalItems, totalRevenue);

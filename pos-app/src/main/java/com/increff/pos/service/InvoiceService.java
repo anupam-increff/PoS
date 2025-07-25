@@ -1,9 +1,9 @@
 package com.increff.pos.service;
 
-
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.InvoicePojo;
 import com.increff.pos.dao.InvoiceDao;
+import com.increff.pos.model.enums.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +20,9 @@ public class InvoiceService {
 
     @Autowired
     private InvoiceDao invoiceDao;
+
+    @Autowired
+    private OrderService orderService;
 
     public boolean checkIfInvoiceExistsForOrder(Integer orderId) {
         InvoicePojo invoice = invoiceDao.getByOrderId(orderId);
@@ -38,12 +41,16 @@ public class InvoiceService {
         if (checkIfInvoiceExistsForOrder(order.getId())) {
             throw new ApiException("Invoice already exists for order ID: " + order.getId());
         }
-
+        
         String invoiceFilePath = buildInvoiceFilePath(order.getId());
         InvoicePojo invoice = new InvoicePojo();
         invoice.setOrderId(order.getId());
         invoice.setFilePath(invoiceFilePath);
         invoiceDao.insert(invoice);
+        
+        // Update order status to INVOICE_GENERATED
+        orderService.updateOrderStatus(order.getId(), OrderStatus.INVOICE_GENERATED);
+        
         return invoice;
     }
 

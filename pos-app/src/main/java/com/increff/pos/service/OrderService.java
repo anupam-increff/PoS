@@ -3,6 +3,7 @@ package com.increff.pos.service;
 import com.increff.pos.dao.OrderDao;
 import com.increff.pos.dao.OrderItemDao;
 import com.increff.pos.exception.ApiException;
+import com.increff.pos.model.enums.OrderStatus;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,19 @@ public class OrderService {
 
     public Integer createOrderWithItems(List<OrderItemPojo> orderItemPojos) {
         OrderPojo order = new OrderPojo();
-        order.setTotal(calculateOrderTotalCost(orderItemPojos));
-        Integer orderId = createOrder(order);
+        Integer orderId = placeOrder(order);
         saveOrderItems(orderItemPojos, orderId);
         return orderId;
     }
 
-    private Integer createOrder(OrderPojo orderPojo) {
+    private Integer placeOrder(OrderPojo orderPojo) {
         orderDao.insert(orderPojo);
         return orderPojo.getId();
+    }
+
+    public void updateOrderStatus(Integer orderId, OrderStatus status) {
+        OrderPojo order = getCheckByOrderId(orderId);
+        order.setOrderStatus(status);
     }
 
     public List<OrderItemPojo> getOrderItemsByOrderId(Integer orderId) {
@@ -48,21 +53,19 @@ public class OrderService {
         return order;
     }
 
-    public List<OrderPojo> getAllOrders(int page, int size) {
-        return orderDao.getAllOrdersByDate(page, size);
+    public void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
+        for (OrderItemPojo orderItemPojo : orderItemPojos) {
+            orderItemPojo.setOrderId(orderId);
+            orderItemDao.insert(orderItemPojo);
+        }
     }
 
-    public List<OrderPojo> getOrdersByDate(ZonedDateTime date) {
-        return orderDao.getOrdersForSpecificDate(date);
+    public List<OrderPojo> getAllOrdersPaginated(int page, int size) {
+        return orderDao.getAllOrdersByDate(page, size);
     }
 
     public long countAll() {
         return orderDao.countAll();
-    }
-
-    public void update(Integer id, OrderPojo newPojo) {
-        OrderPojo existing = getCheckByOrderId(id);
-        existing.setTotal(newPojo.getTotal());
     }
 
     public List<OrderPojo> searchOrderByQuery(ZonedDateTime startDate, ZonedDateTime endDate, String query, int page, int size) {
@@ -73,13 +76,7 @@ public class OrderService {
         return orderDao.countMatchingOrders(startDate, endDate, query);
     }
 
-    private void saveOrderItems(List<OrderItemPojo> orderItemPojos, Integer orderId) {
-        for (OrderItemPojo item : orderItemPojos) {
-            item.setOrderId(orderId);
-            orderItemDao.insert(item);
-        }
-    }
-    private Double calculateOrderTotalCost(List<OrderItemPojo> orderItemPojos) {
-        return orderItemPojos.stream().mapToDouble(i -> i.getSellingPrice() * i.getQuantity()).sum();
+    public List<OrderPojo> getOrdersForSpecificDate(ZonedDateTime date) {
+        return orderDao.getOrdersForSpecificDate(date);
     }
 }

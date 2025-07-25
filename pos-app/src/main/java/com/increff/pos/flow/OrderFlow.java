@@ -41,7 +41,7 @@ public class OrderFlow {
     }
 
     public List<OrderPojo> getAllOrders(int page, int size) {
-        return orderService.getAllOrders(page, size);
+        return orderService.getAllOrdersPaginated(page, size);
     }
 
     public List<OrderItemPojo> getOrderItemsByOrderId(Integer orderId) {
