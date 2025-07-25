@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {IntegrationTestConfig.class})
 @Transactional
-public class ClientOperationsIntegrationTest {
+public class ClientCreationIntegrationTests {
 
     @Autowired
     private ClientDto clientDto;

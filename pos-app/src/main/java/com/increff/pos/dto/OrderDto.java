@@ -55,7 +55,7 @@ public class OrderDto {
         List<OrderPojo> pojos = orderFlow.searchOrders(start, end, query, page, size);
         long totalItems = orderFlow.countMatchingOrders(start, end, query);
         int totalPages = (int) Math.ceil((double) totalItems / size);
-        
+
         List<OrderData> dataList = pojos.stream().map(this::convertOrderPojoToData).collect(Collectors.toList());
         return new PaginatedResponse<>(dataList, page, totalPages, totalItems, size);
     }

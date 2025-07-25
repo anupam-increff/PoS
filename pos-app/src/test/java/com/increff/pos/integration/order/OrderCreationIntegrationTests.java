@@ -27,13 +27,14 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for Order operations.
+ * Integration tests for Order DTO operations.
  * Tests order creation, item management, search, and validation scenarios.
+ * These tests verify the full flow from DTO through to database persistence.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {IntegrationTestConfig.class})
+@ContextConfiguration(classes = IntegrationTestConfig.class)
 @Transactional
-public class OrderOperationsIntegrationTest {
+public class OrderCreationIntegrationTests {
 
     @Autowired
     private OrderDto orderDto;

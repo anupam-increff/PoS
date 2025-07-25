@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {IntegrationTestConfig.class})
 @Transactional
-public class InventoryOperationsIntegrationTest {
+public class InventoryCreationIntegrationTests {
 
     @Autowired
     private InventoryDto inventoryDto;

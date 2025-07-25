@@ -41,16 +41,16 @@ public class InvoiceService {
         if (checkIfInvoiceExistsForOrder(order.getId())) {
             throw new ApiException("Invoice already exists for order ID: " + order.getId());
         }
-        
+
         String invoiceFilePath = buildInvoiceFilePath(order.getId());
         InvoicePojo invoice = new InvoicePojo();
         invoice.setOrderId(order.getId());
         invoice.setFilePath(invoiceFilePath);
         invoiceDao.insert(invoice);
-        
+
         // Update order status to INVOICE_GENERATED
         orderService.updateOrderStatus(order.getId(), OrderStatus.INVOICE_GENERATED);
-        
+
         return invoice;
     }
 

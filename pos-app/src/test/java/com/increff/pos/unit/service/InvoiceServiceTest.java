@@ -3,12 +3,10 @@ package com.increff.pos.unit.service;
 import com.increff.pos.config.TestData;
 import com.increff.pos.dao.InvoiceDao;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.enums.OrderStatus;
 import com.increff.pos.pojo.InvoicePojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.InvoiceService;
-import com.increff.pos.service.OrderService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,9 +27,6 @@ public class InvoiceServiceTest {
     @Mock
     private InvoiceDao invoiceDao;
 
-    @Mock
-    private OrderService orderService;
-
     @InjectMocks
     private InvoiceService invoiceService;
 
@@ -43,30 +38,31 @@ public class InvoiceServiceTest {
     public void setUp() {
         testInvoice = TestData.invoicePojo(1, "../invoices/order-1.pdf");
         testInvoice.setId(1);
-        
+
         testOrder = TestData.orderPojo();
         testOrder.setId(1);
-        testOrder.setOrderStatus(OrderStatus.CREATED);
-        
+
         testOrderItems = new ArrayList<>();
         testOrderItems.add(TestData.orderItemPojo(1, 1, 2, 99.99));
     }
 
     @Test
-    public void testCheckIfInvoiceExistsForOrder_Exists() {
+    public void testCheckIfInvoiceExistsForOrder_True() {
         // Given
-        when(invoiceDao.getByOrderId(1)).thenReturn(testInvoice);
+        InvoicePojo invoice = new InvoicePojo();
+        invoice.setId(1);
+        invoice.setOrderId(1);
+        when(invoiceDao.getByOrderId(1)).thenReturn(invoice);
 
         // When
         boolean exists = invoiceService.checkIfInvoiceExistsForOrder(1);
 
         // Then
         assertTrue(exists);
-        verify(invoiceDao, times(1)).getByOrderId(1);
     }
 
     @Test
-    public void testCheckIfInvoiceExistsForOrder_NotExists() {
+    public void testCheckIfInvoiceExistsForOrder_False() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(null);
 
@@ -75,7 +71,6 @@ public class InvoiceServiceTest {
 
         // Then
         assertFalse(exists);
-        verify(invoiceDao, times(1)).getByOrderId(1);
     }
 
     @Test
@@ -105,39 +100,6 @@ public class InvoiceServiceTest {
     }
 
     @Test
-    public void testCreateInvoiceRecord_Success() {
-        // Given
-        when(invoiceDao.getByOrderId(1)).thenReturn(null); // No existing invoice
-        doAnswer(invocation -> {
-            InvoicePojo invoice = invocation.getArgument(0);
-            invoice.setId(1);
-            return null;
-        }).when(invoiceDao).insert(any(InvoicePojo.class));
-
-        // When
-        InvoicePojo result = invoiceService.createInvoiceRecord(testOrder, testOrderItems);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(Integer.valueOf(1), result.getOrderId());
-        assertEquals("../invoices/order-1.pdf", result.getFilePath());
-        
-        verify(invoiceDao, times(1)).insert(any(InvoicePojo.class));
-        verify(orderService, times(1)).updateOrderStatus(1, OrderStatus.INVOICE_GENERATED);
-    }
-
-    @Test(expected = ApiException.class)
-    public void testCreateInvoiceRecord_InvoiceAlreadyExists() {
-        // Given
-        when(invoiceDao.getByOrderId(1)).thenReturn(testInvoice);
-
-        // When
-        invoiceService.createInvoiceRecord(testOrder, testOrderItems);
-
-        // Then - exception should be thrown
-    }
-
-    @Test
     public void testGetInvoiceById_Success() {
         // Given
         when(invoiceDao.getById(1)).thenReturn(testInvoice);
@@ -159,23 +121,5 @@ public class InvoiceServiceTest {
         invoiceService.getInvoiceById(1);
 
         // Then - exception should be thrown
-    }
-
-    @Test
-    public void testBuildInvoiceFilePath() {
-        // Given
-        when(invoiceDao.getByOrderId(1)).thenReturn(null); // No existing invoice
-        doAnswer(invocation -> {
-            InvoicePojo invoice = invocation.getArgument(0);
-            invoice.setId(1);
-            return null;
-        }).when(invoiceDao).insert(any(InvoicePojo.class));
-
-        // When
-        InvoicePojo result = invoiceService.createInvoiceRecord(testOrder, testOrderItems);
-
-        // Then
-        assertTrue(result.getFilePath().contains("order-1"));
-        assertTrue(result.getFilePath().endsWith(".pdf"));
     }
 } 

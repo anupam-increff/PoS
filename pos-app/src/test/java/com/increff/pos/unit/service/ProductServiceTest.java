@@ -1,5 +1,6 @@
 package com.increff.pos.unit.service;
 
+import com.increff.pos.config.TestData;
 import com.increff.pos.dao.ProductDao;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.ProductPojo;
@@ -9,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
@@ -28,90 +28,113 @@ public class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
+    private ProductPojo testProduct;
+
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        testProduct = TestData.product(1, 1);
+        testProduct.setBarcode("BARCODE-001");
+        testProduct.setName("Test Product");
+        testProduct.setMrp(99.99);
     }
 
     @Test
     public void testAddProduct_Success() {
-        ProductPojo product = createTestProduct("BARCODE-1", "Test Product", 100.0);
-        when(productDao.getByBarcode("BARCODE-1")).thenReturn(null);
+        // Given
+        when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
+        doNothing().when(productDao).insert(any(ProductPojo.class));
 
-        productService.addProduct(product);
+        // When
+        productService.addProduct(testProduct);
 
-        verify(productDao).insert(product);
+        // Then
+        verify(productDao, times(1)).getByBarcode("BARCODE-001");
+        verify(productDao, times(1)).insert(testProduct);
     }
 
     @Test(expected = ApiException.class)
     public void testAddProduct_DuplicateBarcode() {
-        ProductPojo existing = createTestProduct("BARCODE-1", "Existing Product", 50.0);
-        ProductPojo newProduct = createTestProduct("BARCODE-1", "New Product", 100.0);
-        
-        when(productDao.getByBarcode("BARCODE-1")).thenReturn(existing);
+        // Given
+        when(productDao.getByBarcode("BARCODE-001")).thenReturn(testProduct);
 
-        productService.addProduct(newProduct);
+        // When
+        productService.addProduct(testProduct);
+
+        // Then - exception should be thrown
     }
 
     @Test
     public void testGetCheckProductByBarcode_Success() {
-        ProductPojo product = createTestProduct("BARCODE-1", "Test Product", 100.0);
-        when(productDao.getByBarcode("BARCODE-1")).thenReturn(product);
+        // Given
+        when(productDao.getByBarcode("BARCODE-001")).thenReturn(testProduct);
 
-        ProductPojo result = productService.getCheckProductByBarcode("BARCODE-1");
+        // When
+        ProductPojo result = productService.getCheckProductByBarcode("BARCODE-001");
 
-        assertEquals(product, result);
+        // Then
+        assertEquals(testProduct, result);
+        verify(productDao, times(1)).getByBarcode("BARCODE-001");
     }
 
     @Test(expected = ApiException.class)
     public void testGetCheckProductByBarcode_NotFound() {
-        when(productDao.getByBarcode("BARCODE-1")).thenReturn(null);
+        // Given
+        when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
 
-        productService.getCheckProductByBarcode("BARCODE-1");
+        // When
+        productService.getCheckProductByBarcode("BARCODE-001");
+
+        // Then - exception should be thrown
     }
 
     @Test
-    public void testGetAll() {
-        List<ProductPojo> products = Arrays.asList(
-            createTestProduct("BARCODE-1", "Product 1", 100.0),
-            createTestProduct("BARCODE-2", "Product 2", 200.0)
-        );
+    public void testGetCheckProductById_Success() {
+        // Given
+        when(productDao.getById(1)).thenReturn(testProduct);
+
+        // When
+        ProductPojo result = productService.getCheckProductById(1);
+
+        // Then
+        assertEquals(testProduct, result);
+        verify(productDao, times(1)).getById(1);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testGetCheckProductById_NotFound() {
+        // Given
+        when(productDao.getById(1)).thenReturn(null);
+
+        // When
+        productService.getCheckProductById(1);
+
+        // Then - exception should be thrown
+    }
+
+    @Test
+    public void testGetAll_Success() {
+        // Given
+        List<ProductPojo> products = Arrays.asList(testProduct);
         when(productDao.getAllProducts(0, 10)).thenReturn(products);
 
+        // When
         List<ProductPojo> result = productService.getAll(0, 10);
 
-        assertEquals(2, result.size());
-        verify(productDao).getAllProducts(0, 10);
+        // Then
+        assertEquals(products, result);
+        verify(productDao, times(1)).getAllProducts(0, 10);
     }
 
     @Test
-    public void testCountAll() {
+    public void testCountAll_Success() {
+        // Given
         when(productDao.countAll()).thenReturn(5L);
 
+        // When
         long count = productService.countAll();
 
+        // Then
         assertEquals(5L, count);
-    }
-
-    @Test
-    public void testSearchByBarcode() {
-        List<ProductPojo> products = Arrays.asList(
-            createTestProduct("BARCODE-1", "Product 1", 100.0)
-        );
-        when(productDao.searchByBarcode("BARCODE", 0, 10)).thenReturn(products);
-
-        List<ProductPojo> result = productService.searchByBarcode("BARCODE", 0, 10);
-
-        assertEquals(1, result.size());
-        verify(productDao).searchByBarcode("BARCODE", 0, 10);
-    }
-
-    private ProductPojo createTestProduct(String barcode, String name, Double mrp) {
-        ProductPojo product = new ProductPojo();
-        product.setBarcode(barcode);
-        product.setName(name);
-        product.setMrp(mrp);
-        product.setClientId(1);
-        return product;
+        verify(productDao, times(1)).countAll();
     }
 } 

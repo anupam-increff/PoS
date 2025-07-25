@@ -20,8 +20,8 @@ public class InvoiceController {
     }
 
     @ApiOperation("Generate invoice for order and return invoice ID")
-    @PostMapping("/generate/{orderId}")
-    public Integer generateInvoice(@PathVariable Integer orderId) {
+    @PostMapping("/generate")
+    public Integer generateInvoice(@RequestParam Integer orderId) {
         return invoiceDto.generateInvoice(orderId);
     }
 }
