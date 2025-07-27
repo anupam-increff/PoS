@@ -41,20 +41,28 @@ public class InvoiceXmlBuilder {
 
         xml.append("    <fo:flow flow-name=\"xsl-region-body\">\n");
 
-        // Company Header - Simple and Professional
-        xml.append("      <fo:block text-align=\"center\" border-bottom=\"2pt solid #000000\" padding-bottom=\"10pt\" margin-bottom=\"16pt\">\n");
-        xml.append("        <fo:block font-size=\"20pt\" font-weight=\"bold\" font-family=\"Arial, sans-serif\" margin-bottom=\"3pt\">INCREFF</fo:block>\n");
-        xml.append("        <fo:block font-size=\"9pt\" color=\"#666666\">3rd Floor, The Hub Unit 1, Sarjapur-Marathahalli Rd, Bellandur</fo:block>\n");
-        xml.append("        <fo:block font-size=\"9pt\" color=\"#666666\">Bengaluru, Karnataka 560103</fo:block>\n");
-        xml.append("        <fo:block font-size=\"9pt\" color=\"#666666\" margin-top=\"2pt\">Email: sales@increff.com</fo:block>\n");
-        xml.append("      </fo:block>\n");
-
-        // Invoice Title and Details
-        xml.append("      <fo:block text-align=\"center\" margin-bottom=\"16pt\">\n");
-        xml.append("        <fo:block font-size=\"16pt\" font-weight=\"bold\" margin-bottom=\"6pt\">INVOICE</fo:block>\n");
-        xml.append("        <fo:block font-size=\"10pt\" margin-bottom=\"2pt\">Order Number: ").append(String.format("%06d", order.getId())).append("</fo:block>\n");
-        xml.append("        <fo:block font-size=\"10pt\" margin-bottom=\"2pt\">Date: ").append(order.getTime().format(DATE_FMT)).append("</fo:block>\n");
-        xml.append("        <fo:block font-size=\"10pt\">Time: ").append(order.getTime().format(TIME_FMT)).append("</fo:block>\n");
+        // Compact Header with Company Left and Invoice Right
+        xml.append("      <fo:block border-bottom=\"2pt solid #000000\" padding-bottom=\"8pt\" margin-bottom=\"12pt\">\n");
+        xml.append("        <fo:table table-layout=\"fixed\" width=\"100%\">\n");
+        xml.append("          <fo:table-column column-width=\"60%\"/>\n");
+        xml.append("          <fo:table-column column-width=\"40%\"/>\n");
+        xml.append("          <fo:table-body>\n");
+        xml.append("            <fo:table-row>\n");
+        xml.append("              <fo:table-cell display-align=\"before\">\n");
+        xml.append("                <fo:block font-size=\"18pt\" font-weight=\"bold\" font-family=\"Arial, sans-serif\" margin-bottom=\"2pt\">INCREFF</fo:block>\n");
+        xml.append("                <fo:block font-size=\"8pt\" color=\"#666666\">3rd Floor, The Hub Unit 1, Sarjapur-Marathahalli Rd, Bellandur</fo:block>\n");
+        xml.append("                <fo:block font-size=\"8pt\" color=\"#666666\">Bengaluru, Karnataka 560103</fo:block>\n");
+        xml.append("                <fo:block font-size=\"8pt\" color=\"#666666\">Email: sales@increff.com</fo:block>\n");
+        xml.append("              </fo:table-cell>\n");
+        xml.append("              <fo:table-cell text-align=\"right\" display-align=\"before\">\n");
+        xml.append("                <fo:block font-size=\"10pt\" font-weight=\"bold\" margin-bottom=\"4pt\">INVOICE</fo:block>\n");
+        xml.append("                <fo:block font-size=\"9pt\" margin-bottom=\"1pt\">Order Number: ").append(String.format("%06d", order.getId())).append("</fo:block>\n");
+        xml.append("                <fo:block font-size=\"9pt\" margin-bottom=\"1pt\">Date: ").append(order.getTime().format(DATE_FMT)).append("</fo:block>\n");
+        xml.append("                <fo:block font-size=\"9pt\">Time: ").append(order.getTime().format(TIME_FMT)).append("</fo:block>\n");
+        xml.append("              </fo:table-cell>\n");
+        xml.append("            </fo:table-row>\n");
+        xml.append("          </fo:table-body>\n");
+        xml.append("        </fo:table>\n");
         xml.append("      </fo:block>\n");
 
         // Items Table
