@@ -27,15 +27,11 @@ public class InventoryDto extends BaseDto {
     }
 
     public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
-        String[] errorHeaders = {"Barcode", "Quantity", "Error"};
-        String errorFileName = "inventory_upload_errors.tsv";
-        final int maxRows = 5000;
-        String successMessage = "inventory items updated successfully";
-
         return TSVUploadUtil.processTSVUpload(
-            file, InventoryForm.class, errorHeaders, errorFileName, maxRows,
-            form -> inventoryFlow.addInventory(form.getBarcode(), form.getQuantity()),
-            successMessage, tsvDownloadService
+                file,
+                InventoryForm.class,
+                form -> inventoryFlow.addInventory(form.getBarcode(), form.getQuantity()),
+                tsvDownloadService
         );
     }
 

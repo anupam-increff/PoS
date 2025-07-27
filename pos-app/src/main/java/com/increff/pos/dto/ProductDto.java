@@ -37,19 +37,10 @@ public class ProductDto extends BaseDto {
     }
 
     public TSVUploadResponse uploadProductMasterByTsv(MultipartFile file) {
-        String[] errorHeaders = {"Barcode", "ClientName", "Name", "MRP", "Error"};
-        String errorFileName = "product_upload_errors.tsv";
-        final int maxRows = 5000;
-        String successMessage = "products added successfully";
-
-        return TSVUploadUtil.processTSVUpload(
-            file, ProductForm.class, errorHeaders, errorFileName, maxRows,
-            form -> {
-                ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
-                productFlow.addProduct(productPojo, form.getClientName());
-            },
-            successMessage, tsvDownloadService
-        );
+        return TSVUploadUtil.processTSVUpload(file, ProductForm.class, form -> {
+            ProductPojo productPojo = ConvertUtil.convert(form, ProductPojo.class);
+            productFlow.addProduct(productPojo, form.getClientName());
+        }, tsvDownloadService);
     }
 
     public PaginatedResponse<ProductData> getAll(int page, int pageSize) {
@@ -79,8 +70,8 @@ public class ProductDto extends BaseDto {
     }
 
     public void update(Integer id, @Valid ProductForm productForm) {
-        ProductPojo productPojo=ConvertUtil.convert(productForm,ProductPojo.class);
-        productFlow.updateProduct(id, productPojo,productForm.getClientName());
+        ProductPojo productPojo = ConvertUtil.convert(productForm, ProductPojo.class);
+        productFlow.updateProduct(id, productPojo, productForm.getClientName());
     }
 
     private ProductData pojoToData(ProductPojo product) {
