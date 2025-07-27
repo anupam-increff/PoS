@@ -56,8 +56,12 @@ public class OrderFlowIntegrationTest extends AbstractTest {
         inventoryDao.insert(testInventory);
     }
 
+    /**
+     * Tests placing an order through the complete flow with inventory validation.
+     * Verifies multi-service integration including inventory reduction.
+     */
     @Test
-    public void testPlaceOrder_FlowMultiServiceDaoIntegration() {
+    public void testPlaceOrder() {
         // Given - Order items to place
         OrderItemPojo orderItem = TestData.orderItemWithoutId(0, testProduct.getId(), 3, 90.0);
         List<OrderItemPojo> orderItems = Arrays.asList(orderItem);
@@ -84,8 +88,12 @@ public class OrderFlowIntegrationTest extends AbstractTest {
         assertEquals("Inventory should be reduced", Integer.valueOf(47), updatedInventory.getQuantity());
     }
 
+    /**
+     * Tests retrieving all orders with proper pagination.
+     * Verifies flow layer correctly fetches and formats order data.
+     */
     @Test
-    public void testGetAllOrders_FlowServiceDaoIntegration() {
+    public void testGetAllOrders() {
         // Given - Create some orders in database
         OrderPojo order1 = TestData.orderWithoutId();
         orderDao.insert(order1);
@@ -107,8 +115,12 @@ public class OrderFlowIntegrationTest extends AbstractTest {
         assertTrue("Order 2 should be found", foundOrder2);
     }
 
+    /**
+     * Tests counting total orders through the flow layer.
+     * Verifies accurate count retrieval from database.
+     */
     @Test
-    public void testCountAllOrders_FlowServiceDaoIntegration() {
+    public void testCountAllOrders() {
         // Given - Create orders in database
         OrderPojo order1 = TestData.orderWithoutId();
         orderDao.insert(order1);
@@ -123,8 +135,12 @@ public class OrderFlowIntegrationTest extends AbstractTest {
         assertTrue("Count should be at least 2", count >= 2);
     }
 
+    /**
+     * Tests order placement validation when inventory is insufficient.
+     * Verifies proper error handling and inventory protection.
+     */
     @Test
-    public void testPlaceOrder_InsufficientInventory_FlowValidation() {
+    public void testPlaceOrderInsufficientInventory() {
         // Given - Order items with quantity exceeding inventory
         OrderItemPojo orderItem = TestData.orderItemWithoutId(0, testProduct.getId(), 100, 90.0); // More than available 50
         List<OrderItemPojo> orderItems = Arrays.asList(orderItem);

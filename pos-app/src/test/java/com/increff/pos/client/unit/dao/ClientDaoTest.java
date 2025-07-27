@@ -4,6 +4,7 @@ import com.increff.pos.setup.AbstractTest;
 import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.pojo.ClientPojo;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,95 +12,111 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * DAO unit tests for ClientDao.
- * Tests direct database operations for Client entity.
- */
 public class ClientDaoTest extends AbstractTest {
 
     @Autowired
     private ClientDao clientDao;
 
-    @Test
-    public void testInsertAndGetClientByName_Success() {
-        // Given
-        ClientPojo client = TestData.clientWithoutId("Test Client DAO");
+    private ClientPojo testClient;
 
-        // When
-        clientDao.insert(client);
-        ClientPojo savedClient = clientDao.getClientByName("Test Client DAO");
-
-        // Then
-        assertNotNull("Client should be saved and retrieved", savedClient);
-        assertEquals("Test Client DAO", savedClient.getName());
-        assertNotNull("ID should be generated", savedClient.getId());
+    @Before
+    public void setUp() {
+        testClient = TestData.clientWithoutId("Test Client DAO");
     }
 
+    /**
+     * Tests inserting a client and retrieving it by name.
+     * Verifies basic DAO insert and select operations.
+     */
     @Test
-    public void testGetClientByName_NotFound() {
+    public void testInsertAndGetClientByName() {
         // When
-        ClientPojo client = clientDao.getClientByName("NonExistent Client");
+        clientDao.insert(testClient);
 
         // Then
-        assertNull("Non-existent client should return null", client);
+        ClientPojo retrieved = clientDao.getClientByName("Test Client DAO");
+        assertNotNull("Client should be found by name", retrieved);
+        assertEquals("Client name should match", "Test Client DAO", retrieved.getName());
     }
 
+    /**
+     * Tests retrieving client by non-existent name.
+     * Verifies proper handling when no client matches the name.
+     */
     @Test
-    public void testGetAllClients_Success() {
-        // Given
-        clientDao.insert(TestData.clientWithoutId("Client 1"));
-        clientDao.insert(TestData.clientWithoutId("Client 2"));
-
+    public void testGetClientByNameNotFound() {
         // When
-        List<ClientPojo> clients = clientDao.getAllClients(0, 10);
+        ClientPojo result = clientDao.getClientByName("Non-Existent Client");
 
         // Then
-        assertNotNull("Clients list should not be null", clients);
-        assertEquals(2, clients.size());
+        assertNull("Non-existent client should return null", result);
     }
 
+    /**
+     * Tests counting all clients in the database.
+     * Verifies the countAll method returns accurate count.
+     */
     @Test
-    public void testSearchClientByName_Success() {
+    public void testCountAll() {
         // Given
-        clientDao.insert(TestData.clientWithoutId("Search Client Alpha"));
-        clientDao.insert(TestData.clientWithoutId("Search Client Beta"));
-        clientDao.insert(TestData.clientWithoutId("Different Name"));
+        long initialCount = clientDao.countAll();
+        clientDao.insert(testClient);
 
         // When
-        List<ClientPojo> results = clientDao.searchClientByName("Search", 0, 10);
+        long finalCount = clientDao.countAll();
 
         // Then
-        assertNotNull("Search results should not be null", results);
-        assertEquals(2, results.size());
-        assertTrue("All results should contain 'Search'",
-            results.stream().allMatch(c -> c.getName().contains("Search")));
+        assertEquals("Count should increase by one", initialCount + 1, finalCount);
     }
 
+    /**
+     * Tests counting clients by search query.
+     * Verifies the search count functionality.
+     */
     @Test
-    public void testCountByQuery_Success() {
+    public void testCountByQuery() {
         // Given
-        clientDao.insert(TestData.clientWithoutId("Query Client 1"));
-        clientDao.insert(TestData.clientWithoutId("Query Client 2"));
-        clientDao.insert(TestData.clientWithoutId("Other Name"));
+        clientDao.insert(testClient);
 
         // When
-        long count = clientDao.countByQuery("Query");
+        long count = clientDao.countByQuery("Test");
 
         // Then
-        assertEquals(2L, count);
+        assertTrue("Should find at least one matching client", count >= 1);
     }
 
+    /**
+     * Tests retrieving all clients.
+     * Verifies the getAll method returns all persisted clients.
+     */
     @Test
-    public void testCountAll_Success() {
+    public void testGetAllClients() {
         // Given
-        clientDao.insert(TestData.clientWithoutId("Client A"));
-        clientDao.insert(TestData.clientWithoutId("Client B"));
-        clientDao.insert(TestData.clientWithoutId("Client C"));
+        clientDao.insert(testClient);
 
         // When
-        long count = clientDao.countAll();
+        List<ClientPojo> allClients = clientDao.getAll();
 
         // Then
-        assertEquals(3L, count);
+        assertNotNull("Client list should not be null", allClients);
+        assertTrue("Should contain at least one client", allClients.size() >= 1);
+    }
+
+    /**
+     * Tests searching clients by name pattern.
+     * Verifies partial matching and search functionality.
+     */
+    @Test
+    public void testSearchClientByName() {
+        // Given
+        clientDao.insert(testClient);
+
+        // When
+        List<ClientPojo> searchResults = clientDao.searchClientByName("Test", 0, 10);
+
+        // Then
+        assertNotNull("Search results should not be null", searchResults);
+        assertEquals("Should find one matching client", 1, searchResults.size());
+        assertEquals("Found client should match", "Test Client DAO", searchResults.get(0).getName());
     }
 } 

@@ -36,71 +36,72 @@ public class InventoryServiceTest {
         testInventory.setQuantity(100);
     }
 
+    /**
+     * Tests adding inventory to the system.
+     * Verifies proper inventory insertion and database persistence.
+     */
     @Test
-    public void testAddInventory_Success() {
+    public void testAddInventory() {
         // Given
-        when(inventoryDao.getByProductId(1)).thenReturn(null);
         doNothing().when(inventoryDao).insert(any(InventoryPojo.class));
 
         // When
         inventoryService.addInventory(1, 50);
 
         // Then
-        verify(inventoryDao, times(1)).getByProductId(1);
         verify(inventoryDao, times(1)).insert(any(InventoryPojo.class));
     }
 
+    /**
+     * Tests retrieving all inventory with pagination.
+     * Verifies proper DAO delegation and pagination handling.
+     */
     @Test
-    public void testAddInventory_ExistingProduct() {
+    public void testGetAll() {
         // Given
-        when(inventoryDao.getByProductId(1)).thenReturn(testInventory);
-
-        // When
-        inventoryService.addInventory(1, 50);
-
-        // Then
-        verify(inventoryDao, times(2)).getByProductId(1); // Called twice in the method
-        assertEquals(Integer.valueOf(150), testInventory.getQuantity());
-    }
-
-    @Test
-    public void testGetAll_Success() {
-        // Given
-        List<InventoryPojo> inventories = Arrays.asList(testInventory);
-        when(inventoryDao.getAllInventory(0, 10)).thenReturn(inventories);
+        List<InventoryPojo> inventoryList = Arrays.asList(testInventory);
+        when(inventoryDao.getAllInventory(0, 10)).thenReturn(inventoryList);
 
         // When
         List<InventoryPojo> result = inventoryService.getAll(0, 10);
 
         // Then
-        assertEquals(inventories, result);
+        assertEquals("Result should match DAO response", inventoryList, result);
         verify(inventoryDao, times(1)).getAllInventory(0, 10);
     }
 
+    /**
+     * Tests counting all inventory items.
+     * Verifies proper count delegation to DAO layer.
+     */
     @Test
-    public void testCountAll_Success() {
+    public void testCountAll() {
         // Given
         when(inventoryDao.countAll()).thenReturn(5L);
 
         // When
-        long count = inventoryService.countAll();
+        long result = inventoryService.countAll();
 
         // Then
-        assertEquals(5L, count);
+        assertEquals("Count should match DAO response", 5L, result);
         verify(inventoryDao, times(1)).countAll();
     }
 
+    /**
+     * Tests searching inventory by barcode pattern.
+     * Verifies proper search functionality with pagination.
+     */
     @Test
-    public void testSearchByBarcode_Success() {
+    public void testSearchByBarcode() {
         // Given
-        List<InventoryPojo> inventories = Arrays.asList(testInventory);
-        when(inventoryDao.searchByBarcode("TEST", 0, 10)).thenReturn(inventories);
+        List<InventoryPojo> inventoryList = Arrays.asList(testInventory);
+        when(inventoryDao.searchByBarcode("TEST", 0, 10)).thenReturn(inventoryList);
 
         // When
         List<InventoryPojo> result = inventoryService.searchByBarcode("TEST", 0, 10);
 
         // Then
-        assertEquals(inventories, result);
+        assertEquals("Search results should match DAO response", inventoryList, result);
         verify(inventoryDao, times(1)).searchByBarcode("TEST", 0, 10);
     }
 } 

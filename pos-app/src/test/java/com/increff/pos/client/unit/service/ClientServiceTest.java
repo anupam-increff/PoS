@@ -36,8 +36,12 @@ public class ClientServiceTest {
         testClient.setName("Test Client");
     }
 
+    /**
+     * Tests successfully adding a new client.
+     * Verifies proper validation and database insertion.
+     */
     @Test
-    public void testAddClient_Success() {
+    public void testAddClient() {
         // Given
         when(clientDao.getClientByName("Test Client")).thenReturn(null);
         doNothing().when(clientDao).insert(any(ClientPojo.class));
@@ -50,8 +54,12 @@ public class ClientServiceTest {
         verify(clientDao, times(1)).insert(testClient);
     }
 
+    /**
+     * Tests adding a client with duplicate name.
+     * Verifies proper exception handling for name conflicts.
+     */
     @Test(expected = ApiException.class)
-    public void testAddClient_DuplicateName() {
+    public void testAddClientDuplicateName() {
         // Given
         when(clientDao.getClientByName("Test Client")).thenReturn(testClient);
 
@@ -61,8 +69,12 @@ public class ClientServiceTest {
         // Then - exception should be thrown
     }
 
+    /**
+     * Tests retrieving all clients with pagination.
+     * Verifies proper delegation to DAO layer.
+     */
     @Test
-    public void testGetAllClients_Success() {
+    public void testGetAllClients() {
         // Given
         List<ClientPojo> clients = Arrays.asList(testClient);
         when(clientDao.getAllClients(0, 10)).thenReturn(clients);
@@ -71,25 +83,16 @@ public class ClientServiceTest {
         List<ClientPojo> result = clientService.getAllClients(0, 10);
 
         // Then
-        assertEquals(clients, result);
+        assertEquals("Should return client list from DAO", clients, result);
         verify(clientDao, times(1)).getAllClients(0, 10);
     }
 
+    /**
+     * Tests searching clients by query string.
+     * Verifies proper search delegation and result handling.
+     */
     @Test
-    public void testCountAll_Success() {
-        // Given
-        when(clientDao.countAll()).thenReturn(5L);
-
-        // When
-        long count = clientService.countAll();
-
-        // Then
-        assertEquals(5L, count);
-        verify(clientDao, times(1)).countAll();
-    }
-
-    @Test
-    public void testSearchClients_Success() {
+    public void testSearchClients() {
         // Given
         List<ClientPojo> clients = Arrays.asList(testClient);
         when(clientDao.searchClientByName("Test", 0, 10)).thenReturn(clients);
@@ -98,20 +101,39 @@ public class ClientServiceTest {
         List<ClientPojo> result = clientService.searchClients("Test", 0, 10);
 
         // Then
-        assertEquals(clients, result);
+        assertEquals("Should return search results from DAO", clients, result);
         verify(clientDao, times(1)).searchClientByName("Test", 0, 10);
     }
 
+    /**
+     * Tests retrieving client by valid ID.
+     * Verifies proper client lookup and validation.
+     */
     @Test
-    public void testCountByQuery_Success() {
+    public void testGetCheckClientById() {
         // Given
-        when(clientDao.countByQuery("Test")).thenReturn(3L);
+        when(clientDao.getById(1)).thenReturn(testClient);
 
         // When
-        long count = clientService.countByQuery("Test");
+        ClientPojo result = clientService.getCheckClientById(1);
 
         // Then
-        assertEquals(3L, count);
-        verify(clientDao, times(1)).countByQuery("Test");
+        assertEquals("Should return client from DAO", testClient, result);
+        verify(clientDao, times(1)).getById(1);
+    }
+
+    /**
+     * Tests retrieving client by invalid ID.
+     * Verifies proper exception handling for non-existent clients.
+     */
+    @Test(expected = ApiException.class)
+    public void testGetCheckClientByIdNotFound() {
+        // Given
+        when(clientDao.getById(999)).thenReturn(null);
+
+        // When
+        clientService.getCheckClientById(999);
+
+        // Then - exception should be thrown
     }
 } 

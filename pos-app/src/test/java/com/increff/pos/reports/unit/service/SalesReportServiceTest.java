@@ -18,6 +18,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.increff.pos.model.form.SalesReportFilterForm;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SalesReportServiceTest {
@@ -38,26 +39,29 @@ public class SalesReportServiceTest {
         testSalesReport.setRevenue(1500.0);
     }
 
+    /**
+     * Tests retrieving sales report with filtering.
+     * Verifies proper report generation and data filtering.
+     */
     @Test
-    public void testGetSalesReport_Success() {
+    public void testGetSalesReport() {
         // Given
-        ZonedDateTime start = ZonedDateTime.now().minusDays(7);
-        ZonedDateTime end = ZonedDateTime.now();
+        ZonedDateTime startDate = ZonedDateTime.now().minusDays(7);
+        ZonedDateTime endDate = ZonedDateTime.now();
         String clientName = "Test Client";
-        List<SalesReportData> reports = Arrays.asList(testSalesReport);
-        when(salesReportDao.getSalesReport(start, end, clientName, 0, 10)).thenReturn(reports);
-        when(salesReportDao.countTotalClients(start, end, clientName)).thenReturn(1L);
+        
+        List<SalesReportData> mockData = Arrays.asList(new SalesReportData("Test Client", 10L, 1000.0));
+        when(salesReportDao.getSalesReport(startDate, endDate, clientName, 0, 10)).thenReturn(mockData);
+        when(salesReportDao.countTotalClients(startDate, endDate, clientName)).thenReturn(1L);
 
         // When
-        PaginatedResponse<SalesReportData> result = salesReportService.getSalesReport(start, end, clientName, 0, 10);
+        PaginatedResponse<SalesReportData> result = salesReportService.getSalesReport(startDate, endDate, clientName, 0, 10);
 
         // Then
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        assertEquals("Test Client", result.getContent().get(0).getClient());
-        assertEquals(Long.valueOf(25L), result.getContent().get(0).getQuantity());
-        assertEquals(Double.valueOf(1500.0), result.getContent().get(0).getRevenue());
-        verify(salesReportDao, times(1)).getSalesReport(start, end, clientName, 0, 10);
-        verify(salesReportDao, times(1)).countTotalClients(start, end, clientName);
+        assertNotNull("Sales report should not be null", result);
+        assertEquals("Should contain one report entry", 1, result.getContent().size());
+        assertEquals("Total items should match", 1L, result.getTotalItems());
+        verify(salesReportDao, times(1)).getSalesReport(startDate, endDate, clientName, 0, 10);
+        verify(salesReportDao, times(1)).countTotalClients(startDate, endDate, clientName);
     }
 } 

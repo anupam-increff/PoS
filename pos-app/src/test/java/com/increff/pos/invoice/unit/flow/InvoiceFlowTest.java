@@ -61,8 +61,12 @@ public class InvoiceFlowTest {
         testInvoice.setFilePath("../invoices/order-1.pdf");
     }
 
+    /**
+     * Tests successful invoice generation for a given order.
+     * Verifies calls to order and invoice services.
+     */
     @Test
-    public void testGenerateInvoice_Success() {
+    public void testGenerateInvoice() {
         // Given
         when(orderService.getCheckByOrderId(1)).thenReturn(testOrder);
         when(orderService.getOrderItemsByOrderId(1)).thenReturn(testOrderItems);
@@ -79,8 +83,12 @@ public class InvoiceFlowTest {
         verify(invoiceService, times(1)).createInvoiceRecord(testOrder, testOrderItems);
     }
 
+    /**
+     * Tests retrieving an invoice by its ID.
+     * Verifies proper delegation to invoice service.
+     */
     @Test
-    public void testGetInvoiceById_Success() {
+    public void testGetInvoiceById() {
         // Given
         when(invoiceService.getInvoiceById(1)).thenReturn(testInvoice);
 
@@ -92,8 +100,12 @@ public class InvoiceFlowTest {
         verify(invoiceService, times(1)).getInvoiceById(1);
     }
 
+    /**
+     * Tests retrieving order details for invoice generation.
+     * Verifies proper order retrieval for invoice context.
+     */
     @Test
-    public void testGetOrderForInvoice_Success() {
+    public void testGetOrderForInvoice() {
         // Given
         when(orderService.getCheckByOrderId(1)).thenReturn(testOrder);
 
@@ -105,8 +117,12 @@ public class InvoiceFlowTest {
         verify(orderService, times(1)).getCheckByOrderId(1);
     }
 
+    /**
+     * Tests retrieving order items for invoice generation.
+     * Verifies proper order items collection for invoice processing.
+     */
     @Test
-    public void testGetOrderItemsForInvoice_Success() {
+    public void testGetOrderItemsForInvoice() {
         // Given
         when(orderService.getOrderItemsByOrderId(1)).thenReturn(testOrderItems);
 

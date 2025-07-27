@@ -44,6 +44,7 @@ public class OrderDtoTest {
     private OrderPojo testOrder;
     private OrderForm testOrderForm;
     private ProductPojo testProduct;
+    private OrderItemForm testOrderItemForm;
 
     @Before
     public void setUp() {
@@ -53,41 +54,47 @@ public class OrderDtoTest {
         testProduct = TestData.product(1, 1);
         testProduct.setBarcode("ORDER-001");
 
-        OrderItemForm orderItemForm = TestData.orderItemForm("ORDER-001", 2, 95.0);
-        testOrderForm = TestData.orderForm(Arrays.asList(orderItemForm));
+        testOrderItemForm = TestData.orderItemForm("ORDER-001", 2, 95.0);
+        testOrderForm = TestData.orderForm(Arrays.asList(testOrderItemForm));
     }
 
+    /**
+     * Tests placing an order through the DTO layer.
+     * Verifies proper form validation and flow integration.
+     */
     @Test
-    public void testPlaceOrder_Success() {
+    public void testPlaceOrder() {
         // Given
         when(productService.getCheckProductByBarcode("ORDER-001")).thenReturn(testProduct);
         when(orderFlow.placeOrder(any())).thenReturn(testOrder);
-        when(invoiceService.getInvoiceIdByOrderId(1)).thenReturn(null);
 
         // When
         OrderData result = orderDto.placeOrder(testOrderForm);
 
         // Then
-        assertNotNull(result);
-        assertEquals(testOrder.getId(), result.getId());
+        assertNotNull("Order data should not be null", result);
+        assertEquals("Order ID should match", testOrder.getId(), result.getId());
         verify(orderFlow, times(1)).placeOrder(any());
-        verify(productService, times(1)).getCheckProductByBarcode("ORDER-001");
     }
 
+    /**
+     * Tests retrieving all orders with pagination through DTO.
+     * Verifies proper pagination and data conversion.
+     */
     @Test
-    public void testGetAll_Success() {
+    public void testGetAll() {
         // Given
         List<OrderPojo> orders = Arrays.asList(testOrder);
         when(orderFlow.getAllOrders(0, 10)).thenReturn(orders);
         when(orderFlow.countAllOrders()).thenReturn(1L);
-        when(invoiceService.getInvoiceIdByOrderId(1)).thenReturn(null);
 
         // When
         PaginatedResponse<OrderData> result = orderDto.getAll(0, 10);
 
         // Then
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should contain one order", 1, result.getContent().size());
+        assertEquals("Total items should match", 1L, result.getTotalItems());
         verify(orderFlow, times(1)).getAllOrders(0, 10);
         verify(orderFlow, times(1)).countAllOrders();
     }

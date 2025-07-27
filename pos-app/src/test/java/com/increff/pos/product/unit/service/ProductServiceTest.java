@@ -38,11 +38,15 @@ public class ProductServiceTest {
         testProduct.setMrp(99.99);
     }
 
+    /**
+     * Tests adding a new product to the system.
+     * Verifies proper product insertion and duplicate checking.
+     */
     @Test
-    public void testAddProduct_Success() {
+    public void testAddProduct() {
         // Given
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
-        doNothing().when(productDao).insert(any(ProductPojo.class));
+        doNothing().when(productDao).insert(testProduct);
 
         // When
         productService.addProduct(testProduct);
@@ -63,17 +67,22 @@ public class ProductServiceTest {
         // Then - exception should be thrown
     }
 
+    /**
+     * Tests retrieving a product by barcode with validation.
+     * Verifies proper product lookup and error handling.
+     */
     @Test
-    public void testGetCheckProductByBarcode_Success() {
+    public void testGetCheckProductByBarcode() {
         // Given
-        when(productDao.getByBarcode("BARCODE-001")).thenReturn(testProduct);
+        when(productDao.getByBarcode("TEST-001")).thenReturn(testProduct);
 
         // When
-        ProductPojo result = productService.getCheckProductByBarcode("BARCODE-001");
+        ProductPojo result = productService.getCheckProductByBarcode("TEST-001");
 
         // Then
-        assertEquals(testProduct, result);
-        verify(productDao, times(1)).getByBarcode("BARCODE-001");
+        assertNotNull("Product should not be null", result);
+        assertEquals("Product should match", testProduct, result);
+        verify(productDao, times(1)).getByBarcode("TEST-001");
     }
 
     @Test(expected = ApiException.class)
@@ -87,8 +96,12 @@ public class ProductServiceTest {
         // Then - exception should be thrown
     }
 
+    /**
+     * Tests retrieving a product by ID with validation.
+     * Verifies proper product lookup by ID and error handling.
+     */
     @Test
-    public void testGetCheckProductById_Success() {
+    public void testGetCheckProductById() {
         // Given
         when(productDao.getById(1)).thenReturn(testProduct);
 
@@ -96,7 +109,8 @@ public class ProductServiceTest {
         ProductPojo result = productService.getCheckProductById(1);
 
         // Then
-        assertEquals(testProduct, result);
+        assertNotNull("Product should not be null", result);
+        assertEquals("Product should match", testProduct, result);
         verify(productDao, times(1)).getById(1);
     }
 
@@ -111,8 +125,12 @@ public class ProductServiceTest {
         // Then - exception should be thrown
     }
 
+    /**
+     * Tests retrieving all products with pagination.
+     * Verifies proper DAO delegation and pagination handling.
+     */
     @Test
-    public void testGetAll_Success() {
+    public void testGetAll() {
         // Given
         List<ProductPojo> products = Arrays.asList(testProduct);
         when(productDao.getAllProducts(0, 10)).thenReturn(products);
@@ -121,20 +139,24 @@ public class ProductServiceTest {
         List<ProductPojo> result = productService.getAll(0, 10);
 
         // Then
-        assertEquals(products, result);
+        assertEquals("Results should match DAO response", products, result);
         verify(productDao, times(1)).getAllProducts(0, 10);
     }
 
+    /**
+     * Tests counting all products in the system.
+     * Verifies proper count delegation to DAO layer.
+     */
     @Test
-    public void testCountAll_Success() {
+    public void testCountAll() {
         // Given
         when(productDao.countAll()).thenReturn(5L);
 
         // When
-        long count = productService.countAll();
+        long result = productService.countAll();
 
         // Then
-        assertEquals(5L, count);
+        assertEquals("Count should match DAO response", 5L, result);
         verify(productDao, times(1)).countAll();
     }
 } 

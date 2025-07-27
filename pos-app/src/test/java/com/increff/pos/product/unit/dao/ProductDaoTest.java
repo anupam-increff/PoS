@@ -2,10 +2,10 @@ package com.increff.pos.product.unit.dao;
 
 import com.increff.pos.setup.AbstractTest;
 import com.increff.pos.setup.TestData;
-import com.increff.pos.dao.ProductDao;
 import com.increff.pos.dao.ClientDao;
-import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.dao.ProductDao;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.pojo.ProductPojo;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,6 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * DAO unit tests for ProductDao.
- * Tests direct database operations for Product entity.
- */
 public class ProductDaoTest extends AbstractTest {
 
     @Autowired
@@ -27,100 +23,112 @@ public class ProductDaoTest extends AbstractTest {
     private ClientDao clientDao;
 
     private ClientPojo testClient;
+    private ProductPojo testProduct;
 
     @Before
     public void setUp() {
-        testClient = TestData.clientWithoutId("Test Client Product DAO");
+        testClient = TestData.clientWithoutId("Test Client Product");
         clientDao.insert(testClient);
+
+        testProduct = TestData.productWithoutId("PROD-001", "Test Product", testClient.getId());
     }
 
+    /**
+     * Tests inserting a product and retrieving it by barcode.
+     * Verifies basic DAO insert and select operations.
+     */
     @Test
-    public void testInsertAndGetByBarcode_Success() {
+    public void testInsertAndGetByBarcode() {
+        // When
+        productDao.insert(testProduct);
+
+        // Then
+        ProductPojo retrieved = productDao.getByBarcode("PROD-001");
+        assertNotNull("Product should be found by barcode", retrieved);
+        assertEquals("Product name should match", "Test Product", retrieved.getName());
+        assertEquals("Client ID should match", testClient.getId(), retrieved.getClientId());
+    }
+
+    /**
+     * Tests retrieving products by client ID.
+     * Verifies filtering products by their associated client.
+     */
+    @Test
+    public void testGetProductsByClientId() {
         // Given
-        ProductPojo product = TestData.productWithoutId("DAO-001", "DAO Test Product", testClient.getId());
+        productDao.insert(testProduct);
 
         // When
-        productDao.insert(product);
-        ProductPojo savedProduct = productDao.getByBarcode("DAO-001");
+        List<ProductPojo> products = productDao.getProductsByClientId(testClient.getId(), 0, 10);
 
         // Then
-        assertNotNull("Product should be saved and retrieved", savedProduct);
-        assertEquals("DAO Test Product", savedProduct.getName());
-        assertEquals("DAO-001", savedProduct.getBarcode());
-        assertEquals(testClient.getId(), savedProduct.getClientId());
-        assertNotNull("ID should be generated", savedProduct.getId());
+        assertNotNull("Product list should not be null", products);
+        assertEquals("Should contain one product", 1, products.size());
+        assertEquals("Product should match", testProduct.getName(), products.get(0).getName());
     }
 
+    /**
+     * Tests retrieving all products.
+     * Verifies the getAll method returns all persisted products.
+     */
     @Test
-    public void testGetByBarcode_NotFound() {
-        // When
-        ProductPojo product = productDao.getByBarcode("NONEXISTENT");
-
-        // Then
-        assertNull("Non-existent product should return null", product);
-    }
-
-    @Test
-    public void testGetAllProducts_Success() {
+    public void testGetAllProducts() {
         // Given
-        productDao.insert(TestData.productWithoutId("PROD-1", "Product 1", testClient.getId()));
-        productDao.insert(TestData.productWithoutId("PROD-2", "Product 2", testClient.getId()));
+        productDao.insert(testProduct);
 
         // When
-        List<ProductPojo> products = productDao.getAllProducts(0, 10);
+        List<ProductPojo> allProducts = productDao.getAll();
 
         // Then
-        assertNotNull("Products list should not be null", products);
-        assertEquals(2, products.size());
+        assertNotNull("Product list should not be null", allProducts);
+        assertTrue("Should contain at least one product", allProducts.size() >= 1);
     }
 
+    /**
+     * Tests retrieving product by non-existent barcode.
+     * Verifies proper handling when no product matches the barcode.
+     */
     @Test
-    public void testSearchByBarcode_Success() {
-        // Given
-        productDao.insert(TestData.productWithoutId("SEARCH-001", "Search Product Alpha", testClient.getId()));
-        productDao.insert(TestData.productWithoutId("SEARCH-002", "Search Product Beta", testClient.getId()));
-        productDao.insert(TestData.productWithoutId("OTHER-001", "Different Product", testClient.getId()));
-
+    public void testGetByBarcodeNotFound() {
         // When
-        List<ProductPojo> results = productDao.searchByBarcode("SEARCH", 0, 10);
+        ProductPojo result = productDao.getByBarcode("NON-EXISTENT");
 
         // Then
-        assertNotNull("Search results should not be null", results);
-        assertEquals(2, results.size());
-        assertTrue("All results should contain 'SEARCH'",
-            results.stream().allMatch(p -> p.getBarcode().contains("SEARCH")));
+        assertNull("Non-existent product should return null", result);
     }
 
+    /**
+     * Tests searching products by barcode pattern.
+     * Verifies partial matching and search functionality.
+     */
     @Test
-    public void testCountAll_Success() {
+    public void testSearchByBarcode() {
         // Given
-        productDao.insert(TestData.productWithoutId("COUNT-1", "Count Product 1", testClient.getId()));
-        productDao.insert(TestData.productWithoutId("COUNT-2", "Count Product 2", testClient.getId()));
+        productDao.insert(testProduct);
 
         // When
-        long count = productDao.countAll();
+        List<ProductPojo> searchResults = productDao.searchByBarcode("PROD", 0, 10);
 
         // Then
-        assertEquals(2L, count);
+        assertNotNull("Search results should not be null", searchResults);
+        assertEquals("Should find one matching product", 1, searchResults.size());
+        assertEquals("Found product should match", "PROD-001", searchResults.get(0).getBarcode());
     }
 
+    /**
+     * Tests counting all products in the database.
+     * Verifies the countAll method returns accurate count.
+     */
     @Test
-    public void testGetProductsByClientId_Success() {
+    public void testCountAll() {
         // Given
-        ClientPojo anotherClient = TestData.clientWithoutId("Another Client");
-        clientDao.insert(anotherClient);
-
-        productDao.insert(TestData.productWithoutId("CLIENT-1", "Client Product 1", testClient.getId()));
-        productDao.insert(TestData.productWithoutId("CLIENT-2", "Client Product 2", testClient.getId()));
-        productDao.insert(TestData.productWithoutId("OTHER-1", "Other Product", anotherClient.getId()));
+        long initialCount = productDao.countAll();
+        productDao.insert(testProduct);
 
         // When
-        List<ProductPojo> clientProducts = productDao.getProductsByClientId(testClient.getId(), 0, 10);
+        long finalCount = productDao.countAll();
 
         // Then
-        assertNotNull("Client products should not be null", clientProducts);
-        assertEquals(2, clientProducts.size());
-        assertTrue("All products should belong to test client",
-            clientProducts.stream().allMatch(p -> p.getClientId().equals(testClient.getId())));
+        assertEquals("Count should increase by one", initialCount + 1, finalCount);
     }
 } 

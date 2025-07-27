@@ -14,12 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.increff.pos.model.enums.OrderStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrderServiceTest {
@@ -46,8 +48,12 @@ public class OrderServiceTest {
         testOrderItems = Arrays.asList(item1, item2);
     }
 
+    /**
+     * Tests creating an order with items successfully.
+     * Verifies proper order ID generation and database insertion.
+     */
     @Test
-    public void testCreateOrderWithItems_Success() {
+    public void testCreateOrderWithItems() {
         // Given
         doAnswer(invocation -> {
             OrderPojo order = invocation.getArgument(0);
@@ -66,8 +72,48 @@ public class OrderServiceTest {
         verify(orderItemDao, times(2)).insert(any(OrderItemPojo.class));
     }
 
+    /**
+     * Tests creating order with null items list.
+     * Verifies proper error handling for null input.
+     */
+    @Test(expected = NullPointerException.class)
+    public void testCreateOrderWithNullItems() {
+        // When - Try to create order with null items
+        orderService.createOrderWithItems(null);
+        
+        // Then - Exception should be thrown
+    }
+
+    /**
+     * Tests creating order with empty items list.
+     * Verifies service processes empty collections without error.
+     */
     @Test
-    public void testGetCheckByOrderId_Success() {
+    public void testCreateOrderWithEmptyItems() {
+        // Given - Empty items list
+        List<OrderItemPojo> emptyItems = new ArrayList<>();
+        doAnswer(invocation -> {
+            OrderPojo order = invocation.getArgument(0);
+            order.setId(123); // Simulate ID generation
+            return null;
+        }).when(orderDao).insert(any(OrderPojo.class));
+        
+        // When - Try to create order with empty items
+        Integer orderId = orderService.createOrderWithItems(emptyItems);
+        
+        // Then - Order should be created without items
+        assertNotNull("Order should be created even with empty items", orderId);
+        assertEquals(Integer.valueOf(123), orderId);
+        verify(orderDao, times(1)).insert(any(OrderPojo.class));
+        verify(orderItemDao, times(0)).insert(any(OrderItemPojo.class)); // No items to insert
+    }
+
+    /**
+     * Tests retrieving order by valid ID.
+     * Verifies successful order lookup and validation.
+     */
+    @Test
+    public void testGetCheckByOrderId() {
         // Given
         when(orderDao.getById(1)).thenReturn(testOrder);
 
@@ -75,23 +121,31 @@ public class OrderServiceTest {
         OrderPojo result = orderService.getCheckByOrderId(1);
 
         // Then
-        assertEquals(testOrder, result);
+        assertEquals("Order should match", testOrder, result);
         verify(orderDao, times(1)).getById(1);
     }
 
+    /**
+     * Tests retrieving order by invalid ID.
+     * Verifies proper exception handling for non-existent orders.
+     */
     @Test(expected = ApiException.class)
-    public void testGetCheckByOrderId_NotFound() {
+    public void testGetCheckByOrderIdNotFound() {
         // Given
-        when(orderDao.getById(1)).thenReturn(null);
+        when(orderDao.getById(999)).thenReturn(null);
 
         // When
-        orderService.getCheckByOrderId(1);
-
-        // Then - exception should be thrown
+        orderService.getCheckByOrderId(999);
+        
+        // Then - Exception should be thrown
     }
 
+    /**
+     * Tests retrieving order items by order ID.
+     * Verifies proper delegation to DAO layer.
+     */
     @Test
-    public void testGetOrderItemsByOrderId_Success() {
+    public void testGetOrderItemsByOrderId() {
         // Given
         when(orderItemDao.getByOrderId(1)).thenReturn(testOrderItems);
 
@@ -99,12 +153,16 @@ public class OrderServiceTest {
         List<OrderItemPojo> result = orderService.getOrderItemsByOrderId(1);
 
         // Then
-        assertEquals(testOrderItems, result);
+        assertEquals("Order items should match", testOrderItems, result);
         verify(orderItemDao, times(1)).getByOrderId(1);
     }
 
+    /**
+     * Tests retrieving all orders with pagination.
+     * Verifies proper delegation to DAO layer with pagination.
+     */
     @Test
-    public void testGetAllOrdersPaginated_Success() {
+    public void testGetAllOrdersPaginated() {
         // Given
         List<OrderPojo> orders = Arrays.asList(testOrder);
         when(orderDao.getAllOrdersByDate(0, 10)).thenReturn(orders);
@@ -113,20 +171,24 @@ public class OrderServiceTest {
         List<OrderPojo> result = orderService.getAllOrdersPaginated(0, 10);
 
         // Then
-        assertEquals(orders, result);
+        assertEquals("Results should match DAO response", orders, result);
         verify(orderDao, times(1)).getAllOrdersByDate(0, 10);
     }
 
+    /**
+     * Tests counting all orders in the system.
+     * Verifies proper count delegation to DAO layer.
+     */
     @Test
-    public void testCountAll_Success() {
+    public void testCountAll() {
         // Given
         when(orderDao.countAll()).thenReturn(5L);
 
         // When
-        long count = orderService.countAll();
+        long result = orderService.countAll();
 
         // Then
-        assertEquals(5L, count);
+        assertEquals("Count should match DAO response", 5L, result);
         verify(orderDao, times(1)).countAll();
     }
 } 

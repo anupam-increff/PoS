@@ -49,76 +49,93 @@ public class InventoryDtoIntegrationTest extends AbstractTest {
         productDao.insert(testProduct);
     }
 
+    /**
+     * Tests adding inventory through the complete integration stack.
+     * Verifies DTO → Flow → Service → DAO integration with database persistence.
+     */
     @Test
-    public void testAddInventory_DtoFlowServiceDaoIntegration() {
+    public void testAddInventory() {
         // Given
-        InventoryForm inventoryForm = TestData.inventoryForm("INV-001", 100);
+        InventoryForm inventoryForm = new InventoryForm();
+        inventoryForm.setBarcode("INV-001"); // Use the correct product barcode from setUp
+        inventoryForm.setQuantity(50);
 
-        // When - DTO integrates through Flow -> Service -> DAO
+        // When - Add inventory through DTO
         inventoryDto.addInventory(inventoryForm);
 
-        // Then - Verify integration worked
-        InventoryPojo savedInventory = inventoryDao.getByProductId(testProduct.getId());
-        assertNotNull("Inventory should be saved through DTO->Flow->Service->DAO integration", savedInventory);
-        assertEquals("Inventory quantity should match", Integer.valueOf(100), savedInventory.getQuantity());
-        assertEquals("Product ID should match", testProduct.getId(), savedInventory.getProductId());
+        // Then - Verify database state
+        InventoryPojo dbInventory = inventoryDao.getByProductId(testProduct.getId());
+        assertNotNull("Inventory should be persisted in database", dbInventory);
+        assertEquals("Quantity should match", Integer.valueOf(50), dbInventory.getQuantity());
     }
 
+    /**
+     * Tests updating inventory quantity through complete integration.
+     * Verifies the full flow updates existing inventory records correctly.
+     */
     @Test
-    public void testGetAll_DtoFlowServiceIntegration() {
-        // Given - Setup test inventory
-        InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 50);
-        inventoryDao.insert(inventory);
-
-        // When - DTO integrates with Flow and Service for pagination
-        PaginatedResponse<InventoryData> response = inventoryDto.getAll(0, 10);
-
-        // Then - Verify DTO integration worked
-        assertNotNull("Response should be provided by DTO integration", response);
-        assertTrue("Should contain at least one inventory item", response.getContent().size() >= 1);
+    public void testUpdateInventory() {
+        // Given - Create initial inventory
+        InventoryPojo initialInventory = TestData.inventoryWithoutId(testProduct.getId(), 30);
+        inventoryDao.insert(initialInventory);
         
-        InventoryData inventoryData = response.getContent().stream()
-            .filter(i -> i.getBarcode().equals("INV-001"))
-            .findFirst()
-            .orElse(null);
-        
-        assertNotNull("Should find inventory for our test product", inventoryData);
-        assertEquals("Quantity should match", Integer.valueOf(50), inventoryData.getQuantity());
-    }
+        InventoryForm updateForm = new InventoryForm();
+        updateForm.setBarcode("INV-001"); // Use the correct product barcode from setUp
+        updateForm.setQuantity(75);
 
-    @Test
-    public void testUpdateInventory_DtoFlowServiceDaoIntegration() {
-        // Given - Setup existing inventory
-        InventoryPojo existingInventory = TestData.inventoryWithoutId(testProduct.getId(), 30);
-        inventoryDao.insert(existingInventory);
-
-        InventoryForm updateForm = TestData.inventoryForm("INV-001", 80);
-
-        // When - DTO integrates through Flow -> Service -> DAO for update
+        // When - Update through DTO
         inventoryDto.updateInventoryByBarcode("INV-001", updateForm);
 
-        // Then - Verify integration worked
+        // Then - Verify update in database
         InventoryPojo updatedInventory = inventoryDao.getByProductId(testProduct.getId());
-        assertNotNull("Updated inventory should exist", updatedInventory);
-        assertEquals("Quantity should be updated through service integration", 
-            Integer.valueOf(80), updatedInventory.getQuantity());
+        assertEquals("Quantity should be updated", Integer.valueOf(75), updatedInventory.getQuantity());
     }
 
+    /**
+     * Tests retrieving all inventory items with pagination.
+     * Verifies the complete integration returns properly formatted data.
+     */
     @Test
-    public void testSearchByBarcode_DtoFlowServiceIntegration() {
-        // Given - Setup test inventory
+    public void testGetAllInventory() {
+        // Given - Create inventory in database
         InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 25);
         inventoryDao.insert(inventory);
 
-        // When - DTO integrates with Flow for search
+        // When - Retrieve through DTO
+        PaginatedResponse<InventoryData> response = inventoryDto.getAll(0, 10);
+
+        // Then - Verify integration results
+        assertNotNull("Response should not be null", response);
+        assertTrue("Should contain inventory items", response.getContent().size() >= 1);
+        
+        InventoryData foundItem = response.getContent().stream()
+            .filter(item -> "INV-001".equals(item.getBarcode()))
+            .findFirst()
+            .orElse(null);
+            
+        assertNotNull("Test inventory should be found", foundItem);
+        assertEquals("Product name should be populated", "Inventory Test Product", foundItem.getName());
+    }
+
+    /**
+     * Tests searching inventory by barcode through the integration stack.
+     * Verifies search functionality works end-to-end with database queries.
+     */
+    @Test
+    public void testSearchInventoryByBarcode() {
+        // Given - Create searchable inventory
+        InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 40);
+        inventoryDao.insert(inventory);
+
+        // When - Search through DTO
         PaginatedResponse<InventoryData> response = inventoryDto.searchByBarcode("INV", 0, 10);
 
-        // Then - Verify search integration
-        assertNotNull("Search results should be provided by DTO integration", response);
-        assertTrue("Should find matching inventory items", response.getContent().size() >= 1);
+        // Then - Verify search results
+        assertNotNull("Search results should not be null", response);
+        assertEquals("Should find one matching item", 1, response.getContent().size());
         
-        boolean foundMatch = response.getContent().stream()
-            .anyMatch(i -> i.getBarcode().contains("INV"));
-        assertTrue("Should contain items matching search criteria", foundMatch);
+        InventoryData foundItem = response.getContent().get(0);
+        assertEquals("Barcode should match search", "INV-001", foundItem.getBarcode());
+        assertEquals("Quantity should be correct", Integer.valueOf(40), foundItem.getQuantity());
     }
 } 

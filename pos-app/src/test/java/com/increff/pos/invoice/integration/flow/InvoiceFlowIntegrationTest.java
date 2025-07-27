@@ -59,8 +59,12 @@ public class InvoiceFlowIntegrationTest extends AbstractTest {
         orderItemDao.insert(orderItem);
     }
 
+    /**
+     * Tests generating an invoice through the complete flow layer.
+     * Verifies invoice creation, file generation, and database persistence.
+     */
     @Test
-    public void testGenerateInvoice_FlowServiceDaoIntegration() {
+    public void testGenerateInvoice() {
         // When - Generate invoice through Flow
         InvoicePojo generatedInvoice = invoiceFlow.generateInvoice(testOrder.getId());
 
@@ -78,8 +82,12 @@ public class InvoiceFlowIntegrationTest extends AbstractTest {
         assertEquals("Order ID should match in database", testOrder.getId(), dbInvoice.getOrderId());
     }
 
+    /**
+     * Tests retrieving an invoice by ID through the flow layer.
+     * Verifies proper invoice lookup and data consistency.
+     */
     @Test
-    public void testGetInvoiceById_FlowServiceDaoIntegration() {
+    public void testGetInvoiceById() {
         // Given - Create invoice in database first
         InvoicePojo createdInvoice = invoiceFlow.generateInvoice(testOrder.getId());
 
@@ -93,8 +101,12 @@ public class InvoiceFlowIntegrationTest extends AbstractTest {
         assertEquals("File path should match", createdInvoice.getFilePath(), retrievedInvoice.getFilePath());
     }
 
+    /**
+     * Tests retrieving order information for invoice generation.
+     * Verifies the flow layer correctly fetches order details.
+     */
     @Test
-    public void testGetOrderForInvoice_FlowServiceDaoIntegration() {
+    public void testGetOrderForInvoice() {
         // When - Get order for invoice through Flow
         OrderPojo retrievedOrder = invoiceFlow.getOrderForInvoice(testOrder.getId());
 
@@ -108,8 +120,12 @@ public class InvoiceFlowIntegrationTest extends AbstractTest {
         assertEquals("Order timestamps should match", dbOrder.getCreatedAt(), retrievedOrder.getCreatedAt());
     }
 
+    /**
+     * Tests retrieving order items for invoice generation.
+     * Verifies proper order item lookup and data population.
+     */
     @Test
-    public void testGetOrderItemsForInvoice_FlowServiceDaoIntegration() {
+    public void testGetOrderItemsForInvoice() {
         // When - Get order items for invoice through Flow
         List<OrderItemPojo> retrievedItems = invoiceFlow.getOrderItemsForInvoice(testOrder.getId());
 
@@ -129,8 +145,12 @@ public class InvoiceFlowIntegrationTest extends AbstractTest {
         assertEquals("First item should match database", dbItems.get(0).getId(), item.getId());
     }
 
+    /**
+     * Tests preventing duplicate invoice generation for the same order.
+     * Verifies proper validation and error handling.
+     */
     @Test
-    public void testGenerateInvoice_DuplicateInvoice_FlowValidation() {
+    public void testGenerateInvoiceDuplicate() {
         // Given - Generate first invoice
         InvoicePojo firstInvoice = invoiceFlow.generateInvoice(testOrder.getId());
         assertNotNull("First invoice should be created", firstInvoice);

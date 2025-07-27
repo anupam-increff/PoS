@@ -48,8 +48,12 @@ public class InventoryFlowIntegrationTest extends AbstractTest {
         productDao.insert(testProduct);
     }
 
+    /**
+     * Tests adding new inventory through the flow layer with database persistence.
+     * Verifies that inventory is correctly created and stored.
+     */
     @Test
-    public void testAddInventory_FlowServiceDaoIntegration() {
+    public void testAddInventory() {
         // When - Add inventory through Flow
         inventoryFlow.addInventory("INV-FLOW-INT-001", 50);
 
@@ -60,8 +64,12 @@ public class InventoryFlowIntegrationTest extends AbstractTest {
         assertEquals("Product ID should match", testProduct.getId(), dbInventory.getProductId());
     }
 
+    /**
+     * Tests updating existing inventory quantities through the flow layer.
+     * Verifies that existing records are properly modified.
+     */
     @Test
-    public void testUpdateInventory_FlowServiceDaoIntegration() {
+    public void testUpdateInventory() {
         // Given - Create initial inventory
         InventoryPojo initialInventory = TestData.inventoryWithoutId(testProduct.getId(), 30);
         inventoryDao.insert(initialInventory);
@@ -75,8 +83,12 @@ public class InventoryFlowIntegrationTest extends AbstractTest {
         assertEquals("Quantity should be updated", Integer.valueOf(75), updatedInventory.getQuantity());
     }
 
+    /**
+     * Tests retrieving all inventory items with complete data population.
+     * Verifies the flow layer properly aggregates data from multiple sources.
+     */
     @Test
-    public void testGetAll_FlowServiceDaoIntegration() {
+    public void testGetAllInventory() {
         // Given - Create inventory in database
         InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 25);
         inventoryDao.insert(inventory);
@@ -100,8 +112,12 @@ public class InventoryFlowIntegrationTest extends AbstractTest {
         assertEquals("Quantity should match", Integer.valueOf(25), foundItem.getQuantity());
     }
 
+    /**
+     * Tests searching inventory by barcode pattern through the flow layer.
+     * Verifies search functionality works with database queries and data transformation.
+     */
     @Test
-    public void testSearchByBarcode_FlowServiceDaoIntegration() {
+    public void testSearchInventoryByBarcode() {
         // Given - Create inventory in database
         InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 40);
         inventoryDao.insert(inventory);
@@ -119,8 +135,12 @@ public class InventoryFlowIntegrationTest extends AbstractTest {
         assertEquals("Quantity should match", Integer.valueOf(40), foundItem.getQuantity());
     }
 
+    /**
+     * Tests behavior when retrieving inventory from an empty database.
+     * Verifies proper handling of no-data scenarios.
+     */
     @Test
-    public void testGetAll_EmptyDatabase_FlowServiceDaoIntegration() {
+    public void testGetAllInventoryEmptyDatabase() {
         // When - Get all from empty database
         PaginatedResponse<InventoryData> result = inventoryFlow.getAll(0, 10);
 

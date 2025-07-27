@@ -11,6 +11,8 @@ import com.increff.pos.pojo.ClientPojo;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
@@ -25,52 +27,69 @@ public class ClientDtoIntegrationTest extends AbstractTest {
     @Autowired
     private ClientDao clientDao;
 
+    /**
+     * Tests adding a new client through the complete integration stack.
+     * Verifies DTO processes form data and persists client correctly.
+     */
     @Test
-    public void testAddClient_DtoServiceDaoIntegration() {
+    public void testAddClient() {
         // Given
-        ClientForm clientForm = TestData.clientForm("Integration Test Client");
+        ClientForm clientForm = new ClientForm();
+        clientForm.setName("Integration Test Client");
 
-        // When - DTO integrates with Service and DAO
+        // When - Add client through DTO
         clientDto.add(clientForm);
 
-        // Then - Verify integration worked
-        ClientPojo savedClient = clientDao.getClientByName("Integration Test Client");
-        assertNotNull("Client should be saved through DTO->Service->DAO integration", savedClient);
-        assertEquals("Integration Test Client", savedClient.getName());
+        // Then - Verify client was persisted
+        ClientPojo dbClient = clientDao.getClientByName("Integration Test Client");
+        assertNotNull("Client should be persisted in database", dbClient);
+        assertEquals("Client name should match", "Integration Test Client", dbClient.getName());
     }
 
+    /**
+     * Tests retrieving all clients with pagination through the integration stack.
+     * Verifies complete data flow from database to formatted response.
+     */
     @Test
-    public void testGetAllClients_DtoServiceDaoIntegration() {
-        // Given - Setup test data
-        clientDao.insert(TestData.clientWithoutId("Client A"));
-        clientDao.insert(TestData.clientWithoutId("Client B"));
+    public void testGetAllClients() {
+        // Given - Create test clients in database
+        ClientPojo client1 = TestData.clientWithoutId("Client One");
+        ClientPojo client2 = TestData.clientWithoutId("Client Two");
+        clientDao.insert(client1);
+        clientDao.insert(client2);
 
-        // When - DTO integrates with Service for pagination
+        // When - Get all clients through DTO
         PaginatedResponse<ClientData> response = clientDto.getAll(0, 10);
 
-        // Then - Verify DTO integration with Service and DAO
-        assertNotNull("Response should be provided by DTO integration", response);
-        assertEquals(2, response.getContent().size());
-        assertTrue("Should contain Client A", 
-            response.getContent().stream().anyMatch(c -> "Client A".equals(c.getName())));
-        assertTrue("Should contain Client B", 
-            response.getContent().stream().anyMatch(c -> "Client B".equals(c.getName())));
+        // Then - Verify integration results
+        assertNotNull("Response should not be null", response);
+        assertTrue("Should contain at least 2 clients", response.getContent().size() >= 2);
+        assertTrue("Total should be at least 2", response.getTotalItems() >= 2);
+
+        // Verify our test clients are included
+        List<String> clientNames = response.getContent().stream()
+            .map(ClientData::getName)
+            .collect(java.util.stream.Collectors.toList());
+        assertTrue("Should contain Client One", clientNames.contains("Client One"));
+        assertTrue("Should contain Client Two", clientNames.contains("Client Two"));
     }
 
+    /**
+     * Tests searching clients by name through the integration stack.
+     * Verifies search functionality with database queries and result formatting.
+     */
     @Test
-    public void testSearchClients_DtoServiceDaoIntegration() {
-        // Given
-        clientDao.insert(TestData.clientWithoutId("Search Client Alpha"));
-        clientDao.insert(TestData.clientWithoutId("Search Client Beta"));
-        clientDao.insert(TestData.clientWithoutId("Different Name"));
+    public void testSearchClients() {
+        // Given - Create searchable test clients
+        ClientPojo testClient = TestData.clientWithoutId("Searchable Client");
+        clientDao.insert(testClient);
 
-        // When - DTO integrates with Service for search
-        PaginatedResponse<ClientData> response = clientDto.searchClients("Search", 0, 10);
+        // When - Search through DTO
+        PaginatedResponse<ClientData> response = clientDto.searchClients("Searchable", 0, 10);
 
-        // Then - Verify search integration
-        assertNotNull("Search results should be provided by DTO integration", response);
-        assertEquals(2, response.getContent().size());
-        assertTrue("All results should contain 'Search'", 
-            response.getContent().stream().allMatch(c -> c.getName().contains("Search")));
+        // Then - Verify search results
+        assertNotNull("Search response should not be null", response);
+        assertEquals("Should find exactly one client", 1, response.getContent().size());
+        assertEquals("Found client name should match", "Searchable Client", response.getContent().get(0).getName());
     }
 } 

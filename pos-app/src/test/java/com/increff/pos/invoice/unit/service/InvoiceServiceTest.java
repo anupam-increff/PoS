@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.increff.pos.model.enums.OrderStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvoiceServiceTest {
@@ -54,8 +55,12 @@ public class InvoiceServiceTest {
         testInvoice.setFilePath("../invoices/order-1.pdf");
     }
 
+    /**
+     * Tests retrieving an invoice by its ID.
+     * Verifies proper invoice retrieval and error handling.
+     */
     @Test
-    public void testGetInvoiceById_Success() {
+    public void testGetInvoiceById() {
         // Given
         when(invoiceDao.getById(1)).thenReturn(testInvoice);
 
@@ -63,8 +68,8 @@ public class InvoiceServiceTest {
         InvoicePojo result = invoiceService.getInvoiceById(1);
 
         // Then
-        assertNotNull(result);
-        assertEquals(testInvoice, result);
+        assertNotNull("Invoice should not be null", result);
+        assertEquals("Invoice should match", testInvoice, result);
         verify(invoiceDao, times(1)).getById(1);
     }
 
@@ -132,8 +137,12 @@ public class InvoiceServiceTest {
         verify(invoiceDao, times(1)).getByOrderId(1);
     }
 
+    /**
+     * Tests creating an invoice record for an order.
+     * Verifies invoice creation and order status update.
+     */
     @Test
-    public void testCreateInvoiceRecord_Success() {
+    public void testCreateInvoiceRecord() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(null);
         doAnswer(invocation -> {
@@ -152,7 +161,7 @@ public class InvoiceServiceTest {
         assertTrue(result.getFilePath().contains("order-1.pdf"));
         verify(invoiceDao, times(1)).getByOrderId(1);
         verify(invoiceDao, times(1)).insert(any(InvoicePojo.class));
-        verify(orderService, times(1)).updateOrderStatus(eq(1), any());
+        verify(orderService, times(1)).updateOrderStatus(eq(1), eq(OrderStatus.INVOICE_GENERATED));
     }
 
     @Test(expected = ApiException.class)

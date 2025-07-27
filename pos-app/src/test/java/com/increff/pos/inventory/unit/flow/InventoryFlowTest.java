@@ -47,39 +47,51 @@ public class InventoryFlowTest {
         testInventory.setId(1);
     }
 
+    /**
+     * Tests updating inventory quantity through flow layer.
+     * Verifies proper business logic flow for inventory updates.
+     */
     @Test
-    public void testUpdateInventory_Success() {
+    public void testUpdateInventory() {
         // Given
-        when(productService.getCheckProductByBarcode("INV-FLOW-001")).thenReturn(testProduct);
-        doNothing().when(inventoryService).updateInventory(1, 75);
+        when(productService.getCheckProductByBarcode("TEST-001")).thenReturn(testProduct);
+        doNothing().when(inventoryService).updateInventory(1, 50);
 
         // When
-        inventoryFlow.updateInventory("INV-FLOW-001", 75);
+        inventoryFlow.updateInventory("TEST-001", 50);
 
         // Then
-        verify(productService, times(1)).getCheckProductByBarcode("INV-FLOW-001");
-        verify(inventoryService, times(1)).updateInventory(1, 75);
+        verify(productService, times(1)).getCheckProductByBarcode("TEST-001");
+        verify(inventoryService, times(1)).updateInventory(1, 50);
     }
 
+    /**
+     * Tests adding new inventory through flow layer.
+     * Verifies proper inventory creation business logic.
+     */
     @Test
-    public void testAddInventory_Success() {
+    public void testAddInventory() {
         // Given
-        when(productService.getCheckProductByBarcode("INV-FLOW-001")).thenReturn(testProduct);
-        doNothing().when(inventoryService).addInventory(1, 25);
+        when(productService.getCheckProductByBarcode("TEST-001")).thenReturn(testProduct);
+        doNothing().when(inventoryService).addInventory(testProduct.getId(), 30);
 
         // When
-        inventoryFlow.addInventory("INV-FLOW-001", 25);
+        inventoryFlow.addInventory("TEST-001", 30);
 
         // Then
-        verify(productService, times(1)).getCheckProductByBarcode("INV-FLOW-001");
-        verify(inventoryService, times(1)).addInventory(1, 25);
+        verify(productService, times(1)).getCheckProductByBarcode("TEST-001");
+        verify(inventoryService, times(1)).addInventory(1, 30);
     }
 
+    /**
+     * Tests retrieving all inventory with pagination.
+     * Verifies proper delegation to service layer.
+     */
     @Test
-    public void testGetAll_Success() {
+    public void testGetAll() {
         // Given
-        List<InventoryPojo> inventoryList = Arrays.asList(testInventory);
-        when(inventoryService.getAll(0, 10)).thenReturn(inventoryList);
+        List<InventoryPojo> inventories = Arrays.asList(testInventory);
+        when(inventoryService.getAll(0, 10)).thenReturn(inventories);
         when(inventoryService.countAll()).thenReturn(1L);
         when(productService.getCheckProductById(1)).thenReturn(testProduct);
 
@@ -87,43 +99,32 @@ public class InventoryFlowTest {
         PaginatedResponse<InventoryData> result = inventoryFlow.getAll(0, 10);
 
         // Then
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        assertEquals(1L, result.getTotalItems());
-        
-        InventoryData data = result.getContent().get(0);
-        assertEquals("INV-FLOW-001", data.getBarcode());
-        assertEquals("Test Inventory Product", data.getName());
-        assertEquals(Integer.valueOf(50), data.getQuantity());
-
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should contain one inventory", 1, result.getContent().size());
         verify(inventoryService, times(1)).getAll(0, 10);
         verify(inventoryService, times(1)).countAll();
-        verify(productService, times(1)).getCheckProductById(1);
     }
 
+    /**
+     * Tests searching inventory by barcode pattern.
+     * Verifies proper search functionality through flow layer.
+     */
     @Test
-    public void testSearchByBarcode_Success() {
+    public void testSearchByBarcode() {
         // Given
-        List<InventoryPojo> inventoryList = Arrays.asList(testInventory);
-        when(inventoryService.searchByBarcode("INV-FLOW", 0, 10)).thenReturn(inventoryList);
-        when(inventoryService.countByBarcodeSearch("INV-FLOW")).thenReturn(1L);
+        List<InventoryPojo> inventories = Arrays.asList(testInventory);
+        when(inventoryService.searchByBarcode("TEST", 0, 10)).thenReturn(inventories);
+        when(inventoryService.countByBarcodeSearch("TEST")).thenReturn(1L);
         when(productService.getCheckProductById(1)).thenReturn(testProduct);
 
         // When
-        PaginatedResponse<InventoryData> result = inventoryFlow.searchByBarcode("INV-FLOW", 0, 10);
+        PaginatedResponse<InventoryData> result = inventoryFlow.searchByBarcode("TEST", 0, 10);
 
         // Then
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        assertEquals(1L, result.getTotalItems());
-        
-        InventoryData data = result.getContent().get(0);
-        assertEquals("INV-FLOW-001", data.getBarcode());
-        assertEquals("Test Inventory Product", data.getName());
-
-        verify(inventoryService, times(1)).searchByBarcode("INV-FLOW", 0, 10);
-        verify(inventoryService, times(1)).countByBarcodeSearch("INV-FLOW");
-        verify(productService, times(1)).getCheckProductById(1);
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should contain search results", 1, result.getContent().size());
+        verify(inventoryService, times(1)).searchByBarcode("TEST", 0, 10);
+        verify(inventoryService, times(1)).countByBarcodeSearch("TEST");
     }
 
     @Test

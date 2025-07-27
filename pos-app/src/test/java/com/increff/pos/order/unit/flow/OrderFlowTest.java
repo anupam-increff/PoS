@@ -54,13 +54,16 @@ public class OrderFlowTest {
         testOrderItems = Arrays.asList(item1);
     }
 
+    /**
+     * Tests placing an order successfully, verifying inventory reduction and order creation.
+     */
     @Test
-    public void testPlaceOrder_Success() {
+    public void testPlaceOrder() {
         // Given
         ProductPojo mockProduct = TestData.product(1, 1);
         mockProduct.setMrp(100.0);
         InventoryPojo mockInventory = TestData.inventoryWithoutId(1, 10);
-        
+
         when(productService.getCheckProductById(1)).thenReturn(mockProduct);
         when(inventoryService.getCheckByProductId(1)).thenReturn(mockInventory);
         when(orderService.createOrderWithItems(testOrderItems)).thenReturn(1);
@@ -78,8 +81,12 @@ public class OrderFlowTest {
         verify(orderService, times(1)).getCheckByOrderId(1);
     }
 
+    /**
+     * Tests retrieving all orders with pagination.
+     * Verifies proper delegation to order service.
+     */
     @Test
-    public void testGetAllOrders_Success() {
+    public void testGetAllOrders() {
         // Given
         List<OrderPojo> orders = Arrays.asList(testOrder);
         when(orderService.getAllOrdersPaginated(0, 10)).thenReturn(orders);
@@ -88,20 +95,26 @@ public class OrderFlowTest {
         List<OrderPojo> result = orderFlow.getAllOrders(0, 10);
 
         // Then
-        assertEquals(orders, result);
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should contain one order", 1, result.size());
+        assertEquals("Order should match", testOrder, result.get(0));
         verify(orderService, times(1)).getAllOrdersPaginated(0, 10);
     }
 
+    /**
+     * Tests counting all orders in the system.
+     * Verifies proper count delegation to order service.
+     */
     @Test
-    public void testCountAllOrders_Success() {
+    public void testCountAllOrders() {
         // Given
         when(orderService.countAll()).thenReturn(5L);
 
         // When
-        long count = orderFlow.countAllOrders();
+        long result = orderFlow.countAllOrders();
 
         // Then
-        assertEquals(5L, count);
+        assertEquals("Count should match service response", 5L, result);
         verify(orderService, times(1)).countAll();
     }
 } 
