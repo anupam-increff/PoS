@@ -38,7 +38,6 @@ public class InventoryFlowTest {
 
     @Mock
     private TSVDownloadService tsvDownloadService;
-    // No need to mock BulkUploadService as bulk upload is not tested here
 
     private ProductPojo product1;
     private ProductPojo product2;
@@ -49,8 +48,6 @@ public class InventoryFlowTest {
         product1 = TestData.product(1, 1);
         product2 = TestData.product(2, 1);
     }
-
-    // Bulk upload tests are not present here; they are covered in integration tests.
 
     @Test
     public void testAddInventory() {

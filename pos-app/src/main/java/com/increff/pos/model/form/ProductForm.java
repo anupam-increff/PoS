@@ -23,7 +23,7 @@ public class ProductForm {
     private String name;
 
     @NotNull(message = "MRP is required")
-    @DecimalMin(value = "0.01", inclusive = true, message = "MRP must be greater than zero")
+    @DecimalMin(value = "0.01", message = "MRP must be greater than zero")
     private Double mrp;
 
     @Size(max = 300, message = "Image URL must be at most 300 characters")

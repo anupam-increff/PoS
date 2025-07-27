@@ -39,7 +39,6 @@ public class ProductFlowTest {
 
     @Mock
     private TSVDownloadService tsvDownloadService;
-    // No need to mock BulkUploadService as bulk upload is not tested here
 
     private ClientPojo client1;
     private ClientPojo client2;
@@ -200,6 +199,4 @@ public class ProductFlowTest {
         long count = productFlow.countSearchByBarcode("BARCODE");
         assertEquals(2L, count);
     }
-
-    // Bulk upload tests are not present here; they are covered in integration tests.
 } 
