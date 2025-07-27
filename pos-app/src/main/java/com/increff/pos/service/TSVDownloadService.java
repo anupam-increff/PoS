@@ -15,7 +15,7 @@ public class TSVDownloadService
 
     private final Map<String, byte[]> tsvFiles = new ConcurrentHashMap<>();
 
-    public String storeTSVFile(byte[] tsvBytes, String filename) {
+    public String storeTSVFile(byte[] tsvBytes) {
         String fileId = UUID.randomUUID().toString();
         tsvFiles.put(fileId, tsvBytes);
         return fileId;

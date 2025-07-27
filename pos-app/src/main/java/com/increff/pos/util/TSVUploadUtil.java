@@ -57,7 +57,7 @@ public class TSVUploadUtil {
                         .map(s -> s.split("\t", -1))
                         .collect(java.util.stream.Collectors.toList());
                 byte[] errorTsv = TSVConvertUtil.createTsvFromRows(errorRows, errorHeaders);
-                String fileId = tsvDownloadService.storeTSVFile(errorTsv, AppConstants.DEFAULT_ERROR_FILENAME);
+                String fileId = tsvDownloadService.storeTSVFile(errorTsv);
                 
                 TSVUploadResponse resp = TSVUploadResponse.error(
                         "Upload completed with errors. " + successList.size() + " " + AppConstants.DEFAULT_SUCCESS_MESSAGE,
