@@ -59,8 +59,12 @@ public class InvoiceDtoIntegrationTest extends AbstractTest {
         orderItemDao.insert(orderItem);
     }
 
+    /**
+     * Tests invoice generation through the complete stack.
+     * Verifies proper integration between DTO, Flow, Service and DAO layers.
+     */
     @Test
-    public void testGenerateInvoice_DtoFlowServiceDaoIntegration() {
+    public void testGenerateInvoice() {
         // Given
         Integer orderId = testOrder.getId();
 
@@ -75,8 +79,12 @@ public class InvoiceDtoIntegrationTest extends AbstractTest {
         assertTrue("Invoice file path should be set", savedInvoice.getFilePath().contains("order-" + orderId));
     }
 
+    /**
+     * Tests downloading an invoice by its ID.
+     * Verifies proper file handling and data retrieval through all layers.
+     */
     @Test
-    public void testDownloadInvoiceById_DtoFlowServiceIntegration() {
+    public void testDownloadInvoiceById() {
         // Given - Create invoice first and generate actual file
         Integer invoiceId = invoiceDto.generateInvoice(testOrder.getId());
 

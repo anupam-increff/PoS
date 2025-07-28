@@ -67,8 +67,12 @@ public class SalesReportDtoIntegrationTest extends AbstractTest {
         invoiceDao.insert(invoice);
     }
 
+    /**
+     * Tests the complete sales report generation flow through DTO layer.
+     * Verifies proper integration with service and dao layers.
+     */
     @Test
-    public void testGetSalesReport_DtoServiceDaoIntegration() {
+    public void testGetSalesReport() {
         // Given
         SalesReportFilterForm filterForm = new SalesReportFilterForm();
         filterForm.setStartDate(ZonedDateTime.now().minusDays(1));
@@ -87,8 +91,12 @@ public class SalesReportDtoIntegrationTest extends AbstractTest {
         assertTrue("Page size should be valid", response.getPageSize() > 0);
     }
 
+    /**
+     * Tests sales report generation without any filters.
+     * Verifies proper handling of unfiltered data through service layer.
+     */
     @Test
-    public void testGetSalesReportWithoutFilter_DtoServiceIntegration() {
+    public void testGetSalesReportWithoutFilter() {
         // Given
         SalesReportFilterForm filterForm = new SalesReportFilterForm();
         filterForm.setStartDate(ZonedDateTime.now().minusDays(7));

@@ -71,8 +71,11 @@ public class InvoiceServiceTest {
         verify(invoiceDao, times(1)).getById(1);
     }
 
+    /**
+     * Tests error handling when invoice ID is not found.
+     */
     @Test(expected = ApiException.class)
-    public void testGetInvoiceById_NotFound() {
+    public void testGetInvoiceByIdNotFound() {
         // Given
         when(invoiceDao.getById(1)).thenReturn(null);
 
@@ -82,8 +85,11 @@ public class InvoiceServiceTest {
         // Then - exception should be thrown
     }
 
+    /**
+     * Tests verification that invoice exists for an order.
+     */
     @Test
-    public void testCheckIfInvoiceExistsForOrder_True() {
+    public void testCheckIfInvoiceExistsForOrderTrue() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(testInvoice);
 
@@ -95,8 +101,11 @@ public class InvoiceServiceTest {
         verify(invoiceDao, times(1)).getByOrderId(1);
     }
 
+    /**
+     * Tests verification that invoice does not exist for an order.
+     */
     @Test
-    public void testCheckIfInvoiceExistsForOrder_False() {
+    public void testCheckIfInvoiceExistsForOrderFalse() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(null);
 
@@ -108,8 +117,11 @@ public class InvoiceServiceTest {
         verify(invoiceDao, times(1)).getByOrderId(1);
     }
 
+    /**
+     * Tests retrieving invoice ID for an existing order.
+     */
     @Test
-    public void testGetInvoiceIdByOrderId_Exists() {
+    public void testGetInvoiceIdByOrderIdExists() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(testInvoice);
 
@@ -122,8 +134,11 @@ public class InvoiceServiceTest {
         verify(invoiceDao, times(2)).getByOrderId(1);
     }
 
+    /**
+     * Tests error handling when invoice ID is not found for order.
+     */
     @Test
-    public void testGetInvoiceIdByOrderId_NotExists() {
+    public void testGetInvoiceIdByOrderIdNotExists() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(null);
 
@@ -162,8 +177,11 @@ public class InvoiceServiceTest {
         verify(orderService, times(1)).updateOrderStatus(eq(1), eq(OrderStatus.INVOICE_GENERATED));
     }
 
+    /**
+     * Tests error handling when creating duplicate invoice record.
+     */
     @Test(expected = ApiException.class)
-    public void testCreateInvoiceRecord_AlreadyExists() {
+    public void testCreateInvoiceRecordAlreadyExists() {
         // Given
         when(invoiceDao.getByOrderId(1)).thenReturn(testInvoice);
 

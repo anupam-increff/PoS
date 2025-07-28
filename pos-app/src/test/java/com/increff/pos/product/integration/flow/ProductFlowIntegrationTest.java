@@ -37,8 +37,12 @@ public class ProductFlowIntegrationTest extends AbstractTest {
         clientDao.insert(testClient);
     }
 
+    /**
+     * Tests adding a product through the flow layer.
+     * Verifies proper integration between flow and service layers.
+     */
     @Test
-    public void testAddProduct_FlowServiceIntegration() {
+    public void testAddProduct() {
         // Given
         ProductPojo productPojo = TestData.productWithoutId("FLOW-001", "Flow Test Product", testClient.getId());
 
@@ -52,8 +56,12 @@ public class ProductFlowIntegrationTest extends AbstractTest {
         assertEquals(testClient.getId(), savedProduct.getClientId());
     }
 
+    /**
+     * Tests updating a product through the flow layer.
+     * Verifies proper integration between flow and service layers.
+     */
     @Test
-    public void testUpdateProduct_FlowServiceIntegration() {
+    public void testUpdateProduct() {
         // Given - Setup existing product
         ProductPojo existingProduct = TestData.productWithoutId("FLOW-002", "Original Name", testClient.getId());
         productDao.insert(existingProduct);

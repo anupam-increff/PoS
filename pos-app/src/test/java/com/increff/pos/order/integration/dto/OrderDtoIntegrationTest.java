@@ -61,8 +61,12 @@ public class OrderDtoIntegrationTest extends AbstractTest {
         inventoryDao.insert(inventory);
     }
 
+    /**
+     * Tests placing an order through the complete stack.
+     * Verifies proper integration between DTO, Flow and multiple services.
+     */
     @Test
-    public void testPlaceOrder_DtoFlowMultiServiceIntegration() {
+    public void testPlaceOrder() {
         // Given
         OrderItemForm orderItemForm = TestData.orderItemForm("ORDER-001", 5, 95.0);
         OrderForm orderForm = TestData.orderForm(Arrays.asList(orderItemForm));
@@ -83,8 +87,12 @@ public class OrderDtoIntegrationTest extends AbstractTest {
             Integer.valueOf(95), updatedInventory.getQuantity());
     }
 
+    /**
+     * Tests retrieving all orders through the complete stack.
+     * Verifies proper pagination and data retrieval through service layer.
+     */
     @Test
-    public void testGetAll_DtoServiceIntegration() {
+    public void testGetAll() {
         // Given - Create test order through services
         OrderPojo order = TestData.orderPojo();
         orderDao.insert(order);

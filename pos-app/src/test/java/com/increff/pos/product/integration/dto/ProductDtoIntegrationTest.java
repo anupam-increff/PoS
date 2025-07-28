@@ -39,8 +39,12 @@ public class ProductDtoIntegrationTest extends AbstractTest {
         clientDao.insert(testClient);
     }
 
+    /**
+     * Tests adding a product through the complete stack.
+     * Verifies proper integration between DTO, Flow, Service and DAO layers.
+     */
     @Test
-    public void testAddProduct_DtoFlowServiceDaoIntegration() {
+    public void testAddProduct() {
         // Given
         ProductForm productForm = TestData.productForm("BARCODE-001", "Test Product", "Test Client", 99.99);
 
@@ -55,8 +59,12 @@ public class ProductDtoIntegrationTest extends AbstractTest {
         assertEquals(testClient.getId(), savedProduct.getClientId());
     }
 
+    /**
+     * Tests retrieving a product by barcode through service layer.
+     * Verifies proper data retrieval and conversion through DTO.
+     */
     @Test
-    public void testGetByBarcode_DtoServiceIntegration() {
+    public void testGetByBarcode() {
         // Given - Setup test data
         ProductPojo product = TestData.productWithoutId("BARCODE-002", "Test Product 2", testClient.getId());
         productDao.insert(product);

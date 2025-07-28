@@ -56,8 +56,11 @@ public class ProductServiceTest {
         verify(productDao, times(1)).insert(testProduct);
     }
 
+    /**
+     * Tests error handling when adding product with duplicate barcode.
+     */
     @Test(expected = ApiException.class)
-    public void testAddProduct_DuplicateBarcode() {
+    public void testAddProductDuplicateBarcode() {
         // Given
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(testProduct);
 
@@ -85,8 +88,11 @@ public class ProductServiceTest {
         verify(productDao, times(1)).getByBarcode("TEST-001");
     }
 
+    /**
+     * Tests error handling when product barcode is not found.
+     */
     @Test(expected = ApiException.class)
-    public void testGetCheckProductByBarcode_NotFound() {
+    public void testGetCheckProductByBarcodeNotFound() {
         // Given
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
 
@@ -114,8 +120,11 @@ public class ProductServiceTest {
         verify(productDao, times(1)).getById(1);
     }
 
+    /**
+     * Tests error handling when product ID is not found.
+     */
     @Test(expected = ApiException.class)
-    public void testGetCheckProductById_NotFound() {
+    public void testGetCheckProductByIdNotFound() {
         // Given
         when(productDao.getById(1)).thenReturn(null);
 

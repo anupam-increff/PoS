@@ -24,12 +24,6 @@ public final class TestData {
         return client;
     }
     
-    public static ClientForm clientForm(String name) {
-        ClientForm form = new ClientForm();
-        form.setName(name);
-        return form;
-    }
-    
     /* ---------- Product ---------- */
     public static ProductPojo product(int id, int clientId) {
         ProductPojo product = new ProductPojo();
@@ -77,14 +71,7 @@ public final class TestData {
         inventory.setQuantity(quantity);
         return inventory;
     }
-    
-    public static InventoryForm inventoryForm(String barcode, Integer quantity) {
-        InventoryForm form = new InventoryForm();
-        form.setBarcode(barcode);
-        form.setQuantity(quantity);
-        return form;
-    }
-    
+
     /* ---------- Order ---------- */
     public static OrderPojo order(int id) {
         OrderPojo order = new OrderPojo();
@@ -106,26 +93,6 @@ public final class TestData {
         OrderForm form = new OrderForm();
         form.setItems(items);
         return form;
-    }
-    
-    public static OrderSearchForm orderSearchForm(ZonedDateTime startDate, ZonedDateTime endDate) {
-        OrderSearchForm form = new OrderSearchForm();
-        form.setStartDate(startDate);
-        form.setEndDate(endDate);
-        form.setPage(0);
-        form.setSize(10);
-        return form;
-    }
-    
-    /* ---------- OrderItem ---------- */
-    public static OrderItemPojo orderItem(int id, int orderId, int productId) {
-        OrderItemPojo item = new OrderItemPojo();
-        item.setId(id);
-        item.setOrderId(orderId);
-        item.setProductId(productId);
-        item.setQuantity(5);
-        item.setSellingPrice(50.0);
-        return item;
     }
     
     public static OrderItemPojo orderItemPojo(int id, int productId, int quantity, double sellingPrice) {
@@ -151,41 +118,6 @@ public final class TestData {
         form.setBarcode(barcode);
         form.setQuantity(quantity);
         form.setSellingPrice(sellingPrice);
-        return form;
-    }
-    
-    /* ---------- DaySales ---------- */
-    public static DaySalesPojo daySales(ZonedDateTime date) {
-        DaySalesPojo daySales = new DaySalesPojo();
-        daySales.setReportDate(date);
-        daySales.setInvoicedOrdersCount(10);
-        daySales.setInvoicedItemsCount(50);
-        daySales.setTotalRevenue(1000.0);
-        return daySales;
-    }
-    
-    public static DaySalesPojo daySalesWithoutId(ZonedDateTime date) {
-        DaySalesPojo daySales = new DaySalesPojo();
-        daySales.setReportDate(date);
-        daySales.setInvoicedOrdersCount(10);
-        daySales.setInvoicedItemsCount(50);
-        daySales.setTotalRevenue(1000.0);
-        return daySales;
-    }
-    
-    /* ---------- Invoice ---------- */
-    public static InvoicePojo invoicePojo(int orderId, String filePath) {
-        InvoicePojo invoice = new InvoicePojo();
-        invoice.setOrderId(orderId);
-        invoice.setFilePath(filePath);
-        return invoice;
-    }
-    
-    /* ---------- SalesReport ---------- */
-    public static SalesReportFilterForm salesReportFilterForm(ZonedDateTime startDate, ZonedDateTime endDate) {
-        SalesReportFilterForm form = new SalesReportFilterForm();
-        form.setStartDate(startDate);
-        form.setEndDate(endDate);
         return form;
     }
 } 
