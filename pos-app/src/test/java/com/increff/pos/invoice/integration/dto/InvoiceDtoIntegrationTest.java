@@ -1,19 +1,17 @@
 package com.increff.pos.invoice.integration.dto;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.*;
 import com.increff.pos.dto.InvoiceDto;
 import com.increff.pos.pojo.*;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for InvoiceDto.

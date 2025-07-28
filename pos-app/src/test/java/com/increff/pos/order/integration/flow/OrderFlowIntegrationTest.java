@@ -1,10 +1,10 @@
 package com.increff.pos.order.integration.flow;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.*;
 import com.increff.pos.flow.OrderFlow;
 import com.increff.pos.pojo.*;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

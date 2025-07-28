@@ -1,11 +1,11 @@
 package com.increff.pos.product.unit.flow;
 
-import com.increff.pos.setup.TestData;
 import com.increff.pos.flow.ProductFlow;
-import com.increff.pos.service.ProductService;
-import com.increff.pos.service.ClientService;
-import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.service.ClientService;
+import com.increff.pos.service.ProductService;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +16,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 

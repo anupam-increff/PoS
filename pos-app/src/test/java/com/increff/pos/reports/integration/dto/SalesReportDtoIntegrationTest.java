@@ -1,20 +1,21 @@
 package com.increff.pos.reports.integration.dto;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.*;
 import com.increff.pos.dto.SalesReportDto;
-import com.increff.pos.model.data.SalesReportData;
 import com.increff.pos.model.data.PaginatedResponse;
+import com.increff.pos.model.data.SalesReportData;
 import com.increff.pos.model.form.SalesReportFilterForm;
 import com.increff.pos.pojo.*;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZonedDateTime;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for SalesReportDto.

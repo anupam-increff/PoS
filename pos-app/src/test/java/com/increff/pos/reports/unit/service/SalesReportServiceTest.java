@@ -1,8 +1,8 @@
 package com.increff.pos.reports.unit.service;
 
 import com.increff.pos.dao.SalesReportDao;
-import com.increff.pos.model.data.SalesReportData;
 import com.increff.pos.model.data.PaginatedResponse;
+import com.increff.pos.model.data.SalesReportData;
 import com.increff.pos.service.SalesReportService;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,10 +15,9 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
-import com.increff.pos.model.form.SalesReportFilterForm;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SalesReportServiceTest {

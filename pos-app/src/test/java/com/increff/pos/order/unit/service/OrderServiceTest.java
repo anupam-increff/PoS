@@ -1,12 +1,12 @@
 package com.increff.pos.order.unit.service;
 
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.OrderDao;
 import com.increff.pos.dao.OrderItemDao;
 import com.increff.pos.exception.ApiException;
-import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.OrderItemPojo;
+import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.OrderService;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import com.increff.pos.model.enums.OrderStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrderServiceTest {

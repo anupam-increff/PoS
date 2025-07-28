@@ -1,11 +1,11 @@
 package com.increff.pos.product.unit.dao;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.dao.ProductDao;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

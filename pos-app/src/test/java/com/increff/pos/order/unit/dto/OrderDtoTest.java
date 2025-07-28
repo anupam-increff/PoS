@@ -1,17 +1,16 @@
 package com.increff.pos.order.unit.dto;
 
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dto.OrderDto;
 import com.increff.pos.flow.OrderFlow;
-import com.increff.pos.service.ProductService;
-import com.increff.pos.service.InvoiceService;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.OrderPojo;
-import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.service.InvoiceService;
+import com.increff.pos.service.ProductService;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,8 +21,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

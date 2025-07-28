@@ -1,17 +1,18 @@
 package com.increff.pos.product.integration.flow;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.dao.ProductDao;
 import com.increff.pos.flow.ProductFlow;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests for ProductFlow.

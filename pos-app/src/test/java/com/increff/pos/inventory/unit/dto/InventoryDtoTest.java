@@ -1,6 +1,5 @@
 package com.increff.pos.inventory.unit.dto;
 
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dto.InventoryDto;
 import com.increff.pos.flow.InventoryFlow;
 import com.increff.pos.model.data.InventoryData;
@@ -14,13 +13,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

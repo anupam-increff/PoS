@@ -1,13 +1,13 @@
 package com.increff.pos.client.integration.dto;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.dto.ClientDto;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.ClientForm;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

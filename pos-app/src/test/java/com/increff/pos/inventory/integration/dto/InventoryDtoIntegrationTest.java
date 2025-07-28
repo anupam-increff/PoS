@@ -1,17 +1,17 @@
 package com.increff.pos.inventory.integration.dto;
 
-import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dao.ClientDao;
-import com.increff.pos.dao.ProductDao;
 import com.increff.pos.dao.InventoryDao;
+import com.increff.pos.dao.ProductDao;
 import com.increff.pos.dto.InventoryDto;
 import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.ClientPojo;
-import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.pojo.InventoryPojo;
+import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.setup.AbstractTest;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

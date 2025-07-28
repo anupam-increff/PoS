@@ -1,12 +1,12 @@
 package com.increff.pos.client.unit.dto;
 
-import com.increff.pos.setup.TestData;
 import com.increff.pos.dto.ClientDto;
-import com.increff.pos.service.ClientService;
 import com.increff.pos.model.data.ClientData;
 import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.ClientForm;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.service.ClientService;
+import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,15 +15,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
