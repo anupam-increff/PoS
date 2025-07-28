@@ -10,6 +10,7 @@ import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class InventoryDto extends BaseDto {
+public class InventoryDto {
 
     @Autowired
     private InventoryFlow inventoryFlow;
@@ -38,18 +39,18 @@ public class InventoryDto extends BaseDto {
         inventoryFlow.updateInventory(barcode, form.getQuantity());
     }
 
-    public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
+    public PaginatedResponse<InventoryData> getAll(Integer page, Integer pageSize) {
         List<InventoryPojo> inventories = inventoryService.getAll(page, pageSize);
-        long totalInventories = inventoryService.countAll();
+        Long totalInventories = inventoryService.countAll();
         List<InventoryData> inventoryDataList = inventories.stream().map(this::convertToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(inventoryDataList, page, (int) Math.ceil((double) totalInventories / pageSize), totalInventories, pageSize);
+        return PaginationUtil.createPaginatedResponse(inventoryDataList, page, pageSize, totalInventories);
     }
 
-    public PaginatedResponse<InventoryData> searchByBarcode(String barcode, int page, int pageSize) {
+    public PaginatedResponse<InventoryData> searchByBarcode(String barcode, Integer page, Integer pageSize) {
         List<InventoryPojo> inventories = inventoryService.searchByBarcode(barcode, page, pageSize);
-        long totalInventories = inventoryService.countByBarcodeSearch(barcode);
+        Long totalInventories = inventoryService.countByBarcodeSearch(barcode);
         List<InventoryData> inventoryDataList = inventories.stream().map(this::convertToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(inventoryDataList, page, (int) Math.ceil((double) totalInventories / pageSize), totalInventories, pageSize);
+        return PaginationUtil.createPaginatedResponse(inventoryDataList, page, pageSize, totalInventories);
     }
 
     public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {

@@ -10,17 +10,17 @@ import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ClientService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ProductDto extends BaseDto {
+public class ProductDto {
 
     @Autowired
     private ProductFlow productFlow;
@@ -40,21 +40,21 @@ public class ProductDto extends BaseDto {
         List<ProductPojo> products = productService.getAll(page, pageSize);
         long totalProducts = productService.countAll();
         List<ProductData> productDataList = products.stream().map(this::pojoToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(productDataList, page, (int) Math.ceil((double) totalProducts / pageSize), totalProducts, pageSize);
+        return PaginationUtil.createPaginatedResponse(productDataList, page, pageSize, totalProducts);
     }
 
     public PaginatedResponse<ProductData> getByClient(String clientName, int page, int pageSize) {
         List<ProductPojo> products = productFlow.getProductsByAClient(clientName, page, pageSize);
         long totalProducts = productFlow.countProductsByAClient(clientName);
         List<ProductData> productDataList = products.stream().map(this::pojoToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(productDataList, page, (int) Math.ceil((double) totalProducts / pageSize), totalProducts, pageSize);
+        return PaginationUtil.createPaginatedResponse(productDataList, page, pageSize, totalProducts);
     }
 
     public PaginatedResponse<ProductData> searchByBarcode(String barcode, int page, int pageSize) {
         List<ProductPojo> products = productService.searchByBarcode(barcode, page, pageSize);
         long totalProducts = productService.countSearchByBarcode(barcode);
         List<ProductData> productDataList = products.stream().map(this::pojoToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(productDataList, page, (int) Math.ceil((double) totalProducts / pageSize), totalProducts, pageSize);
+        return PaginationUtil.createPaginatedResponse(productDataList, page, pageSize, totalProducts);
     }
 
     public ProductData getByBarcode(String barcode) {

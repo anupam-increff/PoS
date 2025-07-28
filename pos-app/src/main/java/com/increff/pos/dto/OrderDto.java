@@ -14,6 +14,7 @@ import com.increff.pos.service.InvoiceService;
 import com.increff.pos.service.OrderService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
+import com.increff.pos.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class OrderDto extends BaseDto {
+public class OrderDto {
 
     @Autowired
     private OrderFlow orderFlow;
@@ -44,11 +45,11 @@ public class OrderDto extends BaseDto {
         return convertToData(orderPojo);
     }
 
-    public PaginatedResponse<OrderData> getAll(int page, int pageSize) {
+    public PaginatedResponse<OrderData> getAll(Integer page, Integer pageSize) {
         List<OrderPojo> orders = orderService.getAllOrdersPaginated(page, pageSize);
-        long totalOrders = orderService.countAll();
+        Long totalOrders = orderService.countAll();
         List<OrderData> orderDataList = orders.stream().map(this::convertToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(orderDataList, page, (int) Math.ceil((double) totalOrders / pageSize), totalOrders, pageSize);
+        return PaginationUtil.createPaginatedResponse(orderDataList, page, pageSize, totalOrders);
     }
 
     public List<OrderItemData> getItemsByOrderId(Integer orderId) {
@@ -56,11 +57,11 @@ public class OrderDto extends BaseDto {
         return orderItems.stream().map(this::convertToData).collect(Collectors.toList());
     }
 
-    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, String query, int page, int pageSize) {
+    public PaginatedResponse<OrderData> searchOrders(ZonedDateTime startDate, ZonedDateTime endDate, String query, Integer page, Integer pageSize) {
         List<OrderPojo> orders = orderService.searchOrderByQuery(startDate, endDate, query, page, pageSize);
-        long totalOrders = orderService.countMatchingOrdersByQuery(startDate, endDate, query);
+        Long totalOrders = orderService.countMatchingOrdersByQuery(startDate, endDate, query);
         List<OrderData> orderDataList = orders.stream().map(this::convertToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(orderDataList, page, (int) Math.ceil((double) totalOrders / pageSize), totalOrders, pageSize);
+        return PaginationUtil.createPaginatedResponse(orderDataList, page, pageSize, totalOrders);
     }
 
     public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {

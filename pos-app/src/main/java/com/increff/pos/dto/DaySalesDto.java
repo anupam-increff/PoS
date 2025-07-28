@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class DaySalesDto extends BaseDto {
+public class DaySalesDto {
 
     @Autowired
     private DaySalesFlow daySalesFlow;
