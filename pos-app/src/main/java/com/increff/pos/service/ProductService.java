@@ -18,9 +18,7 @@ public class ProductService {
     private ProductDao productDao;
 
     public void addProduct(ProductPojo productPojo) {
-        validateBarcode(productPojo.getBarcode());
-        validateMrp(productPojo.getMrp());
-        validateName(productPojo.getName());
+        checkDuplicateBarcode(productPojo.getBarcode());
         productDao.insert(productPojo);
     }
 
@@ -63,8 +61,6 @@ public class ProductService {
     }
 
     public void update(Integer id, ProductPojo updated) {
-        validateMrp(updated.getMrp());
-        validateName(updated.getName());
         ProductPojo existing = getCheckProductById(id);
         existing.setName(updated.getName());
         existing.setMrp(updated.getMrp());
@@ -79,34 +75,10 @@ public class ProductService {
         return productDao.countByClientId(clientId);
     }
 
-    private void validateBarcode(String barcode) {
-        if (Objects.isNull(barcode)) {
-            throw new ApiException("Barcode cannot be null");
-        }
-        if (barcode.trim().isEmpty()) {
-            throw new ApiException("Barcode cannot be empty");
-        }
+    private void checkDuplicateBarcode(String barcode) {
         ProductPojo existing = productDao.getByBarcode(barcode);
-        if (!Objects.isNull(existing)) {
+        if (Objects.nonNull(existing)) {
             throw new ApiException("Product with barcode " + barcode + " already exists");
-        }
-    }
-
-    private void validateMrp(Double mrp) {
-        if (Objects.isNull(mrp)) {
-            throw new ApiException("MRP cannot be null");
-        }
-        if (mrp <= 0) {
-            throw new ApiException("MRP must be positive");
-        }
-    }
-
-    private void validateName(String name) {
-        if (Objects.isNull(name)) {
-            throw new ApiException("Name cannot be null");
-        }
-        if (name.trim().isEmpty()) {
-            throw new ApiException("Name cannot be empty");
         }
     }
 }

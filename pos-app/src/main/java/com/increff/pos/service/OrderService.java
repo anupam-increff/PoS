@@ -25,7 +25,11 @@ public class OrderService {
     private OrderItemDao orderItemDao;
 
     public Integer createOrderWithItems(List<OrderItemPojo> orderItemPojos) {
+        if (orderItemPojos == null || orderItemPojos.isEmpty()) {
+            throw new ApiException("Order must have at least one item");
+        }
         OrderPojo order = new OrderPojo();
+        order.setOrderStatus(OrderStatus.CREATED);
         Integer orderId = placeOrder(order);
         saveOrderItems(orderItemPojos, orderId);
         return orderId;

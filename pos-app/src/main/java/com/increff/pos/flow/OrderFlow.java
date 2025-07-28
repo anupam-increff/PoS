@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Transactional(rollbackFor = ApiException.class)
@@ -25,6 +26,7 @@ public class OrderFlow {
     private InventoryService inventoryService;
 
     public OrderPojo placeOrder(List<OrderItemPojo> orderItemPojos) {
+        validateOrderItemPojos(orderItemPojos);
         for (OrderItemPojo item : orderItemPojos) {
             ProductPojo product = productService.getCheckProductById(item.getProductId());
             productService.validateSellingPrice(item.getSellingPrice(), product);
@@ -33,5 +35,9 @@ public class OrderFlow {
         Integer orderId = orderService.createOrderWithItems(orderItemPojos);
         return orderService.getCheckByOrderId(orderId);
     }
-
+    private void validateOrderItemPojos(List<OrderItemPojo> orderItemPojos) {
+        if (Objects.isNull(orderItemPojos) || orderItemPojos.isEmpty()) {
+            throw new ApiException("Order must have at least one item");
+        }
+    }
 }

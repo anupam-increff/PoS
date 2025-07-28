@@ -57,8 +57,13 @@ public class TSVUploadUtil {
                 byte[] errorTsv = TSVConvertUtil.createTsvFromRows(errorRows, errorHeaders);
                 String fileId = TSVDownloadUtil.storeTSVFile(errorTsv);
                 
+                // Include first error message in the response message
+                String firstError = failureList.get(0).split("\t")[failureList.get(0).split("\t").length - 1];
+                String message = String.format("Upload completed with errors (%d failed). First error: %s", 
+                        failureList.size(), firstError);
+                
                 TSVUploadResponse resp = TSVUploadResponse.error(
-                        "Upload completed with errors. " + successList.size() + " " + AppConstants.DEFAULT_SUCCESS_MESSAGE,
+                        message,
                         formList.size(),
                         failureList.size(),
                         failureList

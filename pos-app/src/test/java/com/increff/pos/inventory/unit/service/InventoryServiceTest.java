@@ -1,10 +1,9 @@
 package com.increff.pos.inventory.unit.service;
 
 import com.increff.pos.dao.InventoryDao;
+import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.service.InventoryService;
-import com.increff.pos.setup.TestData;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,93 +13,126 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InventoryServiceTest {
 
-    @Mock
-    private InventoryDao inventoryDao;
-
     @InjectMocks
-    private InventoryService inventoryService;
+    private InventoryService service;
 
-    private InventoryPojo testInventory;
+    @Mock
+    private InventoryDao dao;
 
-    @Before
-    public void setUp() {
-        testInventory = TestData.inventory(1, 1);
-        testInventory.setQuantity(100);
-    }
-
-    /**
-     * Tests adding inventory to the system.
-     * Verifies proper inventory insertion and database persistence.
-     */
     @Test
-    public void testAddInventory() {
-        // Given
-        doNothing().when(inventoryDao).insert(any(InventoryPojo.class));
+    public void testGetCheckByProductId() throws ApiException {
+        InventoryPojo pojo = new InventoryPojo();
+        pojo.setProductId(1);
+        pojo.setQuantity(10);
 
-        // When
-        inventoryService.addInventory(1, 50);
+        when(dao.getByProductId(1)).thenReturn(pojo);
 
-        // Then
-        verify(inventoryDao, times(1)).insert(any(InventoryPojo.class));
+        InventoryPojo result = service.getCheckByProductId(1);
+        assertNotNull(result);
+        assertEquals(Integer.valueOf(1), result.getProductId());
+        assertEquals(Integer.valueOf(10), result.getQuantity());
     }
 
-    /**
-     * Tests retrieving all inventory with pagination.
-     * Verifies proper DAO delegation and pagination handling.
-     */
+    @Test(expected = ApiException.class)
+    public void testGetCheckByProductIdNotFound() throws ApiException {
+        when(dao.getByProductId(1)).thenReturn(null);
+        service.getCheckByProductId(1);
+    }
+
     @Test
     public void testGetAll() {
-        // Given
-        List<InventoryPojo> inventoryList = Arrays.asList(testInventory);
-        when(inventoryDao.getAllInventory(0, 10)).thenReturn(inventoryList);
+        InventoryPojo pojo1 = new InventoryPojo();
+        pojo1.setProductId(1);
+        pojo1.setQuantity(10);
 
-        // When
-        List<InventoryPojo> result = inventoryService.getAll(0, 10);
+        InventoryPojo pojo2 = new InventoryPojo();
+        pojo2.setProductId(2);
+        pojo2.setQuantity(20);
 
-        // Then
-        assertEquals("Result should match DAO response", inventoryList, result);
-        verify(inventoryDao, times(1)).getAllInventory(0, 10);
+        when(dao.getAllInventory(0, 10)).thenReturn(Arrays.asList(pojo1, pojo2));
+
+        List<InventoryPojo> result = service.getAll(0, 10);
+        assertEquals(2, result.size());
     }
 
-    /**
-     * Tests counting all inventory items.
-     * Verifies proper count delegation to DAO layer.
-     */
     @Test
-    public void testCountAll() {
-        // Given
-        when(inventoryDao.countAll()).thenReturn(5L);
+    public void testAddInventory() throws ApiException {
+        when(dao.getByProductId(1)).thenReturn(null);
 
-        // When
-        long result = inventoryService.countAll();
+        service.addInventory(1, 10);
 
-        // Then
-        assertEquals("Count should match DAO response", 5L, result);
-        verify(inventoryDao, times(1)).countAll();
+        verify(dao).insert(any(InventoryPojo.class));
     }
 
-    /**
-     * Tests searching inventory by barcode pattern.
-     * Verifies proper search functionality with pagination.
-     */
+    @Test(expected = ApiException.class)
+    public void testAddInventoryNegativeQuantity() throws ApiException {
+        service.addInventory(1, -10);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testAddInventoryNullQuantity() throws ApiException {
+        service.addInventory(1, null);
+    }
+
     @Test
-    public void testSearchByBarcode() {
-        // Given
-        List<InventoryPojo> inventoryList = Arrays.asList(testInventory);
-        when(inventoryDao.searchByBarcode("TEST", 0, 10)).thenReturn(inventoryList);
+    public void testUpdateInventory() throws ApiException {
+        InventoryPojo existingPojo = new InventoryPojo();
+        existingPojo.setProductId(1);
+        existingPojo.setQuantity(10);
 
-        // When
-        List<InventoryPojo> result = inventoryService.searchByBarcode("TEST", 0, 10);
+        when(dao.getByProductId(1)).thenReturn(existingPojo);
 
-        // Then
-        assertEquals("Search results should match DAO response", inventoryList, result);
-        verify(inventoryDao, times(1)).searchByBarcode("TEST", 0, 10);
+        service.updateInventory(1, 20);
+
+        assertEquals(Integer.valueOf(20), existingPojo.getQuantity());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateInventoryNotFound() throws ApiException {
+        when(dao.getByProductId(1)).thenReturn(null);
+        service.updateInventory(1, 20);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateInventoryNegativeQuantity() throws ApiException {
+        lenient().when(dao.getByProductId(1)).thenReturn(new InventoryPojo());
+        service.updateInventory(1, -1);
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateInventoryNullQuantity() throws ApiException {
+        lenient().when(dao.getByProductId(1)).thenReturn(new InventoryPojo());
+        service.updateInventory(1, null);
+    }
+
+    @Test
+    public void testValidateSufficientAndReduceInventory() throws ApiException {
+        InventoryPojo inventory = new InventoryPojo();
+        inventory.setProductId(1);
+        inventory.setQuantity(100);
+
+        when(dao.getByProductId(1)).thenReturn(inventory);
+
+        service.validateSufficientAndReduceInventory(1, 50, "Test Product");
+
+        assertEquals(Integer.valueOf(50), inventory.getQuantity());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testValidateSufficientAndReduceInventoryInsufficientQuantity() throws ApiException {
+        InventoryPojo inventory = new InventoryPojo();
+        inventory.setProductId(1);
+        inventory.setQuantity(30);
+
+        when(dao.getByProductId(1)).thenReturn(inventory);
+
+        service.validateSufficientAndReduceInventory(1, 50, "Test Product");
     }
 } 

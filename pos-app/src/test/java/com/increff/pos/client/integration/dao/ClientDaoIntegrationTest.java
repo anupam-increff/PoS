@@ -1,9 +1,8 @@
-package com.increff.pos.client.unit.dao;
+package com.increff.pos.client.integration.dao;
 
 import com.increff.pos.dao.ClientDao;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.setup.AbstractTest;
-import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class ClientDaoTest extends AbstractTest {
+public class ClientDaoIntegrationTest extends AbstractTest {
 
     @Autowired
     private ClientDao clientDao;
@@ -21,7 +20,8 @@ public class ClientDaoTest extends AbstractTest {
 
     @Before
     public void setUp() {
-        testClient = TestData.clientWithoutId("Test Client DAO");
+        testClient = new ClientPojo();
+        testClient.setName("Test Client DAO");
     }
 
     /**

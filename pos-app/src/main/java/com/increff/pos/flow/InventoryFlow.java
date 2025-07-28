@@ -18,12 +18,12 @@ public class InventoryFlow {
     @Autowired
     private ProductService productService;
 
-    public void updateInventory(String barcode, int quantity) {
+    public void updateInventory(String barcode, Integer quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
         inventoryService.updateInventory(product.getId(), quantity);
     }
 
-    public void addInventory(String barcode, int quantity) {
+    public void addInventory(String barcode, Integer quantity) {
         ProductPojo product = productService.getCheckProductByBarcode(barcode);
         inventoryService.addInventory(product.getId(), quantity);
     }

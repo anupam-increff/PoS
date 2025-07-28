@@ -74,6 +74,9 @@ public class ClientService {
         if (clientPojo.getName().trim().isEmpty()) {
             throw new ApiException("Client name cannot be empty");
         }
+        if (clientPojo.getName().length() > 100) {
+            throw new ApiException("Client name cannot be longer than 100 characters");
+        }
     }
 
     private void validateDuplicateClientWithSameName(ClientPojo clientPojo) {

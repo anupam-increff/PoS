@@ -4,7 +4,6 @@ import com.increff.pos.dao.ProductDao;
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ProductService;
-import com.increff.pos.setup.TestData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,10 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,144 +28,122 @@ public class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    private ProductPojo testProduct;
+    private ProductPojo product;
 
     @Before
     public void setUp() {
-        testProduct = TestData.product(1, 1);
-        testProduct.setBarcode("BARCODE-001");
-        testProduct.setName("Test Product");
-        testProduct.setMrp(99.99);
+        product = new ProductPojo();
+        product.setId(1);
+        product.setBarcode("BARCODE-001");
+        product.setName("Test Product");
+        product.setMrp(99.99);
+        product.setClientId(1);
     }
 
-    /**
-     * Tests adding a new product to the system.
-     * Verifies proper product insertion and duplicate checking.
-     */
     @Test
-    public void testAddProduct() {
-        // Given
+    public void addProduct() {
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
-        doNothing().when(productDao).insert(testProduct);
-
-        // When
-        productService.addProduct(testProduct);
-
-        // Then
-        verify(productDao, times(1)).getByBarcode("BARCODE-001");
-        verify(productDao, times(1)).insert(testProduct);
+        productService.addProduct(product);
+        verify(productDao).insert(product);
     }
 
-    /**
-     * Tests error handling when adding product with duplicate barcode.
-     */
     @Test(expected = ApiException.class)
-    public void testAddProductDuplicateBarcode() {
-        // Given
-        when(productDao.getByBarcode("BARCODE-001")).thenReturn(testProduct);
-
-        // When
-        productService.addProduct(testProduct);
-
-        // Then - exception should be thrown
+    public void addProductDuplicateBarcode() {
+        when(productDao.getByBarcode("BARCODE-001")).thenReturn(new ProductPojo());
+        productService.addProduct(product);
     }
 
-    /**
-     * Tests retrieving a product by barcode with validation.
-     * Verifies proper product lookup and error handling.
-     */
     @Test
-    public void testGetCheckProductByBarcode() {
-        // Given
-        when(productDao.getByBarcode("TEST-001")).thenReturn(testProduct);
-
-        // When
-        ProductPojo result = productService.getCheckProductByBarcode("TEST-001");
-
-        // Then
-        assertNotNull("Product should not be null", result);
-        assertEquals("Product should match", testProduct, result);
-        verify(productDao, times(1)).getByBarcode("TEST-001");
+    public void validateSellingPrice() {
+        productService.validateSellingPrice(50.0, product);
     }
 
-    /**
-     * Tests error handling when product barcode is not found.
-     */
     @Test(expected = ApiException.class)
-    public void testGetCheckProductByBarcodeNotFound() {
-        // Given
-        when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
-
-        // When
-        productService.getCheckProductByBarcode("BARCODE-001");
-
-        // Then - exception should be thrown
+    public void validateSellingPriceExceedsMrp() {
+        productService.validateSellingPrice(100.0, product);
     }
 
-    /**
-     * Tests retrieving a product by ID with validation.
-     * Verifies proper product lookup by ID and error handling.
-     */
     @Test
-    public void testGetCheckProductById() {
-        // Given
-        when(productDao.getById(1)).thenReturn(testProduct);
-
-        // When
-        ProductPojo result = productService.getCheckProductById(1);
-
-        // Then
-        assertNotNull("Product should not be null", result);
-        assertEquals("Product should match", testProduct, result);
-        verify(productDao, times(1)).getById(1);
-    }
-
-    /**
-     * Tests error handling when product ID is not found.
-     */
-    @Test(expected = ApiException.class)
-    public void testGetCheckProductByIdNotFound() {
-        // Given
-        when(productDao.getById(1)).thenReturn(null);
-
-        // When
-        productService.getCheckProductById(1);
-
-        // Then - exception should be thrown
-    }
-
-    /**
-     * Tests retrieving all products with pagination.
-     * Verifies proper DAO delegation and pagination handling.
-     */
-    @Test
-    public void testGetAll() {
-        // Given
-        List<ProductPojo> products = Arrays.asList(testProduct);
+    public void getAll() {
+        List<ProductPojo> products = Arrays.asList(product);
         when(productDao.getAllProducts(0, 10)).thenReturn(products);
-
-        // When
         List<ProductPojo> result = productService.getAll(0, 10);
-
-        // Then
-        assertEquals("Results should match DAO response", products, result);
-        verify(productDao, times(1)).getAllProducts(0, 10);
+        assertEquals(1, result.size());
+        assertEquals("Test Product", result.get(0).getName());
     }
 
-    /**
-     * Tests counting all products in the system.
-     * Verifies proper count delegation to DAO layer.
-     */
     @Test
-    public void testCountAll() {
-        // Given
+    public void getAllEmpty() {
+        when(productDao.getAllProducts(0, 10)).thenReturn(Collections.emptyList());
+        List<ProductPojo> result = productService.getAll(0, 10);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void countAll() {
         when(productDao.countAll()).thenReturn(5L);
+        Long count = productService.countAll();
+        assertEquals(Long.valueOf(5), count);
+    }
 
-        // When
-        long result = productService.countAll();
+    @Test
+    public void searchByBarcode() {
+        List<ProductPojo> products = Arrays.asList(product);
+        when(productDao.searchByBarcode("BARCODE", 0, 10)).thenReturn(products);
+        List<ProductPojo> result = productService.searchByBarcode("BARCODE", 0, 10);
+        assertEquals(1, result.size());
+        assertEquals("Test Product", result.get(0).getName());
+    }
 
-        // Then
-        assertEquals("Count should match DAO response", 5L, result);
-        verify(productDao, times(1)).countAll();
+    @Test
+    public void countSearchByBarcode() {
+        when(productDao.countByBarcodeSearch("BARCODE")).thenReturn(2L);
+        Long count = productService.countSearchByBarcode("BARCODE");
+        assertEquals(Long.valueOf(2), count);
+    }
+
+    @Test
+    public void getCheckProductByBarcode() {
+        when(productDao.getByBarcode("BARCODE-001")).thenReturn(product);
+        ProductPojo result = productService.getCheckProductByBarcode("BARCODE-001");
+        assertEquals("Test Product", result.getName());
+    }
+
+    @Test(expected = ApiException.class)
+    public void getCheckProductByBarcodeNotFound() {
+        when(productDao.getByBarcode("NONEXISTENT")).thenReturn(null);
+        productService.getCheckProductByBarcode("NONEXISTENT");
+    }
+
+    @Test
+    public void getCheckProductById() {
+        when(productDao.getById(1)).thenReturn(product);
+        ProductPojo result = productService.getCheckProductById(1);
+        assertEquals("Test Product", result.getName());
+    }
+
+    @Test(expected = ApiException.class)
+    public void getCheckProductByIdNotFound() {
+        when(productDao.getById(999)).thenReturn(null);
+        productService.getCheckProductById(999);
+    }
+
+    @Test
+    public void update() {
+        when(productDao.getById(1)).thenReturn(product);
+        ProductPojo updated = new ProductPojo();
+        updated.setName("Updated Product");
+        updated.setMrp(149.99);
+        updated.setClientId(2);
+        productService.update(1, updated);
+        assertEquals("Updated Product", product.getName());
+        assertEquals(149.99, product.getMrp(), 0.01);
+        assertEquals(Integer.valueOf(2), product.getClientId());
+    }
+
+    @Test(expected = ApiException.class)
+    public void updateNonExistent() {
+        when(productDao.getById(999)).thenReturn(null);
+        productService.update(999, new ProductPojo());
     }
 } 
