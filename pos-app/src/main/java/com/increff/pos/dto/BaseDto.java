@@ -5,7 +5,7 @@ import com.increff.pos.model.data.PaginatedResponse;
 import java.util.List;
 
 public abstract class BaseDto {
-    
+
     protected <T> PaginatedResponse<T> createPaginatedResponse(List<T> data, int page, int pageSize, long totalItems) {
         int totalPages = (int) Math.ceil((double) totalItems / pageSize);
         return new PaginatedResponse<>(data, page, totalPages, totalItems, pageSize);

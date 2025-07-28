@@ -1,8 +1,6 @@
 package com.increff.pos.inventory.unit.flow;
 
 import com.increff.pos.flow.InventoryFlow;
-import com.increff.pos.model.data.InventoryData;
-import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.InventoryService;
@@ -16,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -40,11 +39,10 @@ public class InventoryFlowTest {
     @Before
     public void setUp() {
         testProduct = TestData.product(1, 1);
-        testProduct.setBarcode("INV-FLOW-001");
-        testProduct.setName("Test Inventory Product");
+        testProduct.setBarcode("TEST-001");
+        testProduct.setName("Test Product");
 
         testInventory = TestData.inventoryWithoutId(1, 50);
-        testInventory.setId(1);
     }
 
     /**
@@ -92,17 +90,32 @@ public class InventoryFlowTest {
         // Given
         List<InventoryPojo> inventories = Arrays.asList(testInventory);
         when(inventoryService.getAll(0, 10)).thenReturn(inventories);
-        when(inventoryService.countAll()).thenReturn(1L);
-        when(productService.getCheckProductById(1)).thenReturn(testProduct);
 
         // When
-        PaginatedResponse<InventoryData> result = inventoryFlow.getAll(0, 10);
+        List<InventoryPojo> result = inventoryFlow.getAll(0, 10);
 
         // Then
         assertNotNull("Result should not be null", result);
-        assertEquals("Should contain one inventory", 1, result.getContent().size());
+        assertEquals("Should contain one inventory", 1, result.size());
         verify(inventoryService, times(1)).getAll(0, 10);
-        verify(inventoryService, times(1)).countAll();
+    }
+
+    /**
+     * Tests retrieving all inventory when database is empty.
+     * Verifies proper handling of empty results.
+     */
+    @Test
+    public void testGetAllEmptyResult() {
+        // Given
+        when(inventoryService.getAll(0, 10)).thenReturn(Collections.emptyList());
+
+        // When
+        List<InventoryPojo> result = inventoryFlow.getAll(0, 10);
+
+        // Then
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should be empty", 0, result.size());
+        verify(inventoryService, times(1)).getAll(0, 10);
     }
 
     /**
@@ -114,34 +127,13 @@ public class InventoryFlowTest {
         // Given
         List<InventoryPojo> inventories = Arrays.asList(testInventory);
         when(inventoryService.searchByBarcode("TEST", 0, 10)).thenReturn(inventories);
-        when(inventoryService.countByBarcodeSearch("TEST")).thenReturn(1L);
-        when(productService.getCheckProductById(1)).thenReturn(testProduct);
 
         // When
-        PaginatedResponse<InventoryData> result = inventoryFlow.searchByBarcode("TEST", 0, 10);
+        List<InventoryPojo> result = inventoryFlow.searchByBarcode("TEST", 0, 10);
 
         // Then
         assertNotNull("Result should not be null", result);
-        assertEquals("Should contain search results", 1, result.getContent().size());
+        assertEquals("Should contain search results", 1, result.size());
         verify(inventoryService, times(1)).searchByBarcode("TEST", 0, 10);
-        verify(inventoryService, times(1)).countByBarcodeSearch("TEST");
-    }
-
-    @Test
-    public void testGetAll_EmptyResult() {
-        // Given
-        when(inventoryService.getAll(0, 10)).thenReturn(Arrays.asList());
-        when(inventoryService.countAll()).thenReturn(0L);
-
-        // When
-        PaginatedResponse<InventoryData> result = inventoryFlow.getAll(0, 10);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(0, result.getContent().size());
-        assertEquals(0L, result.getTotalItems());
-
-        verify(inventoryService, times(1)).getAll(0, 10);
-        verify(inventoryService, times(1)).countAll();
     }
 } 

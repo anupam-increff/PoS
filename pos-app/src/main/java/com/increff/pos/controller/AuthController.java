@@ -17,34 +17,34 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("api/auth")
 public class AuthController {
 
-   @Autowired
-   private AuthDto authDto;
+    @Autowired
+    private AuthDto authDto;
 
-   @ApiOperation("User signup")
-   @PostMapping("/signup")
-   public ResponseEntity<UserData> signup(@RequestBody SignupForm form, HttpSession session) {
-       UserData data = authDto.signup(form, session);
-       return ResponseEntity.ok(data);
-   }
+    @ApiOperation("User signup")
+    @PostMapping("/signup")
+    public ResponseEntity<UserData> signup(@RequestBody SignupForm form, HttpSession session) {
+        UserData data = authDto.signup(form, session);
+        return ResponseEntity.ok(data);
+    }
 
-   @ApiOperation("User login")
-   @PostMapping("/login")
-   public ResponseEntity<UserData> login(@RequestBody LoginForm form, HttpSession session) {
-       UserData data = authDto.login(form, session);
-       return ResponseEntity.ok(data);
-   }
+    @ApiOperation("User login")
+    @PostMapping("/login")
+    public ResponseEntity<UserData> login(@RequestBody LoginForm form, HttpSession session) {
+        UserData data = authDto.login(form, session);
+        return ResponseEntity.ok(data);
+    }
 
-   @ApiOperation("User logout")
-   @PostMapping("/logout")
-   public ResponseEntity<String> logout(HttpSession session) {
-       authDto.logout(session);
-       return ResponseEntity.ok("Logged out successfully");
-   }
+    @ApiOperation("User logout")
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpSession session) {
+        authDto.logout(session);
+        return ResponseEntity.ok("Logged out successfully");
+    }
 
-   @ApiOperation("Check session validity")
-   @GetMapping("/session-check")
-   public ResponseEntity<Boolean> checkSession(HttpSession session) {
-       boolean isValid = authDto.isSessionValid(session);
-       return ResponseEntity.ok(isValid);
-   }
+    @ApiOperation("Check session validity")
+    @GetMapping("/session-check")
+    public ResponseEntity<Boolean> checkSession(HttpSession session) {
+        boolean isValid = authDto.isSessionValid(session);
+        return ResponseEntity.ok(isValid);
+    }
 }

@@ -4,8 +4,6 @@ import com.increff.pos.dao.ClientDao;
 import com.increff.pos.dao.InventoryDao;
 import com.increff.pos.dao.ProductDao;
 import com.increff.pos.flow.InventoryFlow;
-import com.increff.pos.model.data.InventoryData;
-import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.pojo.ClientPojo;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
@@ -15,7 +13,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests for InventoryFlow.
@@ -94,59 +95,46 @@ public class InventoryFlowIntegrationTest extends AbstractTest {
         inventoryDao.insert(inventory);
 
         // When - Get all through Flow
-        PaginatedResponse<InventoryData> result = inventoryFlow.getAll(0, 10);
+        List<InventoryPojo> result = inventoryFlow.getAll(0, 10);
 
-        // Then - Verify integration worked
+        // Then - Verify results
         assertNotNull("Result should not be null", result);
-        assertTrue("Should contain at least one inventory item", result.getContent().size() >= 1);
-        
-        // Find our test inventory
-        InventoryData foundItem = result.getContent().stream()
-            .filter(item -> "INV-FLOW-INT-001".equals(item.getBarcode()))
-            .findFirst()
-            .orElse(null);
-            
-        assertNotNull("Our test inventory should be found", foundItem);
-        assertEquals("Barcode should match", "INV-FLOW-INT-001", foundItem.getBarcode());
-        assertEquals("Product name should match", "Integration Test Product", foundItem.getName());
-        assertEquals("Quantity should match", Integer.valueOf(25), foundItem.getQuantity());
+        assertEquals("Should contain one inventory", 1, result.size());
+        assertEquals("Product ID should match", testProduct.getId(), result.get(0).getProductId());
+        assertEquals("Quantity should match", Integer.valueOf(25), result.get(0).getQuantity());
     }
 
     /**
-     * Tests searching inventory by barcode pattern through the flow layer.
-     * Verifies search functionality works with database queries and data transformation.
+     * Tests searching inventory by barcode pattern.
+     * Verifies proper search functionality and data aggregation.
      */
     @Test
     public void testSearchInventoryByBarcode() {
         // Given - Create inventory in database
-        InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 40);
+        InventoryPojo inventory = TestData.inventoryWithoutId(testProduct.getId(), 25);
         inventoryDao.insert(inventory);
 
-        // When - Search by barcode through Flow
-        PaginatedResponse<InventoryData> result = inventoryFlow.searchByBarcode("INV-FLOW-INT", 0, 10);
+        // When - Search through Flow
+        List<InventoryPojo> result = inventoryFlow.searchByBarcode("INV-FLOW", 0, 10);
 
-        // Then - Verify search worked through full integration
-        assertNotNull("Search result should not be null", result);
-        assertEquals("Should find exactly one matching item", 1, result.getContent().size());
-        
-        InventoryData foundItem = result.getContent().get(0);
-        assertEquals("Barcode should match search", "INV-FLOW-INT-001", foundItem.getBarcode());
-        assertEquals("Product name should be populated", "Integration Test Product", foundItem.getName());
-        assertEquals("Quantity should match", Integer.valueOf(40), foundItem.getQuantity());
+        // Then - Verify results
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should contain one inventory", 1, result.size());
+        assertEquals("Product ID should match", testProduct.getId(), result.get(0).getProductId());
+        assertEquals("Quantity should match", Integer.valueOf(25), result.get(0).getQuantity());
     }
 
     /**
-     * Tests behavior when retrieving inventory from an empty database.
-     * Verifies proper handling of no-data scenarios.
+     * Tests retrieving all inventory when database is empty.
+     * Verifies proper handling of empty results.
      */
     @Test
     public void testGetAllInventoryEmptyDatabase() {
         // When - Get all from empty database
-        PaginatedResponse<InventoryData> result = inventoryFlow.getAll(0, 10);
+        List<InventoryPojo> result = inventoryFlow.getAll(0, 10);
 
-        // Then - Should handle empty case properly
-        assertNotNull("Result should not be null even when empty", result);
-        assertEquals("Should return empty list", 0, result.getContent().size());
-        assertEquals("Total items should be 0", 0L, result.getTotalItems());
+        // Then - Verify empty results
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should be empty", 0, result.size());
     }
 } 

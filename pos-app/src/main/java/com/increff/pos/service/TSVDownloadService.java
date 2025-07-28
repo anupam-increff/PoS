@@ -10,8 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
-public class TSVDownloadService
-{
+public class TSVDownloadService {
 
     private final Map<String, byte[]> tsvFiles = new ConcurrentHashMap<>();
 

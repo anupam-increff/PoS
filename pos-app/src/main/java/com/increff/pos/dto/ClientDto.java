@@ -40,7 +40,7 @@ public class ClientDto extends BaseDto {
                 .collect(Collectors.toList()), page, pageSize, totalItems);
     }
 
-    public void update(int id,@Valid ClientForm form) {
+    public void update(int id, @Valid ClientForm form) {
         ClientPojo pojo = ConvertUtil.convert(form, ClientPojo.class);
         clientService.update(id, pojo);
     }

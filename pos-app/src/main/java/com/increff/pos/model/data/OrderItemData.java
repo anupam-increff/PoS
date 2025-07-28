@@ -7,7 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemData {
     private Integer id;
     private Integer orderId;

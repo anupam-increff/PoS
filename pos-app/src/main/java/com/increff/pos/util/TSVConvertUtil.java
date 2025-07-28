@@ -59,20 +59,20 @@ public class TSVConvertUtil {
         }
     }
 
-    public static List<String[]> readRawRows(MultipartFile file){
-        try(Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8)){
+    public static List<String[]> readRawRows(MultipartFile file) {
+        try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8)) {
             CSVParser parser = CSVFormat.TDF.withFirstRecordAsHeader().parse(reader);
             List<String[]> rows = new ArrayList<>();
-            for(CSVRecord record: parser){
+            for (CSVRecord record : parser) {
                 String[] arr = new String[record.size()];
-                for(int i=0;i<record.size();i++){
+                for (int i = 0; i < record.size(); i++) {
                     arr[i] = record.get(i);
                 }
                 rows.add(arr);
             }
             return rows;
-        }catch(Exception e){
-            throw new ApiException("Error reading TSV file: "+e.getMessage(),e);
+        } catch (Exception e) {
+            throw new ApiException("Error reading TSV file: " + e.getMessage(), e);
         }
     }
 }

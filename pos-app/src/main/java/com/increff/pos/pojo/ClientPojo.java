@@ -7,10 +7,10 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "clients", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
-@Getter 
+@Getter
 @Setter
 public class ClientPojo extends BaseEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
