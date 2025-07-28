@@ -11,6 +11,7 @@ import com.increff.pos.service.InventoryService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
 import com.increff.pos.util.PaginationUtil;
+import com.increff.pos.util.TSVUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,8 +55,11 @@ public class InventoryDto {
     }
 
     public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
-        // TODO: Implement TSV upload logic
-        return TSVUploadResponse.success("File uploaded successfully", 0);
+        return TSVUploadUtil.processTSVUpload(
+                file,
+                InventoryForm.class,
+                form -> inventoryFlow.addInventory(form.getBarcode(), form.getQuantity())
+        );
     }
 
     private InventoryData convertToData(InventoryPojo pojo) {

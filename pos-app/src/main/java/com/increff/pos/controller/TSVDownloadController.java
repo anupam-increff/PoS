@@ -1,40 +1,18 @@
 package com.increff.pos.controller;
 
-import com.increff.pos.exception.ApiException;
-import com.increff.pos.service.TSVDownloadService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import com.increff.pos.util.TSVDownloadUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Objects;
-
 @RestController
 @RequestMapping("/api/tsv")
 public class TSVDownloadController {
 
-    @Autowired
-    private TSVDownloadService tsvDownloadService;
-
     @GetMapping("/download/{fileId}")
     public ResponseEntity<byte[]> downloadTsv(@PathVariable String fileId) {
-
-        byte[] tsvBytes = tsvDownloadService.getTSVFile(fileId);
-
-        if (Objects.isNull(tsvBytes)) {
-            throw new ApiException("File not found or expired");
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.valueOf("text/tab-separated-values"));
-        headers.setContentDispositionFormData("attachment", "upload_result.tsv");
-        headers.setContentLength(tsvBytes.length);
-
-        return new ResponseEntity<>(tsvBytes, headers, HttpStatus.OK);
+        return TSVDownloadUtil.downloadTSVFile(fileId, "upload_result.tsv");
     }
 } 

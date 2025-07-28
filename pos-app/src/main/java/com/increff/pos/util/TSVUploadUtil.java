@@ -2,7 +2,6 @@ package com.increff.pos.util;
 
 import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.data.TSVUploadResponse;
-import com.increff.pos.service.TSVDownloadService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
@@ -18,8 +17,7 @@ public class TSVUploadUtil {
     public static <T> TSVUploadResponse processTSVUpload(
             MultipartFile file, 
             Class<T> formClass, 
-            Consumer<T> processor,
-            TSVDownloadService tsvDownloadService) {
+            Consumer<T> processor) {
         
         try {
             // Use existing TSVConvertUtil for reading
@@ -57,7 +55,7 @@ public class TSVUploadUtil {
                         .map(s -> s.split("\t", -1))
                         .collect(java.util.stream.Collectors.toList());
                 byte[] errorTsv = TSVConvertUtil.createTsvFromRows(errorRows, errorHeaders);
-                String fileId = tsvDownloadService.storeTSVFile(errorTsv);
+                String fileId = TSVDownloadUtil.storeTSVFile(errorTsv);
                 
                 TSVUploadResponse resp = TSVUploadResponse.error(
                         "Upload completed with errors. " + successList.size() + " " + AppConstants.DEFAULT_SUCCESS_MESSAGE,

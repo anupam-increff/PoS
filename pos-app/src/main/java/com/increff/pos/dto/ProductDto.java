@@ -11,6 +11,7 @@ import com.increff.pos.service.ClientService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
 import com.increff.pos.util.PaginationUtil;
+import com.increff.pos.util.TSVUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,23 +37,23 @@ public class ProductDto {
         productFlow.addProduct(pojo, form.getClientName());
     }
 
-    public PaginatedResponse<ProductData> getAll(int page, int pageSize) {
+    public PaginatedResponse<ProductData> getAll(Integer page, Integer pageSize) {
         List<ProductPojo> products = productService.getAll(page, pageSize);
-        long totalProducts = productService.countAll();
+        Long totalProducts = productService.countAll();
         List<ProductData> productDataList = products.stream().map(this::pojoToData).collect(Collectors.toList());
         return PaginationUtil.createPaginatedResponse(productDataList, page, pageSize, totalProducts);
     }
 
-    public PaginatedResponse<ProductData> getByClient(String clientName, int page, int pageSize) {
+    public PaginatedResponse<ProductData> getByClient(String clientName, Integer page, Integer pageSize) {
         List<ProductPojo> products = productFlow.getProductsByAClient(clientName, page, pageSize);
-        long totalProducts = productFlow.countProductsByAClient(clientName);
+        Long totalProducts = productFlow.countProductsByAClient(clientName);
         List<ProductData> productDataList = products.stream().map(this::pojoToData).collect(Collectors.toList());
         return PaginationUtil.createPaginatedResponse(productDataList, page, pageSize, totalProducts);
     }
 
-    public PaginatedResponse<ProductData> searchByBarcode(String barcode, int page, int pageSize) {
+    public PaginatedResponse<ProductData> searchByBarcode(String barcode, Integer page, Integer pageSize) {
         List<ProductPojo> products = productService.searchByBarcode(barcode, page, pageSize);
-        long totalProducts = productService.countSearchByBarcode(barcode);
+        Long totalProducts = productService.countSearchByBarcode(barcode);
         List<ProductData> productDataList = products.stream().map(this::pojoToData).collect(Collectors.toList());
         return PaginationUtil.createPaginatedResponse(productDataList, page, pageSize, totalProducts);
     }
@@ -68,8 +69,14 @@ public class ProductDto {
     }
 
     public TSVUploadResponse uploadProductMasterByTsv(MultipartFile file) {
-        // TODO: Implement TSV upload logic
-        return TSVUploadResponse.success("File uploaded successfully", 0);
+        return TSVUploadUtil.processTSVUpload(
+                file,
+                ProductForm.class,
+                form -> {
+                    ProductPojo pojo = ConvertUtil.convert(form, ProductPojo.class);
+                    productFlow.addProduct(pojo, form.getClientName());
+                }
+        );
     }
 
     private ProductData pojoToData(ProductPojo product) {
