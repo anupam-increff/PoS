@@ -1,7 +1,6 @@
 package com.increff.pos.dto;
 
 import com.increff.pos.model.data.PaginatedResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 

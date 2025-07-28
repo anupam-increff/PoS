@@ -1,9 +1,9 @@
 package com.increff.pos.controller;
 
 import com.increff.pos.dto.AuthDto;
+import com.increff.pos.model.data.UserData;
 import com.increff.pos.model.form.LoginForm;
 import com.increff.pos.model.form.SignupForm;
-import com.increff.pos.model.data.UserData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

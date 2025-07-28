@@ -3,10 +3,6 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.OrderItemPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import org.springframework.transaction.annotation.Transactional;
-import com.increff.pos.exception.ApiException;
 import java.util.List;
 
 @Repository

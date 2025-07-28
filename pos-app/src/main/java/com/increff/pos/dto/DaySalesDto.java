@@ -2,7 +2,6 @@ package com.increff.pos.dto;
 
 import com.increff.pos.flow.DaySalesFlow;
 import com.increff.pos.pojo.DaySalesPojo;
-import com.increff.pos.service.DaySalesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

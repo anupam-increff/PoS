@@ -3,10 +3,7 @@ package com.increff.pos.dao;
 import com.increff.pos.pojo.UserPojo;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository

@@ -1,14 +1,13 @@
 package com.increff.pos.controller;
 
 import com.increff.pos.exception.ApiException;
+import com.increff.pos.model.data.MessageData;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.increff.pos.model.data.MessageData;
 
 @RestControllerAdvice
 public class AppRestControllerAdvice {

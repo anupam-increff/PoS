@@ -1,20 +1,16 @@
 package com.increff.pos.dto;
 
-import com.increff.pos.exception.ApiException;
-import com.increff.pos.model.data.PaginatedResponse;
-import com.increff.pos.service.ClientService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.increff.pos.model.data.ClientData;
+import com.increff.pos.model.data.PaginatedResponse;
 import com.increff.pos.model.form.ClientForm;
 import com.increff.pos.pojo.ClientPojo;
+import com.increff.pos.service.ClientService;
 import com.increff.pos.util.ConvertUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.validation.Valid;
-import javax.validation.Validator;
-import javax.validation.ConstraintViolation;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component

@@ -26,30 +26,5 @@ public abstract class AbstractTest {
     protected void setUp() {
         // Default implementation - can be overridden
     }
-    
-    /**
-     * Common test cleanup method that can be overridden by subclasses.
-     * Called after each test method.
-     */
-    protected void tearDown() {
-        // Default implementation - can be overridden
-    }
-    
-    /**
-     * Utility method to assert that a value is not null with a descriptive message.
-     */
-    protected void assertNotNullWithMessage(String message, Object value) {
-        if (value == null) {
-            throw new AssertionError(message + " should not be null");
-        }
-    }
-    
-    /**
-     * Utility method to assert that two values are equal with a descriptive message.
-     */
-    protected void assertEqualsWithMessage(String message, Object expected, Object actual) {
-        if (!expected.equals(actual)) {
-            throw new AssertionError(message + " - Expected: " + expected + ", but was: " + actual);
-        }
-    }
+
 } 

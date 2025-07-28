@@ -1,18 +1,19 @@
 package com.increff.pos.flow;
 
+import com.increff.pos.exception.ApiException;
 import com.increff.pos.pojo.DaySalesPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.DaySalesService;
-
 import com.increff.pos.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.increff.pos.exception.ApiException;
+
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = ApiException.class)
@@ -25,11 +26,11 @@ public class DaySalesFlow {
     private DaySalesService daySalesService;
 
     public void calculateDailySales(ZonedDateTime date) {
-        if (daySalesService.getByDate(date) != null) return;
+        if (Objects.nonNull(daySalesService.getByDate(date))) return;
 
         List<OrderPojo> orders = orderService.getOrdersForSpecificDate(date);
         SalesMetrics metrics = computeSalesMetrics(orders);
-        
+
         DaySalesPojo dailySales = createDailySalesRecord(date, orders.size(), metrics);
         daySalesService.insert(dailySales);
     }
@@ -64,7 +65,7 @@ public class DaySalesFlow {
 
     @AllArgsConstructor
     private static class SalesMetrics {
-        int itemCount;
-        double revenue;
+        Integer itemCount;
+        Double revenue;
     }
 }
