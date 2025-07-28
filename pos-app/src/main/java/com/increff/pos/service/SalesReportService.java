@@ -16,11 +16,11 @@ public class SalesReportService {
     private SalesReportDao salesReportDao;
 
     public PaginatedResponse<SalesReportData> getSalesReport(
-            ZonedDateTime start, ZonedDateTime end, String clientName, int page, int size) {
+            ZonedDateTime start, ZonedDateTime end, String clientName, Integer page, Integer size) {
 
         List<SalesReportData> content = salesReportDao.getSalesReport(start, end, clientName, page, size);
-        long totalItems = salesReportDao.countTotalClients(start, end, clientName);
-        int totalPages = (int) Math.ceil((double) totalItems / size);
+        Long totalItems = salesReportDao.countTotalClients(start, end, clientName);
+        Integer totalPages = (int) Math.ceil((double) totalItems / size);
 
         return new PaginatedResponse<>(content, page, totalPages, totalItems, size);
     }

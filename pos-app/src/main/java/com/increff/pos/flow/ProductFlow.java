@@ -21,18 +21,10 @@ public class ProductFlow {
     @Autowired
     private ClientService clientService;
 
-    public void addProduct(ProductPojo productPojo , String clientName) {
+    public void addProduct(ProductPojo productPojo, String clientName) {
         ClientPojo client = clientService.getCheckClientByName(clientName);
         productPojo.setClientId(client.getId());
         productService.addProduct(productPojo);
-    }
-
-    public List<ProductPojo> getAllProducts(int page, int pageSize) {
-        return productService.getAll(page, pageSize);
-    }
-
-    public long countAllProducts() {
-        return productService.countAll();
     }
 
     public List<ProductPojo> getProductsByAClient(String clientName, int page, int pageSize) {
@@ -43,18 +35,6 @@ public class ProductFlow {
     public long countProductsByAClient(String clientName) {
         ClientPojo client = clientService.getCheckClientByName(clientName);
         return productService.countProductsByClientId(client.getId());
-    }
-
-    public List<ProductPojo> searchProductsByBarcode(String barcode, int page, int pageSize) {
-        return productService.searchByBarcode(barcode, page, pageSize);
-    }
-
-    public long countSearchByBarcode(String barcode) {
-        return productService.countSearchByBarcode(barcode);
-    }
-
-    public ProductPojo getProductByBarcode(String barcode) {
-        return productService.getCheckProductByBarcode(barcode);
     }
 
     public void updateProduct(Integer id, ProductPojo productPojo, String clientName) {

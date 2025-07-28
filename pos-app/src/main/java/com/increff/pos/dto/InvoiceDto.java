@@ -9,6 +9,7 @@ import com.increff.pos.pojo.InvoicePojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.pojo.ProductPojo;
+import com.increff.pos.service.InvoiceService;
 import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,17 @@ import java.util.List;
 public class InvoiceDto {
 
     @Autowired
-    InvoiceFlow invoiceFlow;
+    private InvoiceFlow invoiceFlow;
 
     @Autowired
-    ProductService productService;
+    private ProductService productService;
+
+    @Autowired
+    private InvoiceService invoiceService;
 
     public ResponseEntity<byte[]> downloadInvoiceById(Integer invoiceId) {
         try {
-            InvoicePojo invoice = invoiceFlow.getInvoiceById(invoiceId);
+            InvoicePojo invoice = invoiceService.getInvoiceById(invoiceId);
             byte[] invoiceBytes = Files.readAllBytes(Paths.get(invoice.getFilePath()));
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice-" + invoiceId + ".pdf")

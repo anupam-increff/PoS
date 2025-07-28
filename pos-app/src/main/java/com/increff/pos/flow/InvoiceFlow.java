@@ -28,10 +28,6 @@ public class InvoiceFlow {
         return invoiceService.createInvoiceRecord(order, orderItems);
     }
 
-    public InvoicePojo getInvoiceById(Integer invoiceId) {
-        return invoiceService.getInvoiceById(invoiceId);
-    }
-
     public OrderPojo getOrderForInvoice(Integer orderId) {
         return orderService.getCheckByOrderId(orderId);
     }

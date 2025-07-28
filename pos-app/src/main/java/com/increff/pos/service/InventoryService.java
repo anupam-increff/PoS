@@ -23,6 +23,13 @@ public class InventoryService {
         inventory.setQuantity(quantity);
     }
 
+    public void validateSufficientAndReduceInventory(Integer productId, Integer quantity, String productName) {
+        validateQuantity(quantity);
+        InventoryPojo inventory = getCheckByProductId(productId);
+        validateSufficientInventory(inventory, quantity, productName);
+        inventory.setQuantity(inventory.getQuantity() - quantity);
+    }
+
     public void addInventory(Integer productId, Integer quantity) {
         validateQuantity(quantity);
         InventoryPojo inventory = inventoryDao.getByProductId(productId);
@@ -36,26 +43,26 @@ public class InventoryService {
         }
     }
 
-    public List<InventoryPojo> getAll(int page, int pageSize) {
+    public List<InventoryPojo> getAll(Integer page, Integer pageSize) {
         return inventoryDao.getAllInventory(page, pageSize);
     }
 
-    public long countAll() {
+    public Long countAll() {
         return inventoryDao.countAll();
     }
 
-    public List<InventoryPojo> searchByBarcode(String barcode, int page, int pageSize) {
+    public List<InventoryPojo> searchByBarcode(String barcode, Integer page, Integer pageSize) {
         return inventoryDao.searchByBarcode(barcode, page, pageSize);
     }
 
-    public long countByBarcodeSearch(String barcode) {
+    public Long countByBarcodeSearch(String barcode) {
         return inventoryDao.countByBarcodeSearch(barcode);
     }
 
     public InventoryPojo getCheckByProductId(Integer productId) {
-        InventoryPojo inventoryPojo = inventoryDao.getByProductId(productId);
-        if (Objects.isNull(inventoryPojo)) throw new ApiException("No Inventory data found for this product");
-        return inventoryPojo;
+        InventoryPojo inventory = inventoryDao.getByProductId(productId);
+        if (Objects.isNull(inventory)) throw new ApiException("No Inventory data found for this product");
+        return inventory;
     }
 
     private void validateQuantity(Integer quantity) {
@@ -64,6 +71,12 @@ public class InventoryService {
         }
         if (quantity < 0) {
             throw new ApiException("Quantity cannot be negative");
+        }
+    }
+
+    private void validateSufficientInventory(InventoryPojo inventory, Integer quantity, String productName) {
+        if (inventory.getQuantity() < quantity) {
+            throw new ApiException("Insufficient inventory for: " + productName);
         }
     }
 }

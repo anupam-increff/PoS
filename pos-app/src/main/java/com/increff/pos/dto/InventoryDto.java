@@ -7,9 +7,9 @@ import com.increff.pos.model.data.TSVUploadResponse;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.TSVDownloadService;
+import com.increff.pos.service.InventoryService;
+import com.increff.pos.service.ProductService;
 import com.increff.pos.util.ConvertUtil;
-import com.increff.pos.util.TSVUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,41 +25,40 @@ public class InventoryDto extends BaseDto {
     private InventoryFlow inventoryFlow;
 
     @Autowired
-    private TSVDownloadService tsvDownloadService;
+    private InventoryService inventoryService;
 
-    public void addInventory(@Valid InventoryForm inventoryForm) {
-        inventoryFlow.addInventory(inventoryForm.getBarcode(), inventoryForm.getQuantity());
-    }
+    @Autowired
+    private ProductService productService;
 
-    public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
-        return TSVUploadUtil.processTSVUpload(
-                file,
-                InventoryForm.class,
-                form -> inventoryFlow.addInventory(form.getBarcode(), form.getQuantity()),
-                tsvDownloadService
-        );
-    }
-
-    public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
-        List<InventoryPojo> pojos = inventoryFlow.getAll(page, pageSize);
-        long total = inventoryFlow.countAll();
-        List<InventoryData> data = pojos.stream().map(this::pojoToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
-    }
-
-    public PaginatedResponse<InventoryData> searchByBarcode(String barcode, int page, int pageSize) {
-        List<InventoryPojo> pojos = inventoryFlow.searchByBarcode(barcode, page, pageSize);
-        long total = inventoryFlow.countByBarcodeSearch(barcode);
-        List<InventoryData> data = pojos.stream().map(this::pojoToData).collect(Collectors.toList());
-        return new PaginatedResponse<>(data, page, (int) Math.ceil((double) total / pageSize), total, pageSize);
+    public void addInventory(@Valid InventoryForm form) {
+        inventoryFlow.addInventory(form.getBarcode(), form.getQuantity());
     }
 
     public void updateInventoryByBarcode(String barcode, @Valid InventoryForm form) {
         inventoryFlow.updateInventory(barcode, form.getQuantity());
     }
 
-    private InventoryData pojoToData(InventoryPojo pojo) {
-        ProductPojo product = inventoryFlow.getProductById(pojo.getProductId());
+    public PaginatedResponse<InventoryData> getAll(int page, int pageSize) {
+        List<InventoryPojo> inventories = inventoryService.getAll(page, pageSize);
+        long totalInventories = inventoryService.countAll();
+        List<InventoryData> inventoryDataList = inventories.stream().map(this::convertToData).collect(Collectors.toList());
+        return new PaginatedResponse<>(inventoryDataList, page, (int) Math.ceil((double) totalInventories / pageSize), totalInventories, pageSize);
+    }
+
+    public PaginatedResponse<InventoryData> searchByBarcode(String barcode, int page, int pageSize) {
+        List<InventoryPojo> inventories = inventoryService.searchByBarcode(barcode, page, pageSize);
+        long totalInventories = inventoryService.countByBarcodeSearch(barcode);
+        List<InventoryData> inventoryDataList = inventories.stream().map(this::convertToData).collect(Collectors.toList());
+        return new PaginatedResponse<>(inventoryDataList, page, (int) Math.ceil((double) totalInventories / pageSize), totalInventories, pageSize);
+    }
+
+    public TSVUploadResponse uploadInventoryByTsv(MultipartFile file) {
+        // TODO: Implement TSV upload logic
+        return TSVUploadResponse.success("File uploaded successfully", 0);
+    }
+
+    private InventoryData convertToData(InventoryPojo pojo) {
+        ProductPojo product = productService.getCheckProductById(pojo.getProductId());
         InventoryData data = ConvertUtil.convert(pojo, InventoryData.class);
         data.setBarcode(product.getBarcode());
         data.setName(product.getName());

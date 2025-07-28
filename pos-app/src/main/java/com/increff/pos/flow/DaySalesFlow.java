@@ -31,7 +31,4 @@ public class DaySalesFlow {
         daySalesService.insert(dailySales);
     }
 
-    public List<DaySalesPojo> getBetween(ZonedDateTime start, ZonedDateTime end) {
-        return daySalesService.getBetween(start, end);
-    }
 }

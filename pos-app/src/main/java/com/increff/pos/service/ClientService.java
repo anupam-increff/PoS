@@ -23,19 +23,19 @@ public class ClientService {
         clientDao.insert(clientPojo);
     }
 
-    public List<ClientPojo> getAllClients(int page, int pageSize) {
+    public List<ClientPojo> getAllClients(Integer page, Integer pageSize) {
         return clientDao.getAllClients(page, pageSize);
     }
 
-    public long countAll() {
+    public Long countAll() {
         return clientDao.countAll();
     }
 
-    public List<ClientPojo> searchClients(String query, int page, int pageSize) {
+    public List<ClientPojo> searchClients(String query, Integer page, Integer pageSize) {
         return clientDao.searchClientByName(query, page, pageSize);
     }
 
-    public long countByQuery(String query) {
+    public Long countByQuery(String query) {
         return clientDao.countByQuery(query);
     }
 
@@ -55,7 +55,7 @@ public class ClientService {
         return client;
     }
 
-    public void update(int id, ClientPojo clientPojo) {
+    public void update(Integer id, ClientPojo clientPojo) {
         validateClientName(clientPojo);
         validateDuplicateClientWithSameName(clientPojo);
         ClientPojo existingClient = getCheckClientById(id);
@@ -74,9 +74,9 @@ public class ClientService {
         if (clientPojo.getName().trim().isEmpty()) {
             throw new ApiException("Client name cannot be empty");
         }
-
     }
-    private void validateDuplicateClientWithSameName(ClientPojo clientPojo){
+
+    private void validateDuplicateClientWithSameName(ClientPojo clientPojo) {
         if (Objects.nonNull(clientDao.getClientByName(clientPojo.getName()))) {
             throw new ApiException("Client with name already exists");
         }

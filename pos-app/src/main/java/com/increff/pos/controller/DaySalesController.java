@@ -1,7 +1,7 @@
 package com.increff.pos.controller;
 
 import com.increff.pos.dto.DaySalesDto;
-import com.increff.pos.pojo.DaySalesPojo;
+import com.increff.pos.model.data.DaySalesData;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,7 @@ public class DaySalesController {
 
     @ApiOperation("Get sales data for date range")
     @GetMapping
-    public List<DaySalesPojo> getSales(
+    public List<DaySalesData> getSales(
             @RequestParam("start") String start,
             @RequestParam("end") String end
     ) {

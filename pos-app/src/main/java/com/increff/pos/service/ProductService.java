@@ -15,63 +15,98 @@ import java.util.Objects;
 public class ProductService {
 
     @Autowired
-    private ProductDao dao;
+    private ProductDao productDao;
 
-    public void addProduct(ProductPojo p) {
-        if (Objects.nonNull(getProductByBarcode(p.getBarcode()))) {
-            throw new ApiException("Product with same barcode : " + p.getBarcode() + " already exists !");
-        }
-        dao.insert(p);
+    public void addProduct(ProductPojo productPojo) {
+        validateBarcode(productPojo.getBarcode());
+        validateMrp(productPojo.getMrp());
+        validateName(productPojo.getName());
+        productDao.insert(productPojo);
     }
 
-    public ProductPojo getCheckProductById(Integer id) {
-        ProductPojo productPojo = dao.getById(id);
-        if (Objects.isNull(productPojo)) {
-            throw new ApiException("No such product exists");
+    public void validateSellingPrice(Double sellingPrice, ProductPojo product) {
+        if (sellingPrice > product.getMrp()) {
+            throw new ApiException("Selling price for product " + product.getName() + " cannot be greater than its mrp " + product.getMrp());
         }
-        return productPojo;
     }
 
-    public ProductPojo getProductByBarcode(String barcode) {
-        return dao.getByBarcode(barcode);
+    public List<ProductPojo> getAll(Integer page, Integer pageSize) {
+        return productDao.getAllProducts(page, pageSize);
+    }
+
+    public Long countAll() {
+        return productDao.countAll();
+    }
+
+    public List<ProductPojo> searchByBarcode(String barcode, Integer page, Integer pageSize) {
+        return productDao.searchByBarcode(barcode, page, pageSize);
+    }
+
+    public Long countSearchByBarcode(String barcode) {
+        return productDao.countByBarcodeSearch(barcode);
     }
 
     public ProductPojo getCheckProductByBarcode(String barcode) {
-        ProductPojo productPojo = dao.getByBarcode(barcode);
-        if (Objects.isNull(productPojo)) {
-            throw new ApiException("No product with barcode : " + barcode + " exists");
+        ProductPojo product = productDao.getByBarcode(barcode);
+        if (Objects.isNull(product)) {
+            throw new ApiException("Product with barcode " + barcode + " not found");
         }
-        return productPojo;
+        return product;
     }
 
-    public List<ProductPojo> getAll(int page, int pageSize) {
-        return dao.getAllProducts(page, pageSize);
+    public ProductPojo getCheckProductById(Integer id) {
+        ProductPojo product = productDao.getById(id);
+        if (Objects.isNull(product)) {
+            throw new ApiException("Product with ID " + id + " not found");
+        }
+        return product;
     }
 
-    public long countAll() {
-        return dao.countAll();
+    public void update(Integer id, ProductPojo updated) {
+        validateMrp(updated.getMrp());
+        validateName(updated.getName());
+        ProductPojo existing = getCheckProductById(id);
+        existing.setName(updated.getName());
+        existing.setMrp(updated.getMrp());
+        existing.setClientId(updated.getClientId());
     }
 
-    public List<ProductPojo> getProductsByClientId(Integer clientId, int page, int pageSize) {
-        return dao.getProductsByClientId(clientId, page, pageSize);
+    public List<ProductPojo> getProductsByClientId(Integer clientId, Integer page, Integer pageSize) {
+        return productDao.getProductsByClientId(clientId, page, pageSize);
     }
 
-    public long countProductsByClientId(Integer clientId) {
-        return dao.countByClientId(clientId);
+    public Long countProductsByClientId(Integer clientId) {
+        return productDao.countByClientId(clientId);
     }
 
-    public List<ProductPojo> searchByBarcode(String barcode, int page, int pageSize) {
-        return dao.searchByBarcode(barcode, page, pageSize);
+    private void validateBarcode(String barcode) {
+        if (Objects.isNull(barcode)) {
+            throw new ApiException("Barcode cannot be null");
+        }
+        if (barcode.trim().isEmpty()) {
+            throw new ApiException("Barcode cannot be empty");
+        }
+        ProductPojo existing = productDao.getByBarcode(barcode);
+        if (!Objects.isNull(existing)) {
+            throw new ApiException("Product with barcode " + barcode + " already exists");
+        }
     }
 
-    public long countSearchByBarcode(String barcode) {
-        return dao.countByBarcodeSearch(barcode);
+    private void validateMrp(Double mrp) {
+        if (Objects.isNull(mrp)) {
+            throw new ApiException("MRP cannot be null");
+        }
+        if (mrp <= 0) {
+            throw new ApiException("MRP must be positive");
+        }
     }
 
-    public void update(Integer id, ProductPojo newProductPojo) {
-        ProductPojo productPojo = getCheckProductById(id);
-        productPojo.setName(newProductPojo.getName());
-        productPojo.setMrp(newProductPojo.getMrp());
-        productPojo.setImageUrl(newProductPojo.getImageUrl());
+    private void validateName(String name) {
+        if (Objects.isNull(name)) {
+            throw new ApiException("Name cannot be null");
+        }
+        if (name.trim().isEmpty()) {
+            throw new ApiException("Name cannot be empty");
+        }
     }
 }

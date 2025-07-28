@@ -46,8 +46,8 @@ public class DaySalesService {
     }
 
     private SalesMetrics computeSalesMetrics(List<OrderPojo> orders) {
-        int totalItems = 0;
-        double totalRevenue = 0.0;
+        Integer totalItems = 0;
+        Double totalRevenue = 0.0;
 
         for (OrderPojo order : orders) {
             List<OrderItemPojo> items = orderService.getOrderItemsByOrderId(order.getId());
