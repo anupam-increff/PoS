@@ -23,7 +23,7 @@ public class AuthService {
     @Autowired
     private UserService userService;
 
-    public UserData signup(@Valid SignupForm form, HttpSession session) {
+    public UserData signup(SignupForm form, HttpSession session) {
         if (!form.getPassword().equals(form.getConfirmPassword())) {
             throw new ApiException("Password and confirm password do not match");
         }
@@ -35,7 +35,7 @@ public class AuthService {
         return createUserSession(user, session);
     }
 
-    public UserData login(@Valid LoginForm form, HttpSession session) {
+    public UserData login(LoginForm form, HttpSession session) {
 
         // Authenticate using UserService
         UserPojo user = userService.login(form.getEmail(), form.getPassword());

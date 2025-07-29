@@ -8,19 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
 
 @Component
-public class AuthDto {
+public class AuthDto extends AbstractDto {
 
     @Autowired
     private AuthService authService;
 
-    public UserData signup(@Valid SignupForm form, HttpSession session) {
+    public UserData signup(SignupForm form, HttpSession session) {
+        checkValid(form);
         return authService.signup(form, session);
     }
 
-    public UserData login(@Valid LoginForm form, HttpSession session) {
+    public UserData login(LoginForm form, HttpSession session) {
+        checkValid(form);
         return authService.login(form, session);
     }
 

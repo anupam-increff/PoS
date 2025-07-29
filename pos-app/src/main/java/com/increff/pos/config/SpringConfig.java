@@ -77,11 +77,6 @@ public class SpringConfig extends WebMvcConfigurerAdapter {
         return resolver;
     }
 
-    @Bean
-    public Validator validator() {
-        return new LocalValidatorFactoryBean();
-    }
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");

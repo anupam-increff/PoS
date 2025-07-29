@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ProductDto {
+public class ProductDto extends AbstractDto {
 
     @Autowired
     private ProductFlow productFlow;
@@ -32,7 +32,8 @@ public class ProductDto {
     @Autowired
     private ClientService clientService;
 
-    public void addProduct(@Valid ProductForm form) {
+    public void addProduct(ProductForm form) {
+        checkValid(form);
         ProductPojo pojo = ConvertUtil.convert(form, ProductPojo.class);
         productFlow.addProduct(pojo, form.getClientName());
     }

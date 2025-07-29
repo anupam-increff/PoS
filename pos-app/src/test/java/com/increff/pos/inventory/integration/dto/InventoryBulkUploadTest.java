@@ -102,8 +102,8 @@ public class InventoryBulkUploadTest extends AbstractTest {
 
         TSVUploadResponse response = inventoryDto.uploadInventoryByTsv(multipartFile);
         assertFalse(response.isSuccess());
-        assertTrue("Expected message to contain 'Quantity cannot be negative' but was: " + response.getMessage(),
-                  response.getMessage().contains("Quantity cannot be negative"));
+        assertTrue("Expected message to contain 'Minimum quantity is at least 1' but was: " + response.getMessage(),
+                  response.getMessage().contains("Minimum quantity is at least 1"));
     }
 
     private void createTestClients() {

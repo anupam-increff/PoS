@@ -2,6 +2,7 @@ package com.increff.pos.order.unit.service;
 
 import com.increff.pos.dao.OrderDao;
 import com.increff.pos.dao.OrderItemDao;
+import com.increff.pos.exception.ApiException;
 import com.increff.pos.model.enums.OrderStatus;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
@@ -33,7 +34,7 @@ public class OrderServiceTest {
     private OrderItemDao orderItemDao;
 
     @Test
-    public void testCreateOrderWithItems() {
+    public void testCreateOrderWithValidItems() {
         OrderItemPojo item = new OrderItemPojo();
         item.setProductId(1);
         item.setQuantity(5);
@@ -53,7 +54,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testGetOrderItemsByOrderId() {
+    public void testGetOrderItemsForValidOrderId() {
         OrderItemPojo item1 = new OrderItemPojo();
         item1.setOrderId(1);
         item1.setProductId(1);
@@ -73,7 +74,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testGetCheckByOrderId() {
+    public void testGetOrderByValidId() {
         OrderPojo order = new OrderPojo();
         order.setId(1);
         order.setOrderStatus(OrderStatus.CREATED);
@@ -86,7 +87,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testGetAllOrdersPaginated() {
+    public void testGetAllOrdersWithPagination() {
         OrderPojo order1 = new OrderPojo();
         order1.setId(1);
         order1.setOrderStatus(OrderStatus.CREATED);
@@ -102,7 +103,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testCountAll() {
+    public void testCountTotalOrders() {
         when(orderDao.countAll()).thenReturn(5L);
 
         Long count = service.countAll();
@@ -110,7 +111,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testSearchOrderByQuery() {
+    public void testSearchOrdersByDateRangeAndQuery() {
         ZonedDateTime startDate = ZonedDateTime.now().minusDays(1);
         ZonedDateTime endDate = ZonedDateTime.now();
         String query = "123";
@@ -127,7 +128,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testCountMatchingOrdersByQuery() {
+    public void testCountOrdersByDateRangeAndQuery() {
         ZonedDateTime startDate = ZonedDateTime.now().minusDays(1);
         ZonedDateTime endDate = ZonedDateTime.now();
         String query = "123";
@@ -140,7 +141,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testUpdateOrderStatus() {
+    public void testUpdateOrderStatusFromCreatedToInvoiceGenerated() {
         OrderPojo order = new OrderPojo();
         order.setId(1);
         order.setOrderStatus(OrderStatus.CREATED);
@@ -148,5 +149,36 @@ public class OrderServiceTest {
 
         service.updateOrderStatus(1, OrderStatus.INVOICE_GENERATED);
         assertEquals(OrderStatus.INVOICE_GENERATED, order.getOrderStatus());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateOrderStatusRejectsInvalidTransition() {
+        OrderPojo order = new OrderPojo();
+        order.setId(1);
+        order.setOrderStatus(OrderStatus.INVOICE_GENERATED);
+        when(orderDao.getById(1)).thenReturn(order);
+
+        service.updateOrderStatus(1, OrderStatus.CREATED);
+    }
+
+    @Test
+    public void testUpdateOrderStatusAllowsSameStatus() {
+        OrderPojo order = new OrderPojo();
+        order.setId(1);
+        order.setOrderStatus(OrderStatus.CREATED);
+        when(orderDao.getById(1)).thenReturn(order);
+
+        service.updateOrderStatus(1, OrderStatus.CREATED);
+        assertEquals(OrderStatus.CREATED, order.getOrderStatus());
+    }
+
+    @Test(expected = ApiException.class)
+    public void testUpdateOrderStatusRejectsTransitionFromInvoiceGenerated() {
+        OrderPojo order = new OrderPojo();
+        order.setId(1);
+        order.setOrderStatus(OrderStatus.INVOICE_GENERATED);
+        when(orderDao.getById(1)).thenReturn(order);
+
+        service.updateOrderStatus(1, OrderStatus.CREATED);
     }
 } 

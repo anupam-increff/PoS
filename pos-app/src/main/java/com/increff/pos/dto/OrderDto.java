@@ -18,14 +18,13 @@ import com.increff.pos.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class OrderDto {
+public class OrderDto extends AbstractDto {
 
     @Autowired
     private OrderFlow orderFlow;
@@ -39,7 +38,9 @@ public class OrderDto {
     @Autowired
     private InvoiceService invoiceService;
 
-    public OrderData placeOrder(@Valid OrderForm form) {
+    public OrderData placeOrder(OrderForm form) {
+        checkValid(form);
+        form.getItems().forEach(this::checkValid);
         List<OrderItemPojo> orderItemPojos = convertFormToPojos(form);
         OrderPojo orderPojo = orderFlow.placeOrder(orderItemPojos);
         return convertToData(orderPojo);
@@ -65,6 +66,7 @@ public class OrderDto {
     }
 
     public PaginatedResponse<OrderData> searchOrdersByForm(OrderSearchForm form) {
+        checkValid(form);
         return searchOrders(form.getStartDate(), form.getEndDate(), form.getQuery(), 0, 10);
     }
 

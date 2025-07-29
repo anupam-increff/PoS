@@ -18,36 +18,7 @@ import java.util.function.Consumer;
 public class TSVDownloadUtil {
     private static final Map<String, byte[]> tsvFiles = new ConcurrentHashMap<>();
 
-    private TSVDownloadUtil() {
-        // Private constructor to prevent instantiation
-    }
-
-    public static <T> TSVUploadResponse processTSVUpload(MultipartFile file, Class<T> formClass, Consumer<T> processor) {
-        try {
-            List<T> forms = TSVConvertUtil.readFromTsv(file, formClass);
-            int totalRows = forms.size();
-            int successRows = 0;
-            List<String> errors = new ArrayList<>();
-
-            for (int i = 0; i < forms.size(); i++) {
-                try {
-                    processor.accept(forms.get(i));
-                    successRows++;
-                } catch (Exception e) {
-                    errors.add("Error at row " + (i + 1) + ": " + e.getMessage());
-                }
-            }
-
-            if (!errors.isEmpty()) {
-                return TSVUploadResponse.error("Some rows failed to process", totalRows, totalRows - successRows, errors);
-            }
-            return TSVUploadResponse.success("File uploaded successfully", totalRows);
-        } catch (Exception e) {
-            List<String> errors = new ArrayList<>();
-            errors.add(e.getMessage());
-            return TSVUploadResponse.error("Error processing file: " + e.getMessage(), 0, 0, errors);
-        }
-    }
+    private TSVDownloadUtil() {}
 
     public static String storeTSVFile(byte[] tsvBytes) {
         String fileId = UUID.randomUUID().toString();
@@ -67,9 +38,5 @@ public class TSVDownloadUtil {
         headers.setContentLength(tsvBytes.length);
 
         return new ResponseEntity<>(tsvBytes, headers, HttpStatus.OK);
-    }
-
-    public static byte[] createTSVFile(List<String[]> rows, String[] headers) {
-        return TSVConvertUtil.createTsvFromRows(rows, headers);
     }
 } 

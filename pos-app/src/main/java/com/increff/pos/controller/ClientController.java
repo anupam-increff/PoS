@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
 @RestController
 @RequestMapping("/api/client")
 public class ClientController {
@@ -19,7 +17,7 @@ public class ClientController {
 
     @ApiOperation("Add a new client")
     @PostMapping
-    public void addClient(@RequestBody @Valid ClientForm clientForm) {
+    public void addClient(@RequestBody ClientForm clientForm) {
         clientDto.add(clientForm);
     }
 
@@ -44,7 +42,7 @@ public class ClientController {
 
     @ApiOperation("Update client by ID")
     @PutMapping("/{id}")
-    public void updateClient(@PathVariable Integer id, @RequestBody @Valid ClientForm clientForm) {
+    public void updateClient(@PathVariable Integer id, @RequestBody ClientForm clientForm) {
         clientDto.update(id, clientForm);
     }
 }

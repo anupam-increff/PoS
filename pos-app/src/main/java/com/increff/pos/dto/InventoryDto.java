@@ -16,12 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class InventoryDto {
+public class InventoryDto extends AbstractDto {
 
     @Autowired
     private InventoryFlow inventoryFlow;
@@ -32,11 +31,13 @@ public class InventoryDto {
     @Autowired
     private ProductService productService;
 
-    public void addInventory(@Valid InventoryForm form) {
+    public void addInventory(InventoryForm form) {
+        checkValid(form);
         inventoryFlow.addInventory(form.getBarcode(), form.getQuantity());
     }
 
-    public void updateInventoryByBarcode(String barcode, @Valid InventoryForm form) {
+    public void updateInventoryByBarcode(String barcode, InventoryForm form) {
+        checkValid(form);
         inventoryFlow.updateInventory(barcode, form.getQuantity());
     }
 
@@ -58,7 +59,10 @@ public class InventoryDto {
         return TSVUploadUtil.processTSVUpload(
                 file,
                 InventoryForm.class,
-                form -> inventoryFlow.addInventory(form.getBarcode(), form.getQuantity())
+                form -> {
+                    checkValid(form);
+                    inventoryFlow.addInventory(form.getBarcode(), form.getQuantity());
+                }
         );
     }
 

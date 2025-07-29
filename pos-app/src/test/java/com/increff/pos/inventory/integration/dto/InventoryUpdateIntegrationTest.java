@@ -72,7 +72,7 @@ public class InventoryUpdateIntegrationTest extends AbstractTest {
             inventoryDto.updateInventoryByBarcode(testBarcode, form);
             fail("Expected ApiException for negative quantity");
         } catch (ApiException e) {
-            assertTrue(e.getMessage().contains("cannot be negative"));
+            assertTrue(e.getMessage().contains("Minimum quantity is at least 1"));
         }
     }
 
@@ -85,7 +85,7 @@ public class InventoryUpdateIntegrationTest extends AbstractTest {
             inventoryDto.updateInventoryByBarcode(testBarcode, form);
             fail("Expected ApiException for null quantity");
         } catch (ApiException e) {
-            assertTrue(e.getMessage().contains("cannot be null"));
+            assertTrue(e.getMessage().contains("Quantity is required"));
         }
     }
 

@@ -7,15 +7,14 @@ import com.increff.pos.service.SalesReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.validation.Valid;
-
 @Component
-public class SalesReportDto {
+public class SalesReportDto extends AbstractDto {
 
     @Autowired
     private SalesReportService salesReportService;
 
-    public PaginatedResponse<SalesReportData> get(@Valid SalesReportFilterForm form, int page, int size) {
+    public PaginatedResponse<SalesReportData> get(SalesReportFilterForm form, int page, int size) {
+        checkValid(form);
         return salesReportService.getSalesReport(form.getStartDate(), form.getEndDate(), form.getClientName(), page, size);
     }
 }

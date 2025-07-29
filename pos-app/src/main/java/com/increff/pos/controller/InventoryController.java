@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
@@ -23,15 +21,15 @@ public class InventoryController {
     @ApiOperation("Get all inventory items")
     @GetMapping
     public PaginatedResponse<InventoryData> getAllInventory(@RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int pageSize) {
+                                                          @RequestParam(defaultValue = "10") int pageSize) {
         return inventoryDto.getAll(page, pageSize);
     }
 
     @ApiOperation("Search inventory by barcode")
     @GetMapping("/search")
     public PaginatedResponse<InventoryData> searchInventory(@RequestParam String barcode,
-                                                            @RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int pageSize) {
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int pageSize) {
         return inventoryDto.searchByBarcode(barcode, page, pageSize);
     }
 
@@ -43,13 +41,13 @@ public class InventoryController {
 
     @ApiOperation("Add new inventory item")
     @PostMapping
-    public void addInventory(@RequestBody @Valid InventoryForm form) {
+    public void addInventory(@RequestBody InventoryForm form) {
         inventoryDto.addInventory(form);
     }
 
     @ApiOperation("Update inventory by barcode")
     @PutMapping
-    public void updateInventory(@RequestBody @Valid InventoryForm form) {
+    public void updateInventory(@RequestBody InventoryForm form) {
         inventoryDto.updateInventoryByBarcode(form.getBarcode(), form);
     }
 }

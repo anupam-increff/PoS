@@ -41,30 +41,30 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void addProduct() {
+    public void testAddProductWithUniqueBarcode() {
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(null);
         productService.addProduct(product);
         verify(productDao).insert(product);
     }
 
     @Test(expected = ApiException.class)
-    public void addProductDuplicateBarcode() {
+    public void testAddProductRejectsDuplicateBarcode() {
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(new ProductPojo());
         productService.addProduct(product);
     }
 
     @Test
-    public void validateSellingPrice() {
+    public void testValidateSellingPriceWithinMrp() {
         productService.validateSellingPrice(50.0, product);
     }
 
     @Test(expected = ApiException.class)
-    public void validateSellingPriceExceedsMrp() {
+    public void testValidateSellingPriceRejectsValueAboveMrp() {
         productService.validateSellingPrice(100.0, product);
     }
 
     @Test
-    public void getAll() {
+    public void testGetAllProductsWithPagination() {
         List<ProductPojo> products = Arrays.asList(product);
         when(productDao.getAllProducts(0, 10)).thenReturn(products);
         List<ProductPojo> result = productService.getAll(0, 10);
@@ -73,21 +73,21 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void getAllEmpty() {
+    public void testGetAllProductsReturnsEmptyList() {
         when(productDao.getAllProducts(0, 10)).thenReturn(Collections.emptyList());
         List<ProductPojo> result = productService.getAll(0, 10);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void countAll() {
+    public void testCountTotalProducts() {
         when(productDao.countAll()).thenReturn(5L);
         Long count = productService.countAll();
         assertEquals(Long.valueOf(5), count);
     }
 
     @Test
-    public void searchByBarcode() {
+    public void testSearchProductsByBarcodeWithResults() {
         List<ProductPojo> products = Arrays.asList(product);
         when(productDao.searchByBarcode("BARCODE", 0, 10)).thenReturn(products);
         List<ProductPojo> result = productService.searchByBarcode("BARCODE", 0, 10);
@@ -96,40 +96,40 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void countSearchByBarcode() {
+    public void testCountProductsByBarcodeSearch() {
         when(productDao.countByBarcodeSearch("BARCODE")).thenReturn(2L);
         Long count = productService.countSearchByBarcode("BARCODE");
         assertEquals(Long.valueOf(2), count);
     }
 
     @Test
-    public void getCheckProductByBarcode() {
+    public void testGetProductByValidBarcode() {
         when(productDao.getByBarcode("BARCODE-001")).thenReturn(product);
         ProductPojo result = productService.getCheckProductByBarcode("BARCODE-001");
         assertEquals("Test Product", result.getName());
     }
 
     @Test(expected = ApiException.class)
-    public void getCheckProductByBarcodeNotFound() {
+    public void testGetProductByNonExistentBarcode() {
         when(productDao.getByBarcode("NONEXISTENT")).thenReturn(null);
         productService.getCheckProductByBarcode("NONEXISTENT");
     }
 
     @Test
-    public void getCheckProductById() {
+    public void testGetProductByValidId() {
         when(productDao.getById(1)).thenReturn(product);
         ProductPojo result = productService.getCheckProductById(1);
         assertEquals("Test Product", result.getName());
     }
 
     @Test(expected = ApiException.class)
-    public void getCheckProductByIdNotFound() {
+    public void testGetProductByNonExistentId() {
         when(productDao.getById(999)).thenReturn(null);
         productService.getCheckProductById(999);
     }
 
     @Test
-    public void update() {
+    public void testUpdateProductWithValidData() {
         when(productDao.getById(1)).thenReturn(product);
         ProductPojo updated = new ProductPojo();
         updated.setName("Updated Product");
@@ -142,7 +142,7 @@ public class ProductServiceTest {
     }
 
     @Test(expected = ApiException.class)
-    public void updateNonExistent() {
+    public void testUpdateProductRejectsNonExistentId() {
         when(productDao.getById(999)).thenReturn(null);
         productService.update(999, new ProductPojo());
     }

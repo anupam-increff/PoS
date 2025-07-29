@@ -10,17 +10,17 @@ import com.increff.pos.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ClientDto {
+public class ClientDto extends AbstractDto {
 
     @Autowired
     private ClientService clientService;
 
-    public void add(@Valid ClientForm form) {
+    public void add(ClientForm form) {
+        checkValid(form);
         ClientPojo pojo = ConvertUtil.convert(form, ClientPojo.class);
         clientService.addClient(pojo);
     }
@@ -43,7 +43,8 @@ public class ClientDto {
         return PaginationUtil.createPaginatedResponse(clientDataList, page, pageSize, totalClients);
     }
 
-    public void update(Integer id, @Valid ClientForm form) {
+    public void update(Integer id, ClientForm form) {
+        checkValid(form);
         ClientPojo pojo = ConvertUtil.convert(form, ClientPojo.class);
         clientService.update(id, pojo);
     }

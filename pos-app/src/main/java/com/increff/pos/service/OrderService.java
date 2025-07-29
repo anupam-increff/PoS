@@ -40,9 +40,25 @@ public class OrderService {
         return orderPojo.getId();
     }
 
-    public void updateOrderStatus(Integer orderId, OrderStatus status) {
+    public void updateOrderStatus(Integer orderId, OrderStatus newStatus) {
         OrderPojo order = getCheckByOrderId(orderId);
-        order.setOrderStatus(status);
+        validateStatusTransitionRule(order.getOrderStatus(), newStatus);
+        order.setOrderStatus(newStatus);
+    }
+
+    private void validateStatusTransitionRule(OrderStatus currentStatus, OrderStatus newStatus) {
+        if (currentStatus == newStatus) {
+            return;
+        }
+        switch (currentStatus) {
+            case CREATED:
+                if (newStatus != OrderStatus.INVOICE_GENERATED) {
+                    throw new ApiException("Invalid status transition. Order in CREATED state can only move to INVOICE_GENERATED state");
+                }
+                break;
+            case INVOICE_GENERATED:
+                throw new ApiException("Cannot change status of an order once invoice is generated");
+        }
     }
 
     public List<OrderItemPojo> getOrderItemsByOrderId(Integer orderId) {

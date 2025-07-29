@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
 @RestController
 @RequestMapping("/api/report")
 public class SalesReportController {
@@ -20,7 +18,7 @@ public class SalesReportController {
     @ApiOperation("Get sales report with filters")
     @PostMapping("/sales")
     public PaginatedResponse<SalesReportData> getSalesReport(
-            @RequestBody @Valid SalesReportFilterForm form,
+            @RequestBody SalesReportFilterForm form,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return salesReportDto.get(form, page, size);

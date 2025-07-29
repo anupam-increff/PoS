@@ -27,7 +27,7 @@ public class InventoryServiceTest {
     private InventoryDao dao;
 
     @Test
-    public void testGetCheckByProductId() throws ApiException {
+    public void testGetInventoryByValidProductId() throws ApiException {
         InventoryPojo pojo = new InventoryPojo();
         pojo.setProductId(1);
         pojo.setQuantity(10);
@@ -41,13 +41,13 @@ public class InventoryServiceTest {
     }
 
     @Test(expected = ApiException.class)
-    public void testGetCheckByProductIdNotFound() throws ApiException {
+    public void testGetInventoryByNonExistentProductId() throws ApiException {
         when(dao.getByProductId(1)).thenReturn(null);
         service.getCheckByProductId(1);
     }
 
     @Test
-    public void testGetAll() {
+    public void testGetAllInventoryWithPagination() {
         InventoryPojo pojo1 = new InventoryPojo();
         pojo1.setProductId(1);
         pojo1.setQuantity(10);
@@ -63,7 +63,7 @@ public class InventoryServiceTest {
     }
 
     @Test
-    public void testAddInventory() throws ApiException {
+    public void testAddInventoryForNewProduct() throws ApiException {
         when(dao.getByProductId(1)).thenReturn(null);
 
         service.addInventory(1, 10);
@@ -72,17 +72,17 @@ public class InventoryServiceTest {
     }
 
     @Test(expected = ApiException.class)
-    public void testAddInventoryNegativeQuantity() throws ApiException {
+    public void testAddInventoryRejectsNegativeQuantity() throws ApiException {
         service.addInventory(1, -10);
     }
 
     @Test(expected = ApiException.class)
-    public void testAddInventoryNullQuantity() throws ApiException {
+    public void testAddInventoryRejectsNullQuantity() throws ApiException {
         service.addInventory(1, null);
     }
 
     @Test
-    public void testUpdateInventory() throws ApiException {
+    public void testUpdateInventoryQuantityForExistingProduct() throws ApiException {
         InventoryPojo existingPojo = new InventoryPojo();
         existingPojo.setProductId(1);
         existingPojo.setQuantity(10);
@@ -95,25 +95,25 @@ public class InventoryServiceTest {
     }
 
     @Test(expected = ApiException.class)
-    public void testUpdateInventoryNotFound() throws ApiException {
+    public void testUpdateInventoryRejectsNonExistentProduct() throws ApiException {
         when(dao.getByProductId(1)).thenReturn(null);
         service.updateInventory(1, 20);
     }
 
     @Test(expected = ApiException.class)
-    public void testUpdateInventoryNegativeQuantity() throws ApiException {
+    public void testUpdateInventoryRejectsNegativeQuantity() throws ApiException {
         lenient().when(dao.getByProductId(1)).thenReturn(new InventoryPojo());
         service.updateInventory(1, -1);
     }
 
     @Test(expected = ApiException.class)
-    public void testUpdateInventoryNullQuantity() throws ApiException {
+    public void testUpdateInventoryRejectsNullQuantity() throws ApiException {
         lenient().when(dao.getByProductId(1)).thenReturn(new InventoryPojo());
         service.updateInventory(1, null);
     }
 
     @Test
-    public void testValidateSufficientAndReduceInventory() throws ApiException {
+    public void testReduceInventoryWithSufficientQuantity() throws ApiException {
         InventoryPojo inventory = new InventoryPojo();
         inventory.setProductId(1);
         inventory.setQuantity(100);
@@ -126,7 +126,7 @@ public class InventoryServiceTest {
     }
 
     @Test(expected = ApiException.class)
-    public void testValidateSufficientAndReduceInventoryInsufficientQuantity() throws ApiException {
+    public void testReduceInventoryRejectsInsufficientQuantity() throws ApiException {
         InventoryPojo inventory = new InventoryPojo();
         inventory.setProductId(1);
         inventory.setQuantity(30);
